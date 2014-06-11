@@ -1,0 +1,5 @@
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Enum\bin\Debug\Enum.dll
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Enum\bin\Debug\Enum.pdb
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Enum\obj\Debug\Enum.csprojResolveAssemblyReference.cache
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Enum\obj\Debug\Enum.dll
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Enum\obj\Debug\Enum.pdb

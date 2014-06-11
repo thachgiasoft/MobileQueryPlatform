@@ -1,0 +1,7 @@
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\BLL\bin\Debug\BLL.dll
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\BLL\bin\Debug\BLL.pdb
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\BLL\obj\Debug\BLL.csprojResolveAssemblyReference.cache
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\BLL\obj\Debug\BLL.dll
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\BLL\obj\Debug\BLL.pdb
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\BLL\bin\Debug\Enum.dll
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\BLL\bin\Debug\Enum.pdb

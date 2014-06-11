@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using MobileQueryPlatform.Filters;
+using System.Web;
 using System.Web.Mvc;
 
 namespace MobileQueryPlatform
@@ -8,6 +9,7 @@ namespace MobileQueryPlatform
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
+            filters.Add(new ActionFilter());
         }
     }
 }
