@@ -43,13 +43,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JsonHelper.cs" />
-    <Compile Include="OracleDAL.cs" />
+    <Compile Include="DALBuilder.cs" />
+    <Compile Include="Interface\IDAL.cs" />
+    <Compile Include="Helper\JsonHelper.cs" />
+    <Compile Include="DAL\MsSQLDAL.cs" />
+    <Compile Include="Helper\ObjectHelper.cs" />
+    <Compile Include="DAL\OracleDAL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="System.Data.OracleClient.dll" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -14,6 +14,5 @@ D:\LSBH\02-工程域\CMP5d1\程序\海信广场\ShopSaleForPad\ShopSaleForPad\DA
 D:\LSBH\02-工程域\CMP5d1\程序\海信广场\ShopSaleForPad\ShopSaleForPad\DAL\obj\Debug\DAL.csprojResolveAssemblyReference.cache
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\bin\Debug\DAL.dll
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\bin\Debug\DAL.pdb
-D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\obj\Debug\DAL.csprojResolveAssemblyReference.cache
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\obj\Debug\DAL.dll
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\obj\Debug\DAL.pdb

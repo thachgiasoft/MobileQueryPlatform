@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Enum;
 
 namespace Model
 {
@@ -38,7 +37,7 @@ namespace Model
         /// <summary>
         /// 是否启用求和
         /// </summary>
-        public CalCulateSum CalCulateSum
+        public bool Sumabled
         {
             get;
             set;
@@ -57,7 +56,7 @@ namespace Model
         /// <summary>
         /// 是否允许排序
         /// </summary>
-        public Sortabled Sortabled
+        public bool Sortabled
         {
             get;
             set;

@@ -45,13 +45,8 @@
     <Compile Include="ReportColumn.cs" />
     <Compile Include="ReportParam.cs" />
     <Compile Include="ReportParamOption.cs" />
+    <Compile Include="ResultModel.cs" />
     <Compile Include="User.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Enum\Enum.csproj">
-      <Project>{4783794f-8906-4dab-8483-a9d70ee73916}</Project>
-      <Name>Enum</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

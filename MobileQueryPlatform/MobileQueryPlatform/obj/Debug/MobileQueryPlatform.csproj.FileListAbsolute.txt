@@ -43,6 +43,12 @@ D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\bin\z
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\bin\zh-Hans\System.Web.WebPages.resources.dll
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\bin\zh-Hans\System.Web.WebPages.Deployment.resources.dll
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\bin\zh-Hans\System.Web.WebPages.Razor.resources.dll
-D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\obj\Debug\MobileQueryPlatform.csprojResolveAssemblyReference.cache
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\obj\Debug\MobileQueryPlatform.dll
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\obj\Debug\MobileQueryPlatform.pdb
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\obj\Debug\MobileQueryPlatform.csprojResolveAssemblyReference.cache
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\bin\BLL.dll
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\bin\Model.dll
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\bin\DAL.dll
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\bin\BLL.pdb
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\bin\Model.pdb
+D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\MobileQueryPlatform\bin\DAL.pdb

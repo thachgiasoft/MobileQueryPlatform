@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Enum;
 
 namespace Model
 {
@@ -82,5 +81,23 @@ namespace Model
             get;
             set;
         }
+    }
+
+    /// <summary>
+    /// 数据库类型
+    /// </summary>
+    public enum DBType 
+    {
+        MSSQL = 0,
+        Oracle = 1
+    }
+
+    /// <summary>
+    /// 验证模式
+    /// </summary>
+    public enum PersistSecurityInfo
+    {
+        用户名密码登录 = 0,
+        Windows登录 = 1
     }
 }

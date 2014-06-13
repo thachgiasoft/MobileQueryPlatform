@@ -1,5 +1,4 @@
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Model\bin\Debug\Model.dll
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Model\bin\Debug\Model.pdb
-D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Model\obj\Debug\Model.csprojResolveAssemblyReference.cache
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Model\obj\Debug\Model.dll
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Model\obj\Debug\Model.pdb

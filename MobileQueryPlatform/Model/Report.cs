@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Enum;
 
 namespace Model
 {
@@ -35,7 +34,7 @@ namespace Model
         /// <summary>
         /// 是否启用页合计
         /// </summary>
-        public PageSum PageSum
+        public bool PageSumabled
         {
             get;
             set;
@@ -44,7 +43,7 @@ namespace Model
         /// <summary>
         /// 是否启用总合计
         /// </summary>
-        public TotalSum TotalSum
+        public bool TotalSumabled
         {
             get;
             set;
@@ -53,7 +52,7 @@ namespace Model
         /// <summary>
         /// 是否启用分页
         /// </summary>
-        public Paging Paging
+        public bool Pagingabled
         {
             get;
             set;

@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-/* Created on:     2014-06-11 17:12:13                          */
+/* Created on:     2014-06-13 09:37:05                          */
 /*==============================================================*/
 
 
@@ -30,20 +30,6 @@ if exists (select 1
    where r.fkeyid = object_id('dbo.tReportParamOption') and o.name = 'FK_TREPORTP_REFERENCE_TREPORTP')
 alter table dbo.tReportParamOption
    drop constraint FK_TREPORTP_REFERENCE_TREPORTP
-go
-
-if exists (select 1
-   from dbo.sysreferences r join dbo.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('dbo.tReportSort') and o.name = 'FK_TREPORTS_REFERENCE_TREPORT')
-alter table dbo.tReportSort
-   drop constraint FK_TREPORTS_REFERENCE_TREPORT
-go
-
-if exists (select 1
-   from dbo.sysreferences r join dbo.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('dbo.tReportSort') and o.name = 'FK_TREPORTS_REFERENCE_TREPORTC')
-alter table dbo.tReportSort
-   drop constraint FK_TREPORTS_REFERENCE_TREPORTC
 go
 
 if exists (select 1
@@ -135,13 +121,6 @@ if exists (select 1
    drop table dbo.tReportParamOption
 go
 
-if exists (select 1
-            from  sysobjects
-           where  id = object_id('dbo.tReportSort')
-            and   type = 'U')
-   drop table dbo.tReportSort
-go
-
 alter table dbo.tSysInfo
    drop constraint PK_TSYSINFO
 go
@@ -212,11 +191,10 @@ create table tReport (
    DBID                 numeric              not null,
    ReportName           char(128)            not null,
    SqlCommand           char(5000)           not null,
-   PageSum              numeric              not null default 0,
-   TotalSum             numeric              not null default 0,
-   Paging               numeric              not null default 1,
+   PageSumabled         numeric              not null default 0,
+   TotalSumabled        numeric              not null default 0,
+   Pagingabled          numeric              not null default 1,
    PageSize             numeric              not null default 10,
-   Sort                 numeric              not null default 0,
    constraint PK_TREPORT primary key (ID)
 )
 go
@@ -229,7 +207,7 @@ create table tReportColumn (
    ReportID             numeric              not null,
    ColumnCode           char(128)            not null,
    ColumnName           char(128)            not null,
-   CalCulateSum         numeric              not null default 0,
+   Sumabled             numeric              not null default 0,
    ColumnWidth          numeric              not null default 1,
    Sortabled            numeric              not null default 0,
    constraint PK_TREPORTCOLUMN primary key (ID),
@@ -286,6 +264,7 @@ create table tUser (
    UserCode             char(128)            not null,
    UserName             char(128)            not null,
    UPassword            char(128)            not null,
+   IsAdmin              numeric              not null default 0,
    constraint PK_TUSER primary key (ID),
    constraint AK_KEY_2_TUSER unique (UserCode)
 )

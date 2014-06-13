@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -39,13 +40,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Des.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserBLL.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Enum\Enum.csproj">
-      <Project>{4783794f-8906-4dab-8483-a9d70ee73916}</Project>
-      <Name>Enum</Name>
+    <ProjectReference Include="..\DAL\DAL.csproj">
+      <Project>{311d5494-ee6a-49bc-975a-f4ae796af3ce}</Project>
+      <Name>DAL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Model\Model.csproj">
+      <Project>{e03a836e-4086-4596-bd79-0dc77d4eb68d}</Project>
+      <Name>Model</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
