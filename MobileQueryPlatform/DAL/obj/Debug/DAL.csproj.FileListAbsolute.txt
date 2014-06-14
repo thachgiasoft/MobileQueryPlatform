@@ -16,3 +16,8 @@ D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\bin\Debug\DAL.dll
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\bin\Debug\DAL.pdb
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\obj\Debug\DAL.dll
 D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\obj\Debug\DAL.pdb
+E:\Documents\项目开发\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\bin\Debug\DAL.dll
+E:\Documents\项目开发\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\bin\Debug\DAL.pdb
+E:\Documents\项目开发\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\obj\Debug\DAL.csprojResolveAssemblyReference.cache
+E:\Documents\项目开发\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\obj\Debug\DAL.dll
+E:\Documents\项目开发\Web\MobileQueryPlatform\MobileQueryPlatform\DAL\obj\Debug\DAL.pdb

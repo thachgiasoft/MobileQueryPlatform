@@ -147,6 +147,13 @@
     <Content Include="Content\css\bootstrap.min.css" />
     <Content Include="Content\css\signin.css" />
     <Content Include="Content\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Content\image\bar-chart-60.png" />
+    <Content Include="Content\image\database-60.png" />
+    <Content Include="Content\image\key-60.png" />
+    <Content Include="Content\image\settings-60.png" />
+    <Content Include="Content\image\user-60.png" />
+    <Content Include="Content\image\user-add-60.png" />
+    <Content Include="Content\image\user-remove-60.png" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\Backbone\backbone-min.js" />
     <Content Include="Scripts\Backbone\backbone.js" />
@@ -223,6 +230,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Home\ReportMenu.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\PublishProfiles\MobileQuery.pubxml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
