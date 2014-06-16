@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-/* Created on:     2014-06-13 09:37:05                          */
+/* Created on:     2014-06-16 08:56:16                          */
 /*==============================================================*/
 
 
@@ -172,11 +172,7 @@ create table tDatabase (
    ID                   numeric              identity,
    DBCode               char(128)            not null,
    DBType               numeric              not null default 0,
-   DataSource           char(128)            not null,
-   InitialCatalog       char(128)            not null,
-   PersistSecurityInfo  numeric              not null default 0,
-   UserID               char(128)            null,
-   Password             char(128)            null,
+   ConnectionString     char(512)            not null,
    Remark               char(512)            null,
    constraint PK_TDATABASE primary key (ID),
    constraint AK_KEY_2_TDATABAS unique (DBCode)
@@ -195,6 +191,7 @@ create table tReport (
    TotalSumabled        numeric              not null default 0,
    Pagingabled          numeric              not null default 1,
    PageSize             numeric              not null default 10,
+   Enabled              numeric              not null default 1,
    constraint PK_TREPORT primary key (ID)
 )
 go

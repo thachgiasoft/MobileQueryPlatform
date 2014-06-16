@@ -1,9 +1,0 @@
-D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Model\bin\Debug\Model.dll
-D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Model\bin\Debug\Model.pdb
-D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Model\obj\Debug\Model.dll
-D:\GitWork\Web\MobileQueryPlatform\MobileQueryPlatform\Model\obj\Debug\Model.pdb
-E:\Documents\项目开发\Web\MobileQueryPlatform\MobileQueryPlatform\Model\bin\Debug\Model.dll
-E:\Documents\项目开发\Web\MobileQueryPlatform\MobileQueryPlatform\Model\bin\Debug\Model.pdb
-E:\Documents\项目开发\Web\MobileQueryPlatform\MobileQueryPlatform\Model\obj\Debug\Model.csprojResolveAssemblyReference.cache
-E:\Documents\项目开发\Web\MobileQueryPlatform\MobileQueryPlatform\Model\obj\Debug\Model.dll
-E:\Documents\项目开发\Web\MobileQueryPlatform\MobileQueryPlatform\Model\obj\Debug\Model.pdb
