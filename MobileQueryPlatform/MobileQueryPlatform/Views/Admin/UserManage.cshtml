@@ -1,1 +1,189 @@
-﻿
+﻿<script type="text/template" id="tempUserList">
+    <%for(var i=0;i<data.length;i++){ %>
+    <tr>
+        <td><%=data[i].UserCode%></td>
+        <td><%=data[i].UserName%></td>
+        <td><%=data[i].IsAdmin==true?"Y":"N"%></td>
+        <td>
+            <a class="btn btn-default" data-action="del" data-id="<%=data[i].ID%>"><span class="glyphicon glyphicon-trash"></span></a>
+            <a class="btn btn-default" data-action="edit" data-id="<%=data[i].ID%>"><span class="glyphicon glyphicon-pencil"></span></a>
+        </td>
+    </tr>
+    <%}%>
+</script>
+
+<script type="text/javascript">
+    if (window.UserManage == undefined) {
+        Tools.Namespace.register("window.UserManage");
+    }
+
+    if (window.UserManage.Toolbar == undefined) {
+        window.UserManage.Toolbar = Backbone.View.extend({
+            events: {
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "add":
+                        userEditView.add();
+                        break;
+                    case "filter":
+                        break;
+                    case "refresh":
+                        userListView.refresh();
+                        break;
+                }
+            }
+        });
+    }
+
+    if (window.UserManage.UserEditView == undefined) {
+        window.UserManage.UserEditView = Backbone.View.extend({
+            add: function () {
+                this.$el.find("input").val("");
+                this.$el.modal("show");
+            },
+            edit: function (i) {
+                this.$el.modal("show");
+            }
+        });
+    }
+
+    if (window.UserManage.UserListView == undefined) {
+        window.UserManage.UserListView = Backbone.View.extend({
+            template: _.template($("#tempUserList").html()),
+            render: function (data) {
+                this.$el.html(this.template(data));
+            },
+            refresh: function () {
+                userList.fetch({
+                    success: function (collection, response, options) {
+                        userListView.render({ data: response });
+                    },
+                    error: function (a, b, c) {
+                        console.info(a);
+                        console.info(b);
+                        console.info(c);
+                    }
+                });
+            },
+            events: {
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "edit":
+                        userListView.edit();
+                        break;
+                    case "del":
+                        console.info($(e.currentTarget).attr("data-id"));
+                        break;
+                }
+            }
+        });
+    }
+
+    if (window.UserManage.UserModel == undefined) {
+        window.UserManage.UserModel = Backbone.Model.extend({
+            defaults: {
+                "ID":0,
+                "UserCode": "",
+                "UserName": "",
+                "UPassword": "",
+                "IsAdmin":false
+            },
+            id:"ID"
+        });
+    }
+    
+    if (window.UserManage.UserList == undefined) {
+        window.UserManage.UserList = Backbone.Collection.extend({
+            model: window.UserManage.UserModel,
+            url:"/api/User"
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var toolbar;
+    var userEditView;
+    var userListView;
+    var userList;
+    $(function () {
+        toolbar == new window.UserManage.Toolbar({
+            el: "#toolbar"
+        });
+        userEditView = new window.UserManage.UserEditView({
+            el: "#userEditView"
+        });
+        userListView = new window.UserManage.UserListView({
+            el: "#userList"
+        });
+        userList = new window.UserManage.UserList();
+        userListView.refresh();
+    })
+</script>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>用户编码</th>
+                <th>用户名称</th>
+                <th>管理员</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="userList">
+           
+        </tbody>
+    </table>   
+</div>
+
+<div class="modal fade" id="userEditView">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">用户信息</h4>
+            </div>
+            <div class="modal-body">
+                <form role="form">
+                    <div class="form-group">
+                        <label for="userCode">用户编码</label>
+                        <input type="text" class="form-control" id="userCode" placeholder="输入用户编码" autofocus="autofocus" required="required"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="userName">用户名称</label>
+                        <input type="text" class="form-control" id="userName" placeholder="输入用户名称" autofocus="autofocus" required="required"/>
+                    </div>
+                    <div class="form-group">
+                        <label>管理员</label>
+                    </div>
+                    <div class="btn-group" data-toggle="buttons" id="isAdmin">
+                            <label class="btn btn-success active">
+                                <input type="radio" name="options" id="yes">&nbsp;&nbsp;是&nbsp;&nbsp;
+                            </label>
+                            <label class="btn btn-success">
+                                <input type="radio" name="options" id="no">&nbsp;&nbsp;否&nbsp;&nbsp;
+                            </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="navbar navbar-fixed-bottom">
+    <div class="navbar-header">
+        <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
+            <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span></a>
+            <a class="btn btn-default" data-action="add"><span class="glyphicon glyphicon-plus"></span></a>
+            <a class="btn btn-default" data-action="filter"><span class="glyphicon glyphicon-filter"></span></a>
+        </div>
+    </div>
+</div> 

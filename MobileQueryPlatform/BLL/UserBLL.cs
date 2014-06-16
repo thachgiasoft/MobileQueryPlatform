@@ -7,6 +7,7 @@ using Model;
 using System.Configuration;
 using DAL.Interface;
 using System.Data;
+using DAL.Helper;
 
 namespace BLL
 {
@@ -128,6 +129,28 @@ namespace BLL
                 msg = ex.Message;
                 user = null;
                 return -1;
+            }
+        }
+
+        /// <summary>
+        /// 列表用户
+        /// </summary>
+        /// <returns></returns>
+        public static ICollection<User> ListUser()
+        {
+            try
+            {
+                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
+                {
+                    IDataReader dr = dal.Select("SELECT * FROM tUser");
+                    ICollection<User> users = ObjectHelper.BuildObject<User>(dr);
+                    dr.Close();
+                    return users;
+                }
+            }
+            catch
+            {
+                throw;
             }
         }
     }

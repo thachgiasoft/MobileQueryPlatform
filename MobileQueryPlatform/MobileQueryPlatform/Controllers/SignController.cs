@@ -9,7 +9,7 @@ using Model;
 
 namespace MobileQueryPlatform.Controllers
 {
-    public class SigninController : Controller
+    public class SignController : Controller
     {
         //
         // GET: /Home/
@@ -64,6 +64,16 @@ namespace MobileQueryPlatform.Controllers
                 Session["SigninedUser"] = rst.ResultObj;
             }
             return Json(rst);
+        }
+
+        /// <summary>
+        /// 注销
+        /// </summary>
+        /// <returns></returns>
+        public RedirectResult Signoff()
+        {
+            Session.Clear();
+            return Redirect("/Sign/UserSignin");
         }
     }
 }

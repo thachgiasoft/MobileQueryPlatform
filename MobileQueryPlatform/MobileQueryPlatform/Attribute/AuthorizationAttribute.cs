@@ -24,7 +24,7 @@ namespace MobileQueryPlatform.Attribute
 
             if (String.IsNullOrEmpty(authUrl))
             {
-                this._AuthUrl = "/Signin/UserSignin";
+                this._AuthUrl = "/Sign/UserSignin";
             }
             else
             {

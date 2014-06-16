@@ -133,7 +133,9 @@
     <Compile Include="Attribute\AuthorizationAttribute.cs" />
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\SigninController.cs" />
+    <Compile Include="Controllers\ReportController.cs" />
+    <Compile Include="Controllers\SignController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Filters\ActionFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -192,7 +194,7 @@
     <Content Include="Views\Home\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Signin\Signin.cshtml" />
+    <Content Include="Views\Sign\Signin.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BLL\BLL.csproj">
@@ -214,25 +216,22 @@
     <Content Include="Views\Admin\ReportManage.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Admin\ReportEdit.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\Admin\UserEdit.cshtml" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Views\Admin\SystemManage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Admin\DatabaseManage.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Home\Report.cshtml" />
+    <Content Include="Views\Report\Report.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Home\ReportMenu.cshtml" />
+    <Content Include="Views\Report\ReportMenu.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\PublishProfiles\MobileQuery.pubxml" />
+    <Content Include="Views\Admin\AuthorizationManage.cshtml" />
+    <Content Include="Views\Admin\Menu.cshtml" />
+    <Content Include="Views\Home\About.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -3,24 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using MobileQueryPlatform.Attribute;
 
 namespace MobileQueryPlatform.Controllers
 {
-    [AuthorizationAttribute]
-    public class HomeController : Controller
+    public class ReportController : Controller
     {
         //
-        // GET: /Home/
+        // GET: /Report/
 
         public ActionResult Index()
         {
             return View();
         }
 
-        public PartialViewResult About()
-        {
-            return PartialView();
-        }
     }
 }

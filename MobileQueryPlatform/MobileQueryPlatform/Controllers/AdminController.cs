@@ -23,5 +23,57 @@ namespace MobileQueryPlatform.Controllers
             return View();
         }
 
+        /// <summary>
+        /// 菜单
+        /// </summary>
+        /// <returns></returns>
+        public PartialViewResult Menu()
+        {
+            return PartialView();
+        }
+        /// <summary>
+        /// 数据库管理页面
+        /// </summary>
+        /// <returns></returns>
+        public PartialViewResult DatabaseManage()
+        {
+            return PartialView();
+        }
+
+        /// <summary>
+        /// 报表管理页面
+        /// </summary>
+        /// <returns></returns>
+        public PartialViewResult ReportManage()
+        {
+            return PartialView();
+        }
+
+        /// <summary>
+        /// 系统参数管理界面
+        /// </summary>
+        /// <returns></returns>
+        public PartialViewResult SystemManage()
+        {
+            return PartialView();
+        }
+
+        /// <summary>
+        /// 用户管理界面
+        /// </summary>
+        /// <returns></returns>
+        public PartialViewResult UserManage()
+        {
+            return PartialView();
+        }
+        
+        /// <summary>
+        /// 权限管理界面
+        /// </summary>
+        /// <returns></returns>
+        public PartialViewResult AuthorizationManage()
+        {
+            return PartialView();
+        }
     }
 }

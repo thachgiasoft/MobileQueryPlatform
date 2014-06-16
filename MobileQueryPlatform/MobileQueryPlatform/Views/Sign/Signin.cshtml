@@ -10,7 +10,7 @@
             },
             clickSignin: function (e) {
                 $("#btnSignin").button("loading");
-                $.post("/Signin/@ViewBag.Action",
+                $.post("/Sign/@ViewBag.Action",
                     {
                         "UserCode": $("#UserCode").val(),
                         "UPassword": $("#UPassword").val()

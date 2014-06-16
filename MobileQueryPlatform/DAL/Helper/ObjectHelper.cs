@@ -17,7 +17,7 @@ namespace DAL.Helper
         /// <typeparam name="T">对象泛型</typeparam>
         /// <param name="dt">数据源DataTable</param>
         /// <returns>返回的对象集合</returns>
-        public ICollection<T> BuildObject<T>(DataTable dt)
+        public static ICollection<T> BuildObject<T>(DataTable dt)
         {
             ICollection<T> objs = new List<T>();
             foreach (DataRow row in dt.Rows)
@@ -34,7 +34,7 @@ namespace DAL.Helper
         /// <typeparam name="T">对象泛型</typeparam>
         /// <param name="dataReader">数据源DataReader</param>
         /// <returns>返回的对象集合</returns>
-        public ICollection<T> BuildObject<T>(IDataReader dataReader)
+        public static ICollection<T> BuildObject<T>(IDataReader dataReader)
         {
             DataTable dt = new DataTable();
             try
@@ -54,13 +54,13 @@ namespace DAL.Helper
         /// <typeparam name="T">对象泛型</typeparam>
         /// <param name="row">数据源DataRow</param>
         /// <returns>返回的对象</returns>
-        public T BuildObject<T>(DataRow row)
+        public static T BuildObject<T>(DataRow row)
         {
             T obj = Activator.CreateInstance<T>();
             PropertyInfo[] propertyInfos = typeof(T).GetProperties();
             foreach (PropertyInfo p in propertyInfos)
             {
-                switch (p.PropertyType.Name.ToUpper())
+                switch (p.PropertyType.Name)
                 {
                     case "String":
                         p.SetValue(obj, Convert.ToString(row[p.Name]), null);
