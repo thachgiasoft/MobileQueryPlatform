@@ -3,7 +3,7 @@
     <tr>
         <td><%=data[i].UserCode%></td>
         <td><%=data[i].UserName%></td>
-        <td><%=data[i].IsAdmin==true?"Y":"N"%></td>
+        <td><%=data[i].IsAdmin==true?"是":"否"%></td>
         <td>
             <a class="btn btn-default" data-action="del" data-id="<%=data[i].ID%>"><span class="glyphicon glyphicon-trash"></span></a>
             <a class="btn btn-default" data-action="edit" data-id="<%=data[i].ID%>"><span class="glyphicon glyphicon-pencil"></span></a>
@@ -73,7 +73,7 @@
             clickBtn: function (e) {
                 switch ($(e.currentTarget).attr("data-action")) {
                     case "edit":
-                        userListView.edit();
+                        userEditView.edit(1);
                         break;
                     case "del":
                         console.info($(e.currentTarget).attr("data-id"));
@@ -124,21 +124,17 @@
     })
 </script>
 
-<div class="table-responsive">
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th>用户编码</th>
-                <th>用户名称</th>
-                <th>管理员</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody id="userList">
-           
-        </tbody>
-    </table>   
-</div>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>编码</th>
+            <th>名称</th>
+            <th>管理员</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody id="userList"></tbody>
+</table>   
 
 <div class="modal fade" id="userEditView">
     <div class="modal-dialog">
@@ -161,12 +157,12 @@
                         <label>管理员</label>
                     </div>
                     <div class="btn-group" data-toggle="buttons" id="isAdmin">
-                            <label class="btn btn-success active">
-                                <input type="radio" name="options" id="yes">&nbsp;&nbsp;是&nbsp;&nbsp;
-                            </label>
-                            <label class="btn btn-success">
-                                <input type="radio" name="options" id="no">&nbsp;&nbsp;否&nbsp;&nbsp;
-                            </label>
+                        <label class="btn btn-info active">
+                            <input type="radio" name="options" id="yes">&nbsp;&nbsp;是&nbsp;&nbsp;
+                        </label>
+                        <label class="btn btn-info">
+                            <input type="radio" name="options" id="no">&nbsp;&nbsp;否&nbsp;&nbsp;
+                        </label>
                     </div>
                 </form>
             </div>
@@ -182,8 +178,8 @@
     <div class="navbar-header">
         <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
             <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a>
-            <a class="btn btn-default" data-action="add"><span class="glyphicon glyphicon-plus"></span>添加</a>
-            <a class="btn btn-default" data-action="filter"><span class="glyphicon glyphicon-filter">过滤</span></a>
+            <a class="btn btn-default" data-action="add"><span class="glyphicon glyphicon-plus"></span>新建</a>
+            <a class="btn btn-default" data-action="filter"><span class="glyphicon glyphicon-filter">筛选</span></a>
         </div>
     </div>
 </div> 
