@@ -18,7 +18,6 @@
                     function (data) {
                         $("#btnSignin").button("reset");
                         if (data.ResultStatus == "1") {
-                            alert(data.ResultMessage);
                             location.href="@ViewBag.Success";
                         }
                         else {

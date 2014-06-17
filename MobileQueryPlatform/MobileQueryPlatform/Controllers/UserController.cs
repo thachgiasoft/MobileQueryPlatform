@@ -24,18 +24,27 @@ namespace MobileQueryPlatform.Controllers
         }
 
         // POST api/user
-        public void Post(User value)
+        public ResultModel<object> Post(User value)
         {
+            ResultModel<object> rst = new ResultModel<object>();
+            rst.ResultStatus= UserBLL.AddUser(value, out rst.ResultMessage);
+            return rst;
         }
 
         // PUT api/user/5
-        public void Put(int id, User value)
+        public ResultModel<object> Put(int id, User value)
         {
+            ResultModel<object> rst = new ResultModel<object>();
+            rst.ResultStatus = UserBLL.UpdateUser(value, out rst.ResultMessage);
+            return rst;
         }
 
         // DELETE api/user/5
-        public void Delete(int id)
+        public ResultModel<object> Delete(int id)
         {
+            ResultModel<object> rst = new ResultModel<object>();
+            rst.ResultStatus = UserBLL.DeleteUser(id, out rst.ResultMessage);
+            return rst;
         }
     }
 }

@@ -63,7 +63,7 @@ namespace DAL.Helper
                 switch (p.PropertyType.Name)
                 {
                     case "String":
-                        p.SetValue(obj, Convert.ToString(row[p.Name]), null);
+                        p.SetValue(obj, Convert.ToString(row[p.Name]).TrimEnd(), null);
                         break;
                     case "Int32":
                         p.SetValue(obj, Convert.ToInt32(row[p.Name]), null);
