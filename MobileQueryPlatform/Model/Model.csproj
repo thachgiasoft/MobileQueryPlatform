@@ -46,6 +46,7 @@
     <Compile Include="ReportParam.cs" />
     <Compile Include="ReportParamOption.cs" />
     <Compile Include="ResultModel.cs" />
+    <Compile Include="Syscfg.cs" />
     <Compile Include="User.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

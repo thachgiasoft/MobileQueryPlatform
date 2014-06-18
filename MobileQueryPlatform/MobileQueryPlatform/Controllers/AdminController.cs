@@ -31,6 +31,7 @@ namespace MobileQueryPlatform.Controllers
         {
             return PartialView();
         }
+
         /// <summary>
         /// 数据库管理页面
         /// </summary>
@@ -66,14 +67,6 @@ namespace MobileQueryPlatform.Controllers
         {
             return PartialView();
         }
-        
-        /// <summary>
-        /// 权限管理界面
-        /// </summary>
-        /// <returns></returns>
-        public PartialViewResult AuthorizationManage()
-        {
-            return PartialView();
-        }
+
     }
 }

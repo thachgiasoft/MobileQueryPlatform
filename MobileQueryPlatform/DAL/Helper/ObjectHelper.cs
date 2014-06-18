@@ -22,7 +22,7 @@ namespace DAL.Helper
             ICollection<T> objs = new List<T>();
             foreach (DataRow row in dt.Rows)
             {
-                T t = BuildObject<T>(row);
+                T t = BuildObject<T>(row,dt.Columns);
                 objs.Add(t);
             }
             return objs;
@@ -54,12 +54,17 @@ namespace DAL.Helper
         /// <typeparam name="T">对象泛型</typeparam>
         /// <param name="row">数据源DataRow</param>
         /// <returns>返回的对象</returns>
-        public static T BuildObject<T>(DataRow row)
+        private static T BuildObject<T>(DataRow row,DataColumnCollection columns)
         {
             T obj = Activator.CreateInstance<T>();
             PropertyInfo[] propertyInfos = typeof(T).GetProperties();
             foreach (PropertyInfo p in propertyInfos)
             {
+                if (!columns.Contains(p.Name))
+                {
+                    //如果该属性未包含在columns中，则跳过
+                    continue;
+                }
                 switch (p.PropertyType.Name)
                 {
                     case "String":

@@ -229,9 +229,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\PublishProfiles\MobileQuery.pubxml" />
-    <Content Include="Views\Admin\AuthorizationManage.cshtml" />
     <Content Include="Views\Admin\Menu.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
+    <Content Include="Views\Admin\UserEdit.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

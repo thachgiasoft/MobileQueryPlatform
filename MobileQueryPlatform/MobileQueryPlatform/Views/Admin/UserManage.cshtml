@@ -7,9 +7,57 @@
         <td>
             <a class="btn btn-default" data-action="del" data-id="<%=i%>"><span class="glyphicon glyphicon-trash"></span></a>
             <a class="btn btn-default" data-action="edit" data-id="<%=i%>"><span class="glyphicon glyphicon-pencil"></span></a>
+            <a class="btn btn-default" data-action="auth" data-id="<%=i%>"><span class="glyphicon glyphicon-eye-open"></span></a>
         </td>
     </tr>
     <%}%>
+</script>
+
+<script id="tempUserView" type="text/template">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><%=title%></h4>
+            </div>
+            <div class="modal-body">
+                <form role="form" id="<%=action%>_form">
+                    <div class="form-group">
+                        <label for="<%=action%>_userCode">用户编码</label>
+                        <input id="<%=action%>_userCode" type="text" class="form-control" name="UserCode" placeholder="输入用户编码" autofocus="autofocus" required="required" />
+                    </div>
+                    <div class="form-group">
+                        <label for="<%=action%>_userName">用户名称</label>
+                        <input id="<%=action%>_userName" type="text" class="form-control" name="UserName" placeholder="输入用户名称" autofocus="autofocus" required="required" />
+                    </div>
+                    <div class="form-group">
+                        <label>管理员</label>
+                    </div>
+                    <div class="btn-group" data-toggle="buttons">
+                        <%if(action=="edit"){%>
+                        <label id="isAdmin_t" class="btn btn-info">
+                            <input name="IsAdmin" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                        </label>
+                        <label id="isAdmin_f"class="btn btn-info">
+                            <input name="IsAdmin" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                        </label>
+                        <%} else {%>
+                        <label class="btn btn-info">
+                            <input name="IsAdmin" type="checkbox" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                        </label>
+                        <label class="btn btn-info">
+                            <input name="IsAdmin" type="checkbox" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                        </label>
+                        <%}%>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-default" data-dismiss="modal">关闭</a>
+                <a class="btn btn-primary" id="<%=action%>_save"><%=saveText%></a>
+            </div>
+        </div>
+    </div>
 </script>
 
 <script type="text/javascript">
@@ -28,6 +76,7 @@
                         userEditView.add();
                         break;
                     case "filter":
+                        userFilterView.show();
                         break;
                     case "refresh":
                         userListView.refresh();
@@ -39,25 +88,39 @@
 
     if (window.UserManage.UserEditView == undefined) {
         window.UserManage.UserEditView = Backbone.View.extend({
+            template: _.template($("#tempUserView").html()),
+            render: function () {
+                this.$el.html(this.template({
+                    "action": "edit",
+                    "title": "用户信息",
+                    "saveText": "保存"
+                }))
+            },
+            initialize:function(){
+                this.render();
+            },
             add: function () {
                 this.curUser = null;
-                $("#userCode").removeAttr("disabled");
-                this.$el.find("input").val("");
+                $("#edit_userCode").removeAttr("disabled");
+                $("#edit_userCode").val("");
+                $("#edit_userName").val("");
+                $("#isAdmin_f").addClass("active");
+                $("#isAdmin_t").removeClass("active");
                 this.$el.modal("show");
             },
             curUser:null,
             edit: function (i) {
-                $("#userCode").attr("disabled","");
+                $("#edit_userCode").attr("disabled", "");
                 this.curUser = userList.at(i);
-                $("#userCode").val(this.curUser.get("UserCode"));
-                $("#userName").val(this.curUser.get("UserName"));
+                $("#edit_userCode").val(this.curUser.get("UserCode"));
+                $("#edit_userName").val(this.curUser.get("UserName"));
                 if (this.curUser.get("IsAdmin")) {
-                    $("#isAdmin").addClass("active");
-                    $("#isNotAdmin").removeClass("active");
+                    $("#isAdmin_t").addClass("active");
+                    $("#isAdmin_f").removeClass("active");
                 }
                 else {
-                    $("#isAdmin").removeClass("active");
-                    $("#isNotAdmin").addClass("active");
+                    $("#isAdmin_t").removeClass("active");
+                    $("#isAdmin_f").addClass("active");
                 }
                 this.$el.modal("show");
             },
@@ -65,22 +128,16 @@
                 this.$el.modal("hide");
             },
             events: {
-                "click #userSave":"saveUser"
+                "click #edit_save":"saveUser"
             },
             saveUser: function () {
                 if (this.curUser == null) {
-                    this.curUser = new window.UserManage.UserModel({
-                        "UserCode": $("#userCode").val(),
-                        "UserName": $("#userName").val(),
-                        "IsAdmin": $("#isAdmin").hasClass("active")
-                    });
+                    this.curUser = new window.UserManage.UserModel(
+                        Tools.serializeObject($("#edit_form"))
+                        );
                 }
                 else {
-                    this.curUser.set({
-                        "UserCode": $("#userCode").val(),
-                        "UserName": $("#userName").val(),
-                        "IsAdmin": $("#isAdmin").hasClass("active")
-                    })
+                    this.curUser.set(Tools.serializeObject($("#edit_form")));
                 }
                 this.curUser.save(null, {
                     success: function (model,rst) {
@@ -100,6 +157,43 @@
         });
     }
 
+    if (window.UserManage.UserFilter == undefined) {
+        window.UserManage.UserFilter = Backbone.View.extend({
+            filter:null, 
+            template: _.template($("#tempUserView").html()),
+            render:function(){
+                this.$el.html(this.template({
+                    "action":"filter",
+                    "title":"用户筛选",
+                    "saveText":"筛选"
+                }))
+            },
+            initialize:function(){
+                this.render();
+            },
+            
+            show:function(){
+                this.$el.modal("show");
+            },
+            hide: function () {
+                this.$el.modal("hide");
+            },
+            events: {
+                "click #filter_save": "saveFilter"
+            },
+            saveFilter: function () {
+                var tempFilter = Tools.serializeObject($("#filter_form"));
+                if (tempFilter.IsAdmin == undefined) {
+                    alert("请选择『管理员选项』");
+                    return;
+                }
+                this.filter = tempFilter;
+                this.hide();
+                userListView.refresh();
+            }
+
+        });
+    }
     if (window.UserManage.UserListView == undefined) {
         window.UserManage.UserListView = Backbone.View.extend({
             template: _.template($("#tempUserList").html()),
@@ -113,7 +207,8 @@
                     },
                     error: function (e) {
                         alert(e.responseJSON.Message);
-                    }
+                    },
+                    data:  userFilterView.filter
                 });
             },
             events: {
@@ -125,6 +220,9 @@
                         userEditView.edit($(e.currentTarget).attr("data-id"));
                         break;
                     case "del":
+                        if (!confirm("确认删除该用户？")) {
+                            return;
+                        }
                         var curUser = userList.at($(e.currentTarget).attr("data-id"));
                         curUser.destroy({
                             success: function (model,rst) {
@@ -172,6 +270,7 @@
     var userEditView;
     var userListView;
     var userList;
+    var userFilterView;
     $(function () {
         toolbar == new window.UserManage.Toolbar({
             el: "#toolbar"
@@ -181,6 +280,9 @@
         });
         userListView = new window.UserManage.UserListView({
             el: "#userList"
+        });
+        userFilterView = new window.UserManage.UserFilter({
+            el: "#userFilterView"
         });
         userList = new window.UserManage.UserList();
         userListView.refresh();
@@ -199,50 +301,16 @@
     <tbody id="userList"></tbody>
 </table>   
 
-<div class="modal fade" id="userEditView">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title">用户信息</h4>
-            </div>
-            <div class="modal-body">
-                <form role="form">
-                    <div class="form-group">
-                        <label for="userCode">用户编码</label>
-                        <input type="text" class="form-control" id="userCode" placeholder="输入用户编码" autofocus="autofocus" required="required"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="userName">用户名称</label>
-                        <input type="text" class="form-control" id="userName" placeholder="输入用户名称" autofocus="autofocus" required="required"/>
-                    </div>
-                    <div class="form-group">
-                        <label>管理员</label>
-                    </div>
-                    <div class="btn-group" data-toggle="buttons">
-                        <label class="btn btn-info" id="isAdmin">
-                            <input type="radio">&nbsp;&nbsp;是&nbsp;&nbsp;
-                        </label>
-                        <label class="btn btn-info active" id="isNotAdmin">
-                            <input type="radio">&nbsp;&nbsp;否&nbsp;&nbsp;
-                        </label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <a class="btn btn-default" data-dismiss="modal">关闭</a>
-                <a class="btn btn-primary" id="userSave">保存</a>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="modal fade" id="userEditView"/>
+
+<div id="userFilterView" class="modal fade"/>
 
 <div class="navbar navbar-fixed-bottom">
     <div class="navbar-header">
         <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
             <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a>
             <a class="btn btn-default" data-action="add"><span class="glyphicon glyphicon-plus"></span>新建</a>
-            <a class="btn btn-default" data-action="filter"><span class="glyphicon glyphicon-filter">筛选</span></a>
+            <a class="btn btn-default" data-action="filter"><span class="glyphicon glyphicon-filter">筛选</span></a>  
         </div>
     </div>
 </div> 

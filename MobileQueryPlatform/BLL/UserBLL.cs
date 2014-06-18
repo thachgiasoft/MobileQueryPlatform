@@ -80,31 +80,13 @@ namespace BLL
                 using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
                 {
                     StringBuilder sql = new StringBuilder(256);
-                    sql.Append("SELECT * FROM dbo.tUser WHERE UserCode=@UserCode AND UPassword=@UPassword AND IsAdmin='1' ");
-                    IDataReader reader = dal.Select(sql.ToString(),
-                       dal.CreateParameter("@UserCode", userCode),
-                       dal.CreateParameter("@UPassword", Des.EncryStrHex(uPassword, userCode))
-                        );
-                    if (reader.Read())
+                    sql.Append("select count(*) userCount from tUser where IsAdmin=1");
+                    IDataReader reader = dal.Select(sql.ToString());
+                    reader.Read();
+                    if (Convert.ToInt16(reader["userCount"]) == 0)
                     {
-                        
-                        //登录成功
-                        msg = "登录成功";
-                        //登录成功
-                        user = new User()
-                        {
-                            ID = Convert.ToDecimal(reader["ID"]),
-                            UserCode = Convert.ToString(reader["UserCode"]),
-                            UserName = Convert.ToString(reader["UserName"]),
-                            IsAdmin=Convert.ToDecimal(reader["IsAdmin"])==1?true:false
-                        };
                         reader.Close();
-                        return 1;
-                    }
-                    else
-                    {
-                        msg = "用户名或密码错误";
-                        //登录失败
+                        //梅伊欧用户
                         if (userCode == "admin" && uPassword == "753951")
                         {
                             msg = "默认用户登录成功，请尽快添加管理员账户";
@@ -112,16 +94,53 @@ namespace BLL
                             user = new User()
                             {
                                 ID = 0,
-                                UserCode ="admin",
+                                UserCode = "admin",
                                 UserName = "默认管理员",
-                                IsAdmin=true
+                                IsAdmin = true
                             };
                             return 1;
                         }
-                        reader.Close();
-                        user = null;
-                        return 0;
+                        else
+                        {
+                            msg = "用户名或密码错误";
+                            user = null;
+                            return 0;
+                        }
                     }
+                    else
+                    {
+                        reader.Close();
+                        sql.Clear();
+                        sql.Append("SELECT * FROM tUser WHERE UserCode=@UserCode AND UPassword=@UPassword AND IsAdmin='1' ");
+                        reader = dal.Select(sql.ToString(),
+                           dal.CreateParameter("@UserCode", userCode),
+                           dal.CreateParameter("@UPassword", Des.EncryStrHex(uPassword, userCode))
+                            );
+                        if (reader.Read())
+                        {
+
+                            //登录成功
+                            msg = "登录成功";
+                            //登录成功
+                            user = new User()
+                            {
+                                ID = Convert.ToDecimal(reader["ID"]),
+                                UserCode = Convert.ToString(reader["UserCode"]),
+                                UserName = Convert.ToString(reader["UserName"]),
+                                IsAdmin = Convert.ToDecimal(reader["IsAdmin"]) == 1 ? true : false
+                            };
+                            reader.Close();
+                            return 1;
+                        }
+                        else
+                        {
+                            msg = "用户名或密码错误";
+                            reader.Close();
+                            user = null;
+                            return 0;
+                        }
+                    }
+                    
                     
                 }
             }
@@ -143,9 +162,62 @@ namespace BLL
             {
                 using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
                 {
-                    IDataReader dr = dal.Select("SELECT * FROM tUser");
+                    IDataReader dr = dal.Select("SELECT ID,UserCode,UserName,IsAdmin,UPassword FROM tUser");
                     ICollection<User> users = ObjectHelper.BuildObject<User>(dr);
                     dr.Close();
+                    foreach (User u in users)
+                    {
+                        u.UPassword = Des.DecryStrHex(u.UPassword, u.UserCode);
+                    }
+                    return users;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 列表用户
+        /// </summary>
+        /// <returns></returns>
+        public static ICollection<User> ListUser(string userCode,string userName,string isAdmin)
+        {
+            try
+            {
+                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
+                {
+                    StringBuilder sql = new StringBuilder(256);
+                    sql.Append(" SELECT ID,UserCode,UserName,UPassword,IsAdmin FROM tUser ");
+                    sql.Append(" Where 1=1");
+                    if (!string.IsNullOrEmpty(userCode))
+                    {
+                        sql.AppendFormat(" And UserCode='{0}'", userCode);
+                    }
+                    if (!string.IsNullOrEmpty(userName))
+                    {
+                        sql.AppendFormat(" And UserName='{0}'", userName);
+                    }
+                    if (!string.IsNullOrEmpty(isAdmin) && !(isAdmin.Contains("true") && isAdmin.Contains("false")))
+                    {
+                        sql.Append(" And ");
+                        if (isAdmin.Contains("true"))
+                        {
+                            sql.Append(" IsAdmin=1 ");
+                        }
+                        else if (isAdmin.Contains("false"))
+                        {
+                            sql.Append(" IsAdmin=0 ");
+                        }
+                    }
+                    IDataReader dr = dal.Select(sql.ToString());
+                    ICollection<User> users = ObjectHelper.BuildObject<User>(dr);
+                    dr.Close();
+                    foreach (User u in users)
+                    {
+                        u.UPassword = Des.DecryStrHex(u.UPassword, u.UserCode);
+                    }
                     return users;
                 }
             }

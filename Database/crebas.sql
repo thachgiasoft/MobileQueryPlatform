@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-/* Created on:     2014-06-16 08:56:16                          */
+/* Created on:     2014-06-18 15:56:24                          */
 /*==============================================================*/
 
 
@@ -121,10 +121,6 @@ if exists (select 1
    drop table dbo.tReportParamOption
 go
 
-alter table dbo.tSysInfo
-   drop constraint PK_TSYSINFO
-go
-
 if exists (select 1
             from  sysobjects
            where  id = object_id('dbo.tSysInfo')
@@ -243,13 +239,13 @@ create table tReportParamOption (
 go
 
 /*==============================================================*/
-/* Table: tSysInfo                                              */
+/* Table: tSysCfg                                               */
 /*==============================================================*/
-create table tSysInfo (
+create table tSysCfg (
    Section              char(128)            not null,
    OptionName           char(128)            not null,
    OptionValue          char(5000)           not null,
-   constraint PK_TSYSINFO primary key (Section, OptionName)
+   constraint PK_TSYSCFG primary key (Section, OptionName)
 )
 go
 

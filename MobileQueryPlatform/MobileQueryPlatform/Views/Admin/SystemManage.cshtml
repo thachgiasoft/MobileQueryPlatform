@@ -1,1 +1,68 @@
-﻿
+﻿<script type="text/javascript">
+    if (window.SysCfg == undefined) {
+        Tools.Namespace.register("window.SysCfg");
+    }
+    if (window.SysCfg.Toolbar == undefined) {
+        window.SysCfg.Toolbar = Backbone.View.extend({
+            events: {
+                "click #refresh":"refresh",
+                "click #save":"save"
+            },
+            refresh:function(){
+                console.info("refresh");
+            },
+            save: function () {
+                console.info("save");
+            }
+        });
+    }
+    if (window.SysCfg.FormView == undefined) {
+        window.SysCfg.FormView = Backbone.View.extend({
+            render: function (data) {
+
+            }
+        });
+    }
+</script>
+
+<script>
+    var toolbar;
+    $(function () {
+        toolbar = new window.SysCfg.Toolbar({
+            el:"#toolbar"
+        });
+    })
+</script>
+<div class="container">
+    <form id="sysCfgForm" role="form">
+        <div class="form-group">
+            <label>序列号</label>
+            <input class="form-control" type="text" placeholder="loading" value="" disabled />
+        </div>
+        <div class="form-group">
+            <label>单位名称</label>
+            <input class="form-control" type="text" placeholder="输入单位名称" />
+        </div>
+        <div class="form-group">
+            <label>授权码</label>
+            <input class="form-control" type="text" placeholder="输入授权码" />
+        </div>
+        <div class="form-group">
+            <label>有效期至</label>
+            <input class="form-control" type="text" placeholder="loading" disabled />
+        </div>
+        <div class="form-group">
+            <label>授权报表数</label>
+            <input class="form-control" type="text" placeholder="loading" disabled />
+        </div>
+    </form>
+</div>
+
+<div class="navbar navbar-fixed-bottom">
+    <div class="navbar-header">
+        <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
+            <a class="btn btn-default" id="refresh"><span class="glyphicon glyphicon-refresh">刷新</span></a>
+            <a class="btn btn-default" id="save"><span class="glyphicon glyphicon-floppy-save">保存</span></a>
+        </div>
+    </div>
+</div>
