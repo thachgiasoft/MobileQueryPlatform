@@ -27,8 +27,9 @@ namespace Model
 
         /// <summary>
         /// 数据库类型
+        /// 0-MSSql 1-Oracle
         /// </summary>
-        public DBType DBType
+        public int DBType
         {
             get;
             set;
@@ -48,15 +49,6 @@ namespace Model
             get;
             set;
         }
-    }
-
-    /// <summary>
-    /// 数据库类型
-    /// </summary>
-    public enum DBType 
-    {
-        MSSQL = 0,
-        Oracle = 1
     }
 
 }

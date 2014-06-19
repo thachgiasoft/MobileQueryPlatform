@@ -9,51 +9,90 @@
                 "click #save":"save"
             },
             refresh:function(){
-                console.info("refresh");
+                formView.refresh();
             },
             save: function () {
-                console.info("save");
+                syscfg.set(Tools.serializeObject($("#sysCfgForm")));
+                syscfg.save(null,{
+                    success: function (model, rst) {
+                        alert(rst.ResultMessage);
+                        formView.refresh();
+                    },
+                    error: function (e) {
+                        alert(e.responseJSON.Message);
+                    }
+                });
             }
         });
     }
     if (window.SysCfg.FormView == undefined) {
         window.SysCfg.FormView = Backbone.View.extend({
-            render: function (data) {
-
+            refresh: function () {
+                syscfg.fetch({
+                    success: function (model) {
+                        $("#SerialNo").val(model.get("SerialNo"));
+                        $("#Company").val(model.get("Company"));
+                        $("#License").val(model.get("License"));
+                        $("#ExpDate").val(model.get("ExpDate"));
+                        $("#ReportNumber").val(model.get("ReportNumber"));
+                    },
+                    error: function (e) {
+                        alert(e.responseJSON.Message);
+                    }
+                });
             }
+        });
+    }
+    if (window.SysCfg.Model == undefined) {
+        window.SysCfg.Model = Backbone.Model.extend({
+            defaults: {
+                "Company": "",
+                "SerialNo": "",
+                "License": "",
+                "ExpDate": "",
+                "ReportNumber": ""
+            },
+            urlRoot: "/api/Syscfg"
         });
     }
 </script>
 
 <script>
     var toolbar;
+    var syscfg;
+    var formView;
     $(function () {
         toolbar = new window.SysCfg.Toolbar({
             el:"#toolbar"
         });
+        formView = new window.SysCfg.FormView({
+            el: "#sysCfgForm"
+        });
+        syscfg = new window.SysCfg.Model();
+        formView.refresh();
     })
 </script>
 <div class="container">
     <form id="sysCfgForm" role="form">
         <div class="form-group">
             <label>序列号</label>
-            <input class="form-control" type="text" placeholder="loading" value="" disabled />
+            <input id="SerialNo" name="SerialNo" class="form-control" type="text" placeholder="loading" value="" readonly="readonly" />
         </div>
         <div class="form-group">
             <label>单位名称</label>
-            <input class="form-control" type="text" placeholder="输入单位名称" />
+            <input id="Company" name="Company"class="form-control" type="text" placeholder="输入单位名称" />
         </div>
         <div class="form-group">
             <label>授权码</label>
-            <input class="form-control" type="text" placeholder="输入授权码" />
+            <input id="License" name="License" class="form-control" type="text" placeholder="输入授权码" />
         </div>
         <div class="form-group">
             <label>有效期至</label>
-            <input class="form-control" type="text" placeholder="loading" disabled />
+            <input id="ExpDate" name="ExpDate" class="form-control" type="text" placeholder="loading" disabled />
         </div>
         <div class="form-group">
             <label>授权报表数</label>
-            <input class="form-control" type="text" placeholder="loading" disabled />
+            <input id="ReportNumber" name="ReportNumber" class="form-control" type="text" placeholder="loading" disabled />
         </div>
     </form>
 </div>

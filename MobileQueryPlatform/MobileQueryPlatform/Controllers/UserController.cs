@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using Model;
 using BLL;
+using System.Web;
 
 namespace MobileQueryPlatform.Controllers
 {
@@ -22,16 +23,16 @@ namespace MobileQueryPlatform.Controllers
             return UserBLL.ListUser(UserCode,UserName,IsAdmin);
         }
 
-        // GET api/user/5
-        public User Get(int id) 
-        {
-            return null;
-        }
-
         // POST api/user
         public ResultModel<object> Post(User value)
         {
             ResultModel<object> rst = new ResultModel<object>();
+            if (HttpContext.Current.Session["SigninedUser"] == null)
+            {
+                rst.ResultMessage = "用户登录失效";
+                rst.ResultStatus = -1;
+                return rst;
+            }
             rst.ResultStatus= UserBLL.AddUser(value, out rst.ResultMessage);
             return rst;
         }
@@ -40,6 +41,12 @@ namespace MobileQueryPlatform.Controllers
         public ResultModel<object> Put(int id, User value)
         {
             ResultModel<object> rst = new ResultModel<object>();
+            if (HttpContext.Current.Session["SigninedUser"] == null)
+            {
+                rst.ResultMessage = "用户登录失效";
+                rst.ResultStatus = -1;
+                return rst;
+            }
             rst.ResultStatus = UserBLL.UpdateUser(value, out rst.ResultMessage);
             return rst;
         }
@@ -48,6 +55,12 @@ namespace MobileQueryPlatform.Controllers
         public ResultModel<object> Delete(int id)
         {
             ResultModel<object> rst = new ResultModel<object>();
+            if (HttpContext.Current.Session["SigninedUser"] == null)
+            {
+                rst.ResultMessage = "用户登录失效";
+                rst.ResultStatus = -1;
+                return rst;
+            }
             rst.ResultStatus = UserBLL.DeleteUser(id, out rst.ResultMessage);
             return rst;
         }

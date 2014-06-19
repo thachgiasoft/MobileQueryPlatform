@@ -7,34 +7,14 @@ namespace Model
 {
     public class Syscfg
     {
-        public string CompanyName
-        {
-            get;
-            set;
-        }
+        public string Company;
 
-        public string SerialNo
-        {
-            get;
-            set;
-        }
+        public string SerialNo;
 
-        public string AuthKey
-        {
-            get;
-            set;
-        }
+        public string License;
 
-        public string EndDate
-        {
-            get;
-            set;
-        }
+        public string ExpDate;
 
-        public int ReportCount
-        {
-            get;
-            set;
-        }
+        public string ReportNumber;
     }
 }

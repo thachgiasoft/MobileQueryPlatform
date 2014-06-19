@@ -132,9 +132,11 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Attribute\AuthorizationAttribute.cs" />
     <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\DatabaseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\SignController.cs" />
+    <Compile Include="Controllers\SyscfgController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Filters\ActionFilter.cs" />
     <Compile Include="Global.asax.cs">
@@ -180,7 +182,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -231,7 +232,7 @@
     <None Include="Properties\PublishProfiles\MobileQuery.pubxml" />
     <Content Include="Views\Admin\Menu.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Admin\UserEdit.cshtml" />
+    <Content Include="Views\Admin\ChangePassword.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
