@@ -54,7 +54,7 @@ namespace BLL
                         }
                         if (cfg.ReportNumber == "999")
                         {
-                            cfg.ExpDate = "无限";
+                            cfg.ReportNumber = "无限";
                         }
                     }
                     else

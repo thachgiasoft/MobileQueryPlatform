@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-/* Created on:     2014-06-18 15:56:24                          */
+/* Created on:     2014-06-20 09:36:48                          */
 /*==============================================================*/
 
 
@@ -121,11 +121,15 @@ if exists (select 1
    drop table dbo.tReportParamOption
 go
 
+alter table dbo.tSysCfg
+   drop constraint PK_TSYSCFG
+go
+
 if exists (select 1
             from  sysobjects
-           where  id = object_id('dbo.tSysInfo')
+           where  id = object_id('dbo.tSysCfg')
             and   type = 'U')
-   drop table dbo.tSysInfo
+   drop table dbo.tSysCfg
 go
 
 alter table dbo.tUser
@@ -166,12 +170,15 @@ go
 /*==============================================================*/
 create table tDatabase (
    ID                   numeric              identity,
-   DBCode               char(128)            not null,
-   DBType               numeric              not null default 0,
-   ConnectionString     char(512)            not null,
+   DbCode               char(128)            not null,
+   DbType               numeric              not null default 0,
+   DataSource           char(50)             not null,
+   DbName               char(50)             not null,
+   UserID               char(50)             not null,
+   Password             char(50)             not null,
    Remark               char(512)            null,
    constraint PK_TDATABASE primary key (ID),
-   constraint AK_KEY_2_TDATABAS unique (DBCode)
+   constraint AK_KEY_2_TDATABAS unique (DbCode)
 )
 go
 
