@@ -14,9 +14,17 @@ namespace LicenseTool
             //string license = Des.EncryStrHex(expDate, reportNumber.ToString());
             //license = Des.EncryStrHex(license + reportNumber, serialNo);
             //return license;
-            char[] date = Des.EncryStrHex(expDate, serialNo).ToCharArray();
-            char[] number= Des.EncryStrHex(reportNumber, serialNo).ToCharArray();
-            char[] license = new char[32];
+            int r = new Random().Next(255, 4095);
+            string key = Convert.ToString(r, 16).ToUpper().PadLeft(3, '0');
+
+            char[] date = Des.EncryStrHex(expDate, key).ToCharArray();
+            char[] number= Des.EncryStrHex(reportNumber, key).ToCharArray();
+            char[] license = new char[35];
+
+            license[32] = key[0];
+            license[33] = key[1];
+            license[34] = key[2];
+
             for (int i = 0; i < 16; i++)
             {
                 license[i*2] = date[i];
@@ -34,8 +42,9 @@ namespace LicenseTool
                 date[i] = chars[i * 2];
                 number[i] = chars[i * 2 + 1];
             }
-            expDate = Des.DecryStrHex(new string(date), serialNo);
-            reportNumber = Des.DecryStrHex(new string(number), serialNo);
+            string key = license.Substring(32, 3);
+            expDate = Des.DecryStrHex(new string(date), key);
+            reportNumber = Des.DecryStrHex(new string(number), key);
         }
 
         ///<summary>
