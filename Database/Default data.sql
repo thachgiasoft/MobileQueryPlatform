@@ -1,4 +1,4 @@
-TRUNCATE TABLE tSysInfo
+TRUNCATE TABLE tSysCfg
 go
 INSERT INTO dbo.tSysCfg
         ( Section, OptionName, OptionValue )
