@@ -1,10 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-<<<<<<< HEAD
 /* Created on:     2014-06-18 15:56:24                          */
-=======
-/* Created on:     2014-06-20 09:36:48                          */
->>>>>>> 39ba0ac33afd3a78f5b9eb141d6b00b0edad484a
 /*==============================================================*/
 
 
@@ -125,23 +121,11 @@ if exists (select 1
    drop table dbo.tReportParamOption
 go
 
-<<<<<<< HEAD
 if exists (select 1
             from  sysobjects
            where  id = object_id('dbo.tSysInfo')
             and   type = 'U')
    drop table dbo.tSysInfo
-=======
-alter table dbo.tSysCfg
-   drop constraint PK_TSYSCFG
-go
-
-if exists (select 1
-            from  sysobjects
-           where  id = object_id('dbo.tSysCfg')
-            and   type = 'U')
-   drop table dbo.tSysCfg
->>>>>>> 39ba0ac33afd3a78f5b9eb141d6b00b0edad484a
 go
 
 alter table dbo.tUser
@@ -182,24 +166,12 @@ go
 /*==============================================================*/
 create table tDatabase (
    ID                   numeric              identity,
-<<<<<<< HEAD
    DBCode               char(128)            not null,
    DBType               numeric              not null default 0,
    ConnectionString     char(512)            not null,
    Remark               char(512)            null,
    constraint PK_TDATABASE primary key (ID),
    constraint AK_KEY_2_TDATABAS unique (DBCode)
-=======
-   DbCode               char(128)            not null,
-   DbType               numeric              not null default 0,
-   DataSource           char(50)             not null,
-   DbName               char(50)             not null,
-   UserID               char(50)             not null,
-   Password             char(50)             not null,
-   Remark               char(512)            null,
-   constraint PK_TDATABASE primary key (ID),
-   constraint AK_KEY_2_TDATABAS unique (DbCode)
->>>>>>> 39ba0ac33afd3a78f5b9eb141d6b00b0edad484a
 )
 go
 
