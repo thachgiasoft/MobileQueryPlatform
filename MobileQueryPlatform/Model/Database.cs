@@ -19,7 +19,7 @@ namespace Model
         /// <summary>
         /// 数据库编码
         /// </summary>
-        public string DBCode
+        public string DbCode
         {
             get;
             set;
@@ -29,26 +29,47 @@ namespace Model
         /// 数据库类型
         /// 0-MSSql 1-Oracle
         /// </summary>
-        public int DBType
+        public int DbType
+        {
+            get;
+            set;
+        }
+
+        public string DataSource
         {
             get;
             set;
         }
 
         /// <summary>
-        /// 数据库连接字符串
+        /// 数据库 或 服务名
         /// </summary>
-        public string ConnectionString
+        public string DbName
         {
             get;
             set;
         }
 
+        public string UserID
+        {
+            get;
+            set;
+        }
+        public string Password
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 备注
+        /// </summary>
         public string Remark
         {
             get;
             set;
         }
+
     }
 
 }

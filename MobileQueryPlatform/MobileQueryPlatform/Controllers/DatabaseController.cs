@@ -1,39 +1,64 @@
-﻿using System;
+﻿using Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using BLL;
+using System.Web;
 
 namespace MobileQueryPlatform.Controllers
 {
     public class DatabaseController : ApiController
     {
         // GET api/database
-        public IEnumerable<string> Get()
+        public IEnumerable<Database> Get()
         {
-            return new string[] { "value1", "value2" };
+            return DatabaseBLL.ListDatabase();
         }
 
-        // GET api/database/5
-        public string Get(int id)
-        {
-            return "value";
-        }
-
+        
         // POST api/database
-        public void Post([FromBody]string value)
+        public ResultModel<object> Post(Database value)
         {
+            ResultModel<object> rst = new ResultModel<object>();
+            if (HttpContext.Current.Session["SigninedUser"] == null)
+            {
+                rst.ResultMessage = "用户登录失效";
+                rst.ResultStatus = -1;
+                return rst;
+            }
+            rst.ResultStatus = DatabaseBLL.SaveDatabase(value, out rst.ResultMessage);
+            return rst;
         }
 
         // PUT api/database/5
-        public void Put(int id, [FromBody]string value)
+        public ResultModel<object> Put(int id, Database value)
         {
+            ResultModel<object> rst = new ResultModel<object>();
+            if (HttpContext.Current.Session["SigninedUser"] == null)
+            {
+                rst.ResultMessage = "用户登录失效";
+                rst.ResultStatus = -1;
+                return rst;
+            }
+            rst.ResultStatus = DatabaseBLL.UpdateDatabase(id, value, out rst.ResultMessage);
+            return rst;
         }
 
         // DELETE api/database/5
-        public void Delete(int id)
+        public ResultModel<object> Delete(int id)
         {
+            ResultModel<object> rst = new ResultModel<object>();
+            if (HttpContext.Current.Session["SigninedUser"] == null)
+            {
+                rst.ResultMessage = "用户登录失效";
+                rst.ResultStatus = -1;
+                return rst;
+            }
+            rst.ResultStatus = DatabaseBLL.DeleteDatabase(id, out rst.ResultMessage);
+            return rst;
         }
     }
 }
