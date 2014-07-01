@@ -12,13 +12,16 @@ namespace BLL
         {
             char[] chars = license.ToCharArray();
             char[] date = new char[16];
+            char[] keys = new char[16];
             char[] number = new char[16];
+
             for (int i = 0; i < 16; i++)
             {
-                date[i] = chars[i * 2];
-                number[i] = chars[i * 2 + 1];
+                date[i] = chars[i * 3];
+                number[i] = chars[i * 3 + 1];
+                keys[i] = chars[i * 3 + 2];
             }
-            string key = license.Substring(32, 3);
+            string key = Des.DecryStrHex(new string(keys), serialNo);
             expDate = Des.DecryStrHex(new string(date), key);
             reportNumber = Des.DecryStrHex(new string(number), key);
         }

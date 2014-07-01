@@ -15,20 +15,18 @@ namespace LicenseTool
             //license = Des.EncryStrHex(license + reportNumber, serialNo);
             //return license;
             int r = new Random().Next(255, 4095);
-            string key = Convert.ToString(r, 16).ToUpper().PadLeft(3, '0');
+            string key =Convert.ToString(r, 16).ToUpper().PadLeft(3, '0');
 
+            char[] keys=Des.EncryStrHex(key,serialNo).ToCharArray();
             char[] date = Des.EncryStrHex(expDate, key).ToCharArray();
             char[] number= Des.EncryStrHex(reportNumber, key).ToCharArray();
-            char[] license = new char[35];
-
-            license[32] = key[0];
-            license[33] = key[1];
-            license[34] = key[2];
+            char[] license = new char[48];
 
             for (int i = 0; i < 16; i++)
             {
-                license[i*2] = date[i];
-                license[i*2+1] = number[i];
+                license[i * 3] = date[i];
+                license[i * 3 + 1] = number[i];
+                license[i * 3 + 2] = keys[i];
             }
             return new string(license);
         }
@@ -36,13 +34,16 @@ namespace LicenseTool
         {
             char[] chars = license.ToCharArray();
             char[] date = new char[16];
+            char[] keys = new char[16];
             char[] number = new char[16];
+
             for (int i = 0; i < 16; i++)
             {
-                date[i] = chars[i * 2];
-                number[i] = chars[i * 2 + 1];
+                date[i] = chars[i * 3];
+                number[i] = chars[i * 3 + 1];
+                keys[i] = chars[i * 3 + 2];
             }
-            string key = license.Substring(32, 3);
+            string key =Des.DecryStrHex( new string(keys),serialNo);
             expDate = Des.DecryStrHex(new string(date), key);
             reportNumber = Des.DecryStrHex(new string(number), key);
         }

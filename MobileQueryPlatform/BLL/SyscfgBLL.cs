@@ -45,7 +45,7 @@ namespace BLL
                         msg = "获取序列号失败";
                         return null;
                     }
-                    if (cfg.License!=null && cfg.License.Length==32)
+                    if (cfg.License!=null && cfg.License.Length==48)
                     {
                         LicenseClass.AnalyzeLisense(cfg.License, cfg.SerialNo, out cfg.ExpDate, out cfg.ReportNumber);
                         if (cfg.ExpDate == "99999999")
@@ -54,7 +54,7 @@ namespace BLL
                         }
                         if (cfg.ReportNumber == "999")
                         {
-                            cfg.ExpDate = "无限";
+                            cfg.ReportNumber = "无限";
                         }
                     }
                     else
