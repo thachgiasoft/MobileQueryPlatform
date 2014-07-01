@@ -160,6 +160,10 @@ namespace BLL
                     IDataReader dr = dal.Select("SELECT ID,DbCode,DbType,DataSource,DbName,UserID,Password,Remark  FROM tDatabase");
                     ICollection<Database> rst = ObjectHelper.BuildObject<Database>(dr);
                     dr.Close();
+                    foreach (Database db in rst)
+                    {
+                        db.Password = Des.DecryStrHex(db.Password, db.UserID);
+                    }
                     return rst;
                 }
             }

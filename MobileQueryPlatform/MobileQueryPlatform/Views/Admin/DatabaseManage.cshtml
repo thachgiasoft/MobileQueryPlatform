@@ -20,58 +20,60 @@
                 <h4 class="modal-title">数据源编辑</h4>
             </div>
             <div class="modal-body">
-                <form role="form" id="<%=action%>_form">
+                <form role="form" id="db_form">
                     <div class="form-group">
-                        <label for="<%=action%>_DbCode">编码</label>
-                        <input id="<%=action%>_DbCode" type="text" class="form-control" name="DbCode" value="<%=data.DbCode%>" placeholder="输入编码" autofocus="autofocus" required="required" />
+                        <label for="dbCode">编码</label>
+                        <input id="dbCode" type="text" class="form-control"  <%=data.DbCode!=null?'disabled':''%> name="DbCode" value="<%=data.DbCode%>" placeholder="输入编码" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
                         <label>数据库类型</label>
-                    </div>
-                    <%if(data.DbType==0){%>
-                    <div class="btn-group" data-toggle="buttons">
-                        <label id="DbType_MsSql" class="btn btn-info active">
-                            <input name="DbType" type="radio" value="0">&nbsp;&nbsp;MsSql&nbsp;&nbsp;
-                        </label>
-                        <label id="isAdmin_f"class="btn btn-info">
-                            <input name="DbType" type="radio" value="1">&nbsp;&nbsp;Oracle&nbsp;&nbsp;
-                        </label>
-                    </div>
-                    <%} else {%>
-                    <div class="btn-group" data-toggle="buttons">
-                        <label id="DbType_MsSql" class="btn btn-info">
-                            <input name="DbType" type="radio" value="0">&nbsp;&nbsp;MsSql&nbsp;&nbsp;
-                        </label>
-                        <label id="isAdmin_f" class="btn btn-info active">
-                            <input name="DbType" type="radio" value="1">&nbsp;&nbsp;Oracle&nbsp;&nbsp;
-                        </label>
-                    </div>
-                    <%}%>
-                    <div class="form-group">
-                        <label for="<%=action%>_DataSource">数据源</label>
-                        <input id="<%=action%>_DataSource" type="text" class="form-control" name="DataSource" value="<%=data.DataSource%>" placeholder="输入数据源" autofocus="autofocus" required="required" />
+                        <br />
+                        <%if(data.DbType==0){%>
+                        <div class="btn-group" data-toggle="buttons">
+
+                            <label class="btn btn-info active">
+                                <input name="DbType" type="radio" value="0" checked>&nbsp;&nbsp;MsSql&nbsp;&nbsp;
+                            </label>
+                            <label class="btn btn-info">
+                                <input name="DbType" type="radio" value="1">&nbsp;&nbsp;Oracle&nbsp;&nbsp;
+                            </label>
+                        </div>
+                        <%} else {%>
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-info">
+                                <input name="DbType" type="radio" value="0">&nbsp;&nbsp;MsSql&nbsp;&nbsp;
+                            </label>
+                            <label class="btn btn-info active">
+                                <input name="DbType" type="radio" value="1" checked>&nbsp;&nbsp;Oracle&nbsp;&nbsp;
+                            </label>
+                        </div>
+                        <%}%>
                     </div>
                     <div class="form-group">
-                        <label for="<%=action%>_DbName">数据库名称</label>
-                        <input id="<%=action%>_DbName" type="text" class="form-control" name="DbName" value="<%=data.DbName%>" placeholder="输入数据库名称" autofocus="autofocus" required="required" />
+                        <label for="dataSource">数据源</label>
+                        <input id="dataSource" type="text" class="form-control" name="DataSource" value="<%=data.DataSource%>" placeholder="输入数据源" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
-                        <label for="<%=action%>_UserID">用户ID</label>
-                        <input id="<%=action%>_UserID" type="text" class="form-control" name="UserID" value="<%=data.UserID%>" placeholder="输入用户ID" autofocus="autofocus" required="required" />
+                        <label for="dbName">数据库名称</label>
+                        <input id="dbName" type="text" class="form-control" name="DbName" value="<%=data.DbName%>" placeholder="输入数据库名称" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
-                        <label for="<%=action%>_Password">登录密码</label>
-                        <input id="<%=action%>_Password" type="password" class="form-control" name="Password" value="<%=data.Password%>" placeholder="输入登录密码" autofocus="autofocus" required="required" />
+                        <label for="userID">用户ID</label>
+                        <input id="userID" type="text" class="form-control" name="UserID" value="<%=data.UserID%>" placeholder="输入用户ID" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
-                        <label for="<%=action%>_Remark">说明</label>
-                        <input id="<%=action%>_Remark" type="text" class="form-control" name="Remark" value="<%=data.Remark%>" placeholder="输入说明" autofocus="autofocus" required="required" />
+                        <label for="password">登录密码</label>
+                        <input id="password" type="password" class="form-control" name="Password" value="<%=data.Password%>" placeholder="输入登录密码" autofocus="autofocus" required="required" />
+                    </div>
+                    <div class="form-group">
+                        <label for="remark">说明</label>
+                        <input id="remark" type="text" class="form-control" name="Remark" value="<%=data.Remark%>" placeholder="输入说明" autofocus="autofocus" required="required" />
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <a class="btn btn-default" data-dismiss="modal">关闭</a>
-                <a class="btn btn-primary" id="<%=action%>_save">保存</a>
+                <a class="btn btn-primary" id="btn_save">保存</a>
             </div>
         </div>
     </div>
@@ -92,6 +94,7 @@
                         dbListView.refresh();
                         break;
                     case "add":
+                        dbEditView.edit(null);
                         break;
                 }
             }
@@ -115,7 +118,30 @@
             },
             events: {
                 "click a": function (e) {
-                    console.info(e);
+                    switch ($(e.currentTarget).attr("data-action")) {
+                        case "edit":
+                            dbEditView.edit(dbList.at($(e.currentTarget).attr("data-id")));
+                            break;
+                        case "del":
+                            if (!confirm("确认删除该数据源？")) {
+                                return;
+                            }
+                            var curDb = dbList.at($(e.currentTarget).attr("data-id"));
+                            curDb.destroy({
+                                success: function (model,rst) {
+                                    if (rst.ResultStatus == 1) {
+                                        alert("删除成功");
+                                        dbListView.refresh();
+                                    } else {
+                                        alert(rst.ResultMessage);
+                                    }
+                                },
+                                error: function () {
+                                    alert("连接失败");
+                                }
+                            });
+                            break;
+                    }
                 }
             }
         });
@@ -145,14 +171,44 @@
 
     if (window.Database.DbEditView == undefined) {
         window.Database.DbEditView = Backbone.View.extend({
+            curDb:null,
             template: _.template($("#tempDbEditView").html()),
-            render: function (data) {
+            render: function () {
+                if (this.curDb == null) {
+                    this.curDb = new window.Database.DbModel();
+                }
                 this.$el.html(this.template({
-                    "data": data,
-                    "action": "edit"
+                    "data": this.curDb.toJSON(this.curDb)
                 }))
+            },
+            hide: function () {
+                this.$el.modal("hide");
+            },
+            edit: function (data) {
+                this.curDb = data;
+                this.render();
+                this.$el.modal("show");
+            },
+            events: {
+                "click #btn_save": "save"
+            },
+            save: function () {
+                this.curDb.set(Tools.serializeObject($("#db_form")));
+                this.curDb.save(null, {
+                    success: function (model, rst) {
+                        if (rst.ResultStatus == 1) {
+                            dbEditView.hide();
+                            dbListView.refresh();
+
+                        } else {
+                            alert(rst.ResultMessage);
+                        }
+                    },
+                    error: function (e) {
+                        alert("连接失败");
+                    }
+                })
             }
-            //编写到此处，需要添加add、edit函数
         });
     }
 </script>
@@ -160,6 +216,7 @@
 <script type="text/javascript">
     var toolbar;
     var dbListView;
+    var dbEditView;
     var dbList;
     $(function () {
         toolbar = new window.Database.Toolbar({
@@ -167,6 +224,9 @@
         });
         dbListView = new window.Database.DbListView({
             el: "#dbListView"
+        });
+        dbEditView = new window.Database.DbEditView({
+            el: "#editView"
         });
         dbList = new window.Database.DbList();
         dbListView.refresh();
