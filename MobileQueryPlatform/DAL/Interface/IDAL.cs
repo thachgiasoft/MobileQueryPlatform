@@ -39,7 +39,7 @@ namespace DAL.Interface
         /// <returns></returns>
         DataTable Select(string sqlString, out int i, params IDbDataParameter[] paramArray);
 
-        IDataReader Select(string sqlString, params IDbDataParameter[] paramArray);
+        bool OpenReader(string sqlString, params IDbDataParameter[] paramArray);
 
         #endregion
 
@@ -62,7 +62,7 @@ namespace DAL.Interface
         #endregion
 
         #region execute
-        bool Execute(string sqlString, out int i, params IDbDataParameter[] Params);
+        void Execute(string sqlString, out int i, params IDbDataParameter[] Params);
         #endregion
 
         #region ParameterCreater
@@ -73,5 +73,14 @@ namespace DAL.Interface
         IDbDataParameter CreateParameter(string paramName, DbType dbType,int size ,ParameterDirection direction);
         #endregion
 
+        /// <summary>
+        /// DataReader
+        /// 同一时间只能开一个reader
+        /// </summary>
+        IDataReader DataReader
+        {
+            get;
+            set;
+        }
     }
 }

@@ -54,7 +54,7 @@ namespace DAL.Helper
         /// <typeparam name="T">对象泛型</typeparam>
         /// <param name="row">数据源DataRow</param>
         /// <returns>返回的对象</returns>
-        private static T BuildObject<T>(DataRow row,DataColumnCollection columns)
+        public static T BuildObject<T>(DataRow row,DataColumnCollection columns)
         {
             T obj = Activator.CreateInstance<T>();
             PropertyInfo[] propertyInfos = typeof(T).GetProperties();
@@ -83,13 +83,12 @@ namespace DAL.Helper
                         p.SetValue(obj, Convert.ToSingle(row[p.Name]), null);
                         break;
                     case "Boolean":
-                        p.SetValue(obj, Convert.ToInt16(row[p.Name])==1?true:false, null);
+                        p.SetValue(obj, Convert.ToBoolean(row[p.Name]), null);
                         break;
                 }
             }
             return obj;
         }
-
         #endregion
     }
 }

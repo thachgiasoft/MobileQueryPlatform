@@ -81,14 +81,20 @@ namespace DAL
             }
         }
 
-        public IDataReader Select(string OracleString, params IDbDataParameter[] paramArray)
+        public bool OpenReader(string OracleString, params IDbDataParameter[] paramArray)
         {
             try
             {
+                if (DataReader != null && !DataReader.IsClosed)
+                {
+                    //如果reader未关闭，则抛异常
+                    throw new Exception("DataReader未关闭");
+                }
                 OracleCommand cmd = new OracleCommand(OracleString, Connection);
                 cmd.Transaction = Tran;
                 cmd.Parameters.AddRange(paramArray);
-                return cmd.ExecuteReader();
+                DataReader= cmd.ExecuteReader();
+                return true;
             }
             catch
             {
@@ -179,7 +185,7 @@ namespace DAL
         #endregion
 
         #region Execute
-        public bool Execute(string OracleString, out int i, params IDbDataParameter[] Params)
+        public void Execute(string OracleString, out int i, params IDbDataParameter[] Params)
         {
             try
             {
@@ -187,7 +193,6 @@ namespace DAL
                 cmd.Transaction = Tran;
                 cmd.Parameters.AddRange(Params);
                 i = cmd.ExecuteNonQuery();
-                return true;
             }
             catch
             {
@@ -200,6 +205,10 @@ namespace DAL
 
         public void Dispose()
         {
+            if (DataReader != null && !DataReader.IsClosed)
+            {
+                DataReader.Close();
+            }
             //关闭连接并释放
             Connection.Close();
             Connection = null;
@@ -257,11 +266,19 @@ namespace DAL
 
         public IDbDataParameter CreateParameter(string paramName, object value)
         {
+            if (paramName[0] != ':')
+            {
+                paramName = ":" + paramName;
+            }
             return new OracleParameter(paramName, value);
         }
 
         public IDbDataParameter CreateParameter(string paramName, DbType dbType)
         {
+            if (paramName[0] != ':')
+            {
+                paramName = ":" + paramName;
+            }
             return new OracleParameter()
             {
                 ParameterName = paramName,
@@ -271,6 +288,10 @@ namespace DAL
 
         public IDbDataParameter CreateParameter(string paramName, DbType dbType, int size)
         {
+            if (paramName[0] != ':')
+            {
+                paramName = ":" + paramName;
+            }
             return new OracleParameter()
             {
                 ParameterName = paramName,
@@ -281,6 +302,10 @@ namespace DAL
 
         public IDbDataParameter CreateParameter(string paramName, DbType dbType, ParameterDirection direction)
         {
+            if (paramName[0] != ':')
+            {
+                paramName = ":" + paramName;
+            }
             return new OracleParameter()
             {
                 ParameterName = paramName,
@@ -291,6 +316,10 @@ namespace DAL
 
         public IDbDataParameter CreateParameter(string paramName, DbType dbType, int size, ParameterDirection direction)
         {
+            if (paramName[0] != ':')
+            {
+                paramName = ":" + paramName;
+            }
             return new OracleParameter()
             {
                 ParameterName = paramName,
@@ -301,5 +330,12 @@ namespace DAL
         }
 
         #endregion
+
+
+        public IDataReader DataReader
+        {
+            get;
+            set;
+        }
     }
 }

@@ -21,7 +21,7 @@ namespace BLL
         /// </summary>
         /// <param name="db"></param>
         /// <returns></returns>
-        public static int SaveDatabase(Database db,out string msg)
+        public static int InsertDatabase(Database db,out string msg)
         {
             try
             {
@@ -157,9 +157,8 @@ namespace BLL
             {
                 using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
                 {
-                    IDataReader dr = dal.Select("SELECT ID,DbCode,DbType,DataSource,DbName,UserID,Password,Remark  FROM tDatabase");
-                    ICollection<Database> rst = ObjectHelper.BuildObject<Database>(dr);
-                    dr.Close();
+                    dal.OpenReader("SELECT ID,DbCode,DbType,DataSource,DbName,UserID,Password,Remark  FROM tDatabase");
+                    ICollection<Database> rst = ObjectHelper.BuildObject<Database>(dal.DataReader);
                     foreach (Database db in rst)
                     {
                         db.Password = Des.DecryStrHex(db.Password, db.UserID);
@@ -185,16 +184,15 @@ namespace BLL
                 {
                     decimal DbType;
                     string DataSource, DbName, UserID, Password;
-                    IDataReader dr = dal.Select("SELECT DbType, DataSource,DbName,UserID,Password FROM dbo.tDatabase WHERE ID=@ID",
+                    dal.OpenReader("SELECT DbType, DataSource,DbName,UserID,Password FROM dbo.tDatabase WHERE ID=@ID",
                         dal.CreateParameter("@ID", ID));
-                    if (dr.Read())
+                    if (dal.DataReader.Read())
                     {
-                        DbType = Convert.ToDecimal(dr["DbType"]);
-                        DataSource = Convert.ToString(dr["DataSource"]);
-                        DbName = Convert.ToString(dr["DbName"]);
-                        UserID = Convert.ToString(dr["UserID"]);
-                        Password = Convert.ToString(dr["Password"]);
-                        dr.Close();
+                        DbType = Convert.ToDecimal(dal.DataReader["DbType"]);
+                        DataSource = Convert.ToString(dal.DataReader["DataSource"]);
+                        DbName = Convert.ToString(dal.DataReader["DbName"]);
+                        UserID = Convert.ToString(dal.DataReader["UserID"]);
+                        Password = Convert.ToString(dal.DataReader["Password"]);
                         Password = Des.DecryStrHex(Password, UserID);
                         connectionString = DbType == 0 ?
                             MSSQL_CONNECTIONSTRING :
@@ -208,7 +206,6 @@ namespace BLL
                     }
                     else
                     {
-                        dr.Close();
                         connectionString = null;
                         msg = "error";
                         return 0;
@@ -223,5 +220,6 @@ namespace BLL
                 return -1;
             }
         }
+
     }
 }

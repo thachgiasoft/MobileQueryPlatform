@@ -24,21 +24,20 @@ namespace BLL
             {
                 using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
                 {
-                    IDataReader dr = dal.Select("Select Section,OptionName,OptionValue From tSyscfg");
+                    dal.OpenReader("Select Section,OptionName,OptionValue From tSyscfg");
                     Syscfg cfg=new Syscfg();
-                    while (dr.Read())
+                    while (dal.DataReader.Read())
                     {
-                        switch (Convert.ToString(dr["OptionName"]).TrimEnd())
+                        switch (Convert.ToString(dal.DataReader["OptionName"]).TrimEnd())
                         {
                             case "Company":
-                                cfg.Company = Convert.ToString(dr["OptionValue"]).TrimEnd();
+                                cfg.Company = Convert.ToString(dal.DataReader["OptionValue"]).TrimEnd();
                                 break;
                             case "License":
-                                cfg.License = Convert.ToString(dr["OptionValue"]).TrimEnd();
+                                cfg.License = Convert.ToString(dal.DataReader["OptionValue"]).TrimEnd();
                                 break;
                         }
                     }
-                    dr.Close();
                     cfg.SerialNo = LicenseClass.GetMacByNetworkInterface();
                     if (string.IsNullOrEmpty(cfg.SerialNo))
                     {

@@ -1,1 +1,133 @@
-﻿
+﻿<script type="text/template" id="tempReportList">
+    <%for(var i=0;i<data.length;i++){ %>
+        <tr>
+            <td><%=data[i].ReportName%></td>
+            <td><%=data[i].DBName%></td>
+            <td><%=data[i].Enabled==true?"是":"否"%></td>
+            <td><%=data[i].Remark%></td>
+            <td>
+                <a class="btn btn-default" data-action="del" data-id="<%=i%>"><span class="glyphicon glyphicon-trash"></span></a>
+                <a class="btn btn-default" data-action="edit" data-id="<%=i%>"><span class="glyphicon glyphicon-pencil"></span></a>
+                <a class="btn btn-default" data-action="enabled" data-id="<%=i%>"><span class="glyphicon glyphicon-eye-open"></span></a>
+            </td>
+        </tr>
+    <%}%>
+</script>
+
+<script type="text/javascript">
+    if (window.ReportManage == undefined) {
+        Tools.Namespace.register("window.ReportManage");
+    }
+    
+    if (window.ReportManage.Toolbar == undefined) {
+        window.ReportManage.Toolbar = Backbone.View.extend({
+            events: {
+                "click a": "clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "add":
+                        //userEditView.add();
+                        break;
+                    case "filter":
+                        //userFilterView.show();
+                        break;
+                    case "refresh":
+                        reportListView.refresh();
+                        break;
+                }
+            }
+
+        });
+    }
+   
+    if (window.ReportManage.Report == undefined) {
+        window.ReportManage.Report = Backbone.Model.extend({
+            defaults: {
+                "ID": null,
+                "DBID": null,
+                "DBName": "",
+                "ReportName": "",
+                "Enabled": true,
+                "Remark": "",
+                "Columns": null,
+                "Params": null,
+                "Command": null,
+                "Result": null
+            },
+            idAttribute:"ID",
+            urlRoot:"/api/Report"
+        });
+    }
+
+    
+    if (window.ReportManage.ReportList == undefined) {
+        window.ReportManage.ReportList = Backbone.Collection.extend({
+            model: window.ReportManage.Report,
+            url: "/api/Report"
+        });
+    }
+    
+    if (window.ReportManage.ReportListView == undefined) {
+        window.ReportManage.ReportListView = Backbone.View.extend({
+            template: _.template($("#tempReportList").html()),
+            render: function (data) {
+                this.$el.html(this.template(data));
+            },
+            refresh: function () {
+                reportList.fetch({
+                    success: function (collection, response, options) {
+                        
+                        reportListView.render({ data: response });
+                    },
+                    error: function (e) {
+                        alert(e.responseJSON.Message);
+                    }
+                });
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var toolbar;
+    var reportList;
+    var reportListView;
+    $(function () {
+        
+        toolbar = new window.ReportManage.Toolbar({
+            el: "#toolbar"
+        });
+        reportList = new window.ReportManage.ReportList();
+        reportListView = new window.ReportManage.ReportListView({
+            el: "#reportList"
+        });
+        reportListView.refresh();
+    })
+</script>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>报表名</th>
+            <th>数据源</th>
+            <th>可用</th>
+            <th>说明</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody id="reportList"></tbody>
+</table> 
+
+<div class="modal fade" id="reportEditView" />
+
+<div id="reportFilterView" class="modal fade" />
+
+<div class="navbar navbar-fixed-bottom">
+    <div class="navbar-header">
+        <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
+            <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a>
+            <a class="btn btn-default" data-action="add"><span class="glyphicon glyphicon-plus"></span>新建</a>
+            <a class="btn btn-default" data-action="filter"><span class="glyphicon glyphicon-filter">筛选</span></a>
+        </div>
+    </div>
+</div> 

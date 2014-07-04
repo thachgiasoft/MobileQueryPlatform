@@ -29,7 +29,7 @@ namespace MobileQueryPlatform.Controllers
                 rst.ResultStatus = -1;
                 return rst;
             }
-            rst.ResultStatus = DatabaseBLL.SaveDatabase(value, out rst.ResultMessage);
+            rst.ResultStatus = DatabaseBLL.InsertDatabase(value, out rst.ResultMessage);
             return rst;
         }
 

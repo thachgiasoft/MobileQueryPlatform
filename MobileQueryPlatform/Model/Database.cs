@@ -29,7 +29,7 @@ namespace Model
         /// 数据库类型
         /// 0-MSSql 1-Oracle
         /// </summary>
-        public int DbType
+        public short DbType
         {
             get;
             set;

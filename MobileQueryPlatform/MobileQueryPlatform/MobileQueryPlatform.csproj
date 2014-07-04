@@ -135,6 +135,7 @@
     <Compile Include="Controllers\DatabaseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
+    <Compile Include="Controllers\ReportRequestController.cs" />
     <Compile Include="Controllers\SignController.cs" />
     <Compile Include="Controllers\SyscfgController.cs" />
     <Compile Include="Controllers\UserController.cs" />
