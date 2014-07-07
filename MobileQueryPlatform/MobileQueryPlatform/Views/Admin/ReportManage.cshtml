@@ -14,6 +14,52 @@
     <%}%>
 </script>
 
+<script id="tempReportView" type="text/template">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><%=title%></h4>
+            </div>
+            <div class="modal-body">
+                <form role="form" id="<%=action%>_form">
+                    <div class="form-group">
+                        <label for="<%=action%>_userCode">用户编码</label>
+                        <input id="<%=action%>_userCode" type="text" class="form-control" name="UserCode" placeholder="输入用户编码" autofocus="autofocus" required="required" />
+                    </div>
+                    <div class="form-group">
+                        <label for="<%=action%>_userName">用户名称</label>
+                        <input id="<%=action%>_userName" type="text" class="form-control" name="UserName" placeholder="输入用户名称" autofocus="autofocus" required="required" />
+                    </div>
+                    <div class="form-group">
+                        <label>管理员</label>
+                    </div>
+                    <div class="btn-group" data-toggle="buttons">
+                        <%if(action=="edit"){%>
+                        <label id="isAdmin_t" class="btn btn-info">
+                            <input name="IsAdmin" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                        </label>
+                        <label id="isAdmin_f" class="btn btn-info">
+                            <input name="IsAdmin" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                        </label>
+                        <%} else {%>
+                        <label class="btn btn-info">
+                            <input name="IsAdmin" type="checkbox" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                        </label>
+                        <label class="btn btn-info">
+                            <input name="IsAdmin" type="checkbox" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                        </label>
+                        <%}%>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-default" data-dismiss="modal">关闭</a>
+                <a class="btn btn-primary" id="<%=action%>_save"><%=saveText%></a>
+            </div>
+        </div>
+    </div>
+</script>
 <script type="text/javascript">
     if (window.ReportManage == undefined) {
         Tools.Namespace.register("window.ReportManage");
@@ -87,6 +133,11 @@
             }
         });
     }
+
+    if (window.ReportManage.ReportEditView == undefined) {
+        window.ReportManage.ReportEditView = Backbone.View.extend({
+        });
+    }
 </script>
 
 <script type="text/javascript">
@@ -103,6 +154,11 @@
             el: "#reportList"
         });
         reportListView.refresh();
+        $("#reportEditView").modal( {
+            keyboard: false,
+            backdrop:false
+        });
+        $("#reportEditView").modal('show');
     })
 </script>
 <table class="table table-bordered table-hover">
@@ -117,9 +173,108 @@
     </thead>
     <tbody id="reportList"></tbody>
 </table> 
+<div class="modal fade" aria-hidden="true" id="reportEditView">
+    <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">报表编辑</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <div class="form-group">
+                            <label for="userCode">报表名称</label>
+                            <input id="userCode" type="text" class="form-control" name="UserCode" placeholder="输入报表名称" autofocus="autofocus" required="required" />
+                        </div>
+                        <div class="form-group">
+                            <label for="userName">数据源</label>
+                            <input id="userName" type="text" class="form-control" name="UserName" placeholder="选择数据源" autofocus="autofocus" required="required" />
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-5">
+                                <div class="form-group">
+                                    <label>可用</label>
+                                    <br />
+                                    <div class="btn-group" data-toggle="buttons">
+                                        <label id="isAdmin_t" class="btn btn-info">
+                                            <input name="IsAdmin" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                                        </label>
+                                        <label id="isAdmin_f" class="btn btn-info">
+                                            <input name="IsAdmin" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
 
-<div class="modal fade" id="reportEditView" />
+                        </div>
 
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <div class="form-group">
+                                    <label>页合计</label>
+                                    <br />
+                                    <div class="btn-group" data-toggle="buttons">
+                                        <label id="isAdmin_t" class="btn btn-info">
+                                            <input name="IsAdmin" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                                        </label>
+                                        <label id="isAdmin_f" class="btn btn-info">
+                                            <input name="IsAdmin" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-3">
+                                <div class="form-group">
+                                    <label>总合计</label>
+                                    <br />
+                                    <div class="btn-group" data-toggle="buttons">
+                                        <label id="isAdmin_t" class="btn btn-info">
+                                            <input name="IsAdmin" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                                        </label>
+                                        <label id="isAdmin_f" class="btn btn-info">
+                                            <input name="IsAdmin" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <div class="form-group">
+                                    <label>分页</label>
+                                    <br />
+                                    <div class="btn-group" data-toggle="buttons">
+                                        <label id="isAdmin_t" class="btn btn-info">
+                                            <input name="IsAdmin" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                                        </label>
+                                        <label id="isAdmin_f" class="btn btn-info">
+                                            <input name="IsAdmin" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-3">
+                                <div class="form-group">
+                                    <label for="userName">每页显示条数</label>
+                                    <input id="userName" type="text" class="form-control" name="UserName" placeholder="输入条数" autofocus="autofocus" required="required" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sqlCommand">SQL语句</label>
+                            <textarea id="sqlCommand" class="form-control" rows="3">select * from tDatabase</textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-default" data-dismiss="modal">关闭</a>
+                    <a class="btn btn-primary" id="save">保存</a>
+                </div>
+            </div>
+        </div>
+</div>
 <div id="reportFilterView" class="modal fade" />
 
 <div class="navbar navbar-fixed-bottom">
@@ -127,7 +282,6 @@
         <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
             <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a>
             <a class="btn btn-default" data-action="add"><span class="glyphicon glyphicon-plus"></span>新建</a>
-            <a class="btn btn-default" data-action="filter"><span class="glyphicon glyphicon-filter">筛选</span></a>
         </div>
     </div>
 </div> 
