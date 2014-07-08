@@ -230,19 +230,27 @@
         });
         dbList = new window.Database.DbList();
         dbListView.refresh();
+        $("#editView").modal({
+            show: false,
+            keyboard: false,
+            backdrop: false
+        });
     })
 </script>
-<table class="table table-bordered table-hover">
-    <thead>
-        <tr>
-            <th>编码</th>
-            <th>类型</th>
-            <th>说明</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody id="dbListView"></tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>编码</th>
+                <th>类型</th>
+                <th>说明</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="dbListView"></tbody>
+    </table>
+</div>
+
 
 <div class="modal fade" id="editView" />
 

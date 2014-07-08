@@ -286,24 +286,39 @@
         });
         userList = new window.UserManage.UserList();
         userListView.refresh();
+        $("#userFilterView").modal({
+            show:false,
+            keyboard: false,
+            backdrop: false
+        });
+        $("#userEditView").modal({
+            show:false,
+            keyboard: false,
+            backdrop: false
+        });
+
     })
 </script>
 
-<table class="table table-bordered table-hover">
-    <thead>
-        <tr>
-            <th>编码</th>
-            <th>名称</th>
-            <th>管理员</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody id="userList"></tbody>
-</table>   
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>编码</th>
+                <th>名称</th>
+                <th>管理员</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="userList"></tbody>
+    </table> 
+</div>
+  
 
 <div class="modal fade" id="userEditView"/>
 
 <div id="userFilterView" class="modal fade"/>
+
 <div class="navbar navbar-fixed-bottom">
     <div class="navbar-header">
         <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
