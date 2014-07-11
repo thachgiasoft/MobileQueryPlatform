@@ -106,7 +106,11 @@
                 $("#edit_userName").val("");
                 $("#isAdmin_f").addClass("active");
                 $("#isAdmin_t").removeClass("active");
-                this.$el.modal("show");
+                this.$el.modal({
+                    show: true,
+                    keyboard: false,
+                    backdrop: false
+                });
             },
             curUser:null,
             edit: function (i) {
@@ -122,7 +126,11 @@
                     $("#isAdmin_t").removeClass("active");
                     $("#isAdmin_f").addClass("active");
                 }
-                this.$el.modal("show");
+                this.$el.modal({
+                    show: true,
+                    keyboard: false,
+                    backdrop: false
+                });
             },
             hide: function () {
                 this.$el.modal("hide");
@@ -173,7 +181,11 @@
             },
             
             show:function(){
-                this.$el.modal("show");
+                this.$el.modal({
+                    show: true,
+                    keyboard: false,
+                    backdrop: false
+                });
             },
             hide: function () {
                 this.$el.modal("hide");
@@ -286,17 +298,6 @@
         });
         userList = new window.UserManage.UserList();
         userListView.refresh();
-        $("#userFilterView").modal({
-            show:false,
-            keyboard: false,
-            backdrop: false
-        });
-        $("#userEditView").modal({
-            show:false,
-            keyboard: false,
-            backdrop: false
-        });
-
     })
 </script>
 

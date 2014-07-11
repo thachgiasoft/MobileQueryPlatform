@@ -187,7 +187,11 @@
             edit: function (data) {
                 this.curDb = data;
                 this.render();
-                this.$el.modal("show");
+                this.$el.modal({
+                    show:true,
+                    keyboard: false,
+                    backdrop: false
+                });
             },
             events: {
                 "click #btn_save": "save"
@@ -230,11 +234,6 @@
         });
         dbList = new window.Database.DbList();
         dbListView.refresh();
-        $("#editView").modal({
-            show: false,
-            keyboard: false,
-            backdrop: false
-        });
     })
 </script>
 <div class="table-responsive">
