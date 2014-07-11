@@ -177,53 +177,53 @@ namespace BLL
             }
         }
 
-        /// <summary>
-        /// 列表用户
-        /// </summary>
-        /// <returns></returns>
-        public static ICollection<User> ListUser(string userCode,string userName,string isAdmin)
-        {
-            try
-            {
-                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
-                {
-                    StringBuilder sql = new StringBuilder(256);
-                    sql.Append(" SELECT ID,UserCode,UserName,UPassword,IsAdmin FROM tUser ");
-                    sql.Append(" Where 1=1");
-                    if (!string.IsNullOrEmpty(userCode))
-                    {
-                        sql.AppendFormat(" And UserCode='{0}'", userCode);
-                    }
-                    if (!string.IsNullOrEmpty(userName))
-                    {
-                        sql.AppendFormat(" And UserName='{0}'", userName);
-                    }
-                    if (!string.IsNullOrEmpty(isAdmin) && !(isAdmin.Contains("true") && isAdmin.Contains("false")))
-                    {
-                        sql.Append(" And ");
-                        if (isAdmin.Contains("true"))
-                        {
-                            sql.Append(" IsAdmin=1 ");
-                        }
-                        else if (isAdmin.Contains("false"))
-                        {
-                            sql.Append(" IsAdmin=0 ");
-                        }
-                    }
-                    dal.OpenReader(sql.ToString());
-                    ICollection<User> users = ObjectHelper.BuildObject<User>(dal.DataReader);
-                    foreach (User u in users)
-                    {
-                        u.UPassword = Des.DecryStrHex(u.UPassword, u.UserCode);
-                    }
-                    return users;
-                }
-            }
-            catch
-            {
-                throw;
-            }
-        }
+        ///// <summary>
+        ///// 列表用户
+        ///// </summary>
+        ///// <returns></returns>
+        //public static ICollection<User> ListUser(string userCode,string userName,string isAdmin)
+        //{
+        //    try
+        //    {
+        //        using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
+        //        {
+        //            StringBuilder sql = new StringBuilder(256);
+        //            sql.Append(" SELECT ID,UserCode,UserName,UPassword,IsAdmin FROM tUser ");
+        //            sql.Append(" Where 1=1");
+        //            if (!string.IsNullOrEmpty(userCode))
+        //            {
+        //                sql.AppendFormat(" And UserCode='{0}'", userCode);
+        //            }
+        //            if (!string.IsNullOrEmpty(userName))
+        //            {
+        //                sql.AppendFormat(" And UserName='{0}'", userName);
+        //            }
+        //            if (!string.IsNullOrEmpty(isAdmin) && !(isAdmin.Contains("true") && isAdmin.Contains("false")))
+        //            {
+        //                sql.Append(" And ");
+        //                if (isAdmin.Contains("true"))
+        //                {
+        //                    sql.Append(" IsAdmin=1 ");
+        //                }
+        //                else if (isAdmin.Contains("false"))
+        //                {
+        //                    sql.Append(" IsAdmin=0 ");
+        //                }
+        //            }
+        //            dal.OpenReader(sql.ToString());
+        //            ICollection<User> users = ObjectHelper.BuildObject<User>(dal.DataReader);
+        //            foreach (User u in users)
+        //            {
+        //                u.UPassword = Des.DecryStrHex(u.UPassword, u.UserCode);
+        //            }
+        //            return users;
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        throw;
+        //    }
+        //}
 
         /// <summary>
         /// 增加用户

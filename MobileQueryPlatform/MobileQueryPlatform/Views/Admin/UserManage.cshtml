@@ -75,9 +75,6 @@
                     case "add":
                         userEditView.add();
                         break;
-                    case "filter":
-                        userFilterView.show();
-                        break;
                     case "refresh":
                         userListView.refresh();
                         break;
@@ -165,47 +162,6 @@
         });
     }
 
-    if (window.UserManage.UserFilter == undefined) {
-        window.UserManage.UserFilter = Backbone.View.extend({
-            filter:null, 
-            template: _.template($("#tempUserView").html()),
-            render:function(){
-                this.$el.html(this.template({
-                    "action":"filter",
-                    "title":"用户筛选",
-                    "saveText":"筛选"
-                }))
-            },
-            initialize:function(){
-                this.render();
-            },
-            
-            show:function(){
-                this.$el.modal({
-                    show: true,
-                    keyboard: false,
-                    backdrop: false
-                });
-            },
-            hide: function () {
-                this.$el.modal("hide");
-            },
-            events: {
-                "click #filter_save": "saveFilter"
-            },
-            saveFilter: function () {
-                var tempFilter = Tools.serializeObject($("#filter_form"));
-                if (tempFilter.IsAdmin == undefined) {
-                    alert("请选择『管理员选项』");
-                    return;
-                }
-                this.filter = tempFilter;
-                this.hide();
-                userListView.refresh();
-            }
-
-        });
-    }
     if (window.UserManage.UserListView == undefined) {
         window.UserManage.UserListView = Backbone.View.extend({
             template: _.template($("#tempUserList").html()),
@@ -219,8 +175,7 @@
                     },
                     error: function (e) {
                         alert(e.responseJSON.Message);
-                    },
-                    data:  userFilterView.filter
+                    }
                 });
             },
             events: {
@@ -282,7 +237,6 @@
     var userEditView;
     var userListView;
     var userList;
-    var userFilterView;
     $(function () {
         toolbar == new window.UserManage.Toolbar({
             el: "#toolbar"
@@ -292,9 +246,6 @@
         });
         userListView = new window.UserManage.UserListView({
             el: "#userList"
-        });
-        userFilterView = new window.UserManage.UserFilter({
-            el: "#userFilterView"
         });
         userList = new window.UserManage.UserList();
         userListView.refresh();
@@ -318,14 +269,11 @@
 
 <div class="modal fade" id="userEditView"/>
 
-<div id="userFilterView" class="modal fade"/>
-
 <div class="navbar navbar-fixed-bottom">
     <div class="navbar-header">
         <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
             <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a>
             <a class="btn btn-default" data-action="add"><span class="glyphicon glyphicon-plus"></span>新建</a>
-            <a class="btn btn-default" data-action="filter"><span class="glyphicon glyphicon-filter">筛选</span></a>  
         </div>
     </div>
 </div> 

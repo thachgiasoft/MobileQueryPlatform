@@ -157,12 +157,8 @@ namespace BLL
             {
                 using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
                 {
-                    dal.OpenReader("SELECT ID,DbCode,DbType,DataSource,DbName,UserID,Password,Remark  FROM tDatabase");
+                    dal.OpenReader("SELECT ID,DbCode,DbType,DataSource,DbName,UserID,Remark  FROM tDatabase");
                     ICollection<Database> rst = ObjectHelper.BuildObject<Database>(dal.DataReader);
-                    foreach (Database db in rst)
-                    {
-                        db.Password = Des.DecryStrHex(db.Password, db.UserID);
-                    }
                     return rst;
                 }
             }
