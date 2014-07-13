@@ -79,6 +79,24 @@ namespace DAL
             }
         }
 
+        public DataSet Select(string sqlString, params IDbDataParameter[] paramArray)
+        {
+            try
+            {
+                SqlCommand cmd = new SqlCommand(sqlString, Connection);
+                cmd.Transaction = Tran;
+                cmd.Parameters.AddRange(paramArray);
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataSet ds = new DataSet();
+                adapter.Fill(ds);
+                return ds;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public bool OpenReader(string sqlString, params IDbDataParameter[] paramArray)
         {
             try
@@ -234,6 +252,10 @@ namespace DAL
 
         public IDbDataParameter CreateParameter(string paramName, object value)
         {
+            if (paramName[0] == ':')
+            {
+                paramName = "@" + paramName.Substring(1, paramName.Length - 1);//如果变量以:开头，替换为@
+            }
             if (paramName[0] != '@')
             {
                 paramName = "@" + paramName;

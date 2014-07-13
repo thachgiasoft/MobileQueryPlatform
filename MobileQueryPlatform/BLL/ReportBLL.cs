@@ -8,6 +8,7 @@ using DAL;
 using System.Configuration;
 using System.Data;
 using DAL.Helper;
+using System.Text.RegularExpressions;
 
 namespace BLL
 {
@@ -558,6 +559,82 @@ namespace BLL
             result = "";
             msg = "";
             return -1;
+        }
+
+        const string REGEX_PARAMS=@"(?<=)@\D\w+";
+        /// <summary>
+        /// 重建报表结构
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="SQL"></param>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        public static Report RebuildReport(decimal id, string SQL, out string msg)
+        {
+
+            Report report=new Report();
+            MatchCollection pms= Regex.Matches(SQL,REGEX_PARAMS);
+            report.Params=new List<ReportParam>();
+            report.Columns=new List<ReportColumn>();
+            foreach (Match m in pms)
+            {
+                //获取SQL语句中的参数
+                report.Params.Add(new ReportParam()
+                {
+                    ReportID = id,
+                    ParamCode = m.Value,
+                    ParamName = m.Value,
+                    ParamType = 0,
+                    ParamInputType = 0,
+                    ParamItems = new List<ReportParamItem>()
+                });
+            }
+            string tmpSql=Regex.Replace(SQL,REGEX_PARAMS,"NULL");//将所有参数设置为null，获取表结构
+            try
+            {
+                using(IDAL dal=DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString,0))
+                {
+                    //获取SQL语句中的Column
+                    DataSet ds=dal.Select(tmpSql);
+                    if(ds.Tables.Count!=1)
+                    {
+                        throw new Exception("错误：查询结果必须只有一个结果表");
+                    }
+                    else
+                    {
+                        foreach (DataColumn c in ds.Tables[0].Columns)
+                        {
+                            report.Columns.Add(new ReportColumn()
+                            {
+                                ReportID = id,
+                                ColumnCode = c.ColumnName,
+                                ColumnName = c.ColumnName,
+                                Sumabled = false,
+                                Sortabled = false
+                            });
+                        }
+                    }
+                    //获取之前设置的Params 
+                    StringBuilder sql = new StringBuilder(256);
+                    sql.Append("SELECT * FROM tReportParam WHERE ReportID=@ReportID");
+                    dal.OpenReader(sql.ToString(),
+                        dal.CreateParameter("@ReportID", id));
+                    while (dal.DataReader.Read())
+                    {
+                        
+                    }
+                    
+                    //获取之前设置的Column
+                    msg="success";
+                    return report;
+                }
+                
+            }
+            catch (System.Exception ex)
+            {
+            	msg=ex.Message;
+                return null;
+            }
         }
     }
 }

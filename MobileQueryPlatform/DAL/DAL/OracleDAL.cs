@@ -80,6 +80,23 @@ namespace DAL
                 throw;
             }
         }
+        public DataSet Select(string sqlString, params IDbDataParameter[] paramArray)
+        {
+            try
+            {
+                OracleCommand cmd = new OracleCommand(sqlString, Connection);
+                cmd.Transaction = Tran;
+                cmd.Parameters.AddRange(paramArray);
+                OracleDataAdapter adapter = new OracleDataAdapter(cmd);
+                DataSet ds = new DataSet();
+                adapter.Fill(ds);
+                return ds;
+            }
+            catch
+            {
+                throw;
+            }
+        }
 
         public bool OpenReader(string OracleString, params IDbDataParameter[] paramArray)
         {
@@ -266,9 +283,13 @@ namespace DAL
 
         public IDbDataParameter CreateParameter(string paramName, object value)
         {
+            if (paramName[0] == '@')
+            {
+                paramName = ":" + paramName.Substring(1, paramName.Length - 1);//如果变量以@开头，替换为：
+            }
             if (paramName[0] != ':')
             {
-                paramName = ":" + paramName;
+                paramName = ":" + paramName;//如果变量不以：开头，则添加：
             }
             return new OracleParameter(paramName, value);
         }

@@ -207,16 +207,6 @@ namespace Model
             get;
             set;
         }
-
-        /// <summary>
-        /// 字段状态
-        /// 0-不变 1-增加 2-修改 3-删除
-        /// </summary>
-        public short Status
-        {
-            get;
-            set;
-        }
     }
 
     /// <summary>
@@ -266,23 +256,6 @@ namespace Model
         }
 
         /// <summary>
-        /// 参数值
-        /// </summary>
-        public object Value
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 0-不变 1-增加 2-修改 3-删除
-        /// </summary>
-        public short Status
-        {
-            get;
-            set;
-        }
-        /// <summary>
         /// 列表参数集合
         /// </summary>
         public ICollection<ReportParamItem> ParamItems
@@ -316,15 +289,6 @@ namespace Model
         }
 
         public string OptionValue
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 0-不变 1-增加 2-修改 3-删除
-        /// </summary>
-        public short Status
         {
             get;
             set;

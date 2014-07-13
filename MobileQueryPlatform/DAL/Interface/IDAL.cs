@@ -39,6 +39,8 @@ namespace DAL.Interface
         /// <returns></returns>
         DataTable Select(string sqlString, out int i, params IDbDataParameter[] paramArray);
 
+        DataSet Select(string sqlString, params IDbDataParameter[] paramArray);
+
         bool OpenReader(string sqlString, params IDbDataParameter[] paramArray);
 
         #endregion

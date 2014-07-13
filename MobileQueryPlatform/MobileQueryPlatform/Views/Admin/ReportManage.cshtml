@@ -122,7 +122,8 @@
                                                 <ul class="dropdown-menu" role="menu">
                                                     <li class="active"><a>字符型</a></li>
                                                     <li><a>日期型</a></li>
-                                                    <li><a>数字型</a></li>
+                                                    <li><a>小数型</a></li>
+                                                    <li><a>整数型</a></li>
                                                 </ul>
                                             </div>
                                         </td>
@@ -172,32 +173,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="sqlCommand">SQL语句</label><a class="btn btn-sm btn-warning pull-right">刷新结构</a>
+                        <label for="sqlCommand">SQL语句</label>
                         <textarea id="sqlCommand" class="form-control" rows="3">select * from tDatabase</textarea>
-
-                    </div>
-                    <div class="form-group">
-                        <label>表头预览</label>
-                        <div style="overflow-x:auto">
-                            <table class="table table-striped table-bordered table-hover table-condensed">
-                                <tbody>
-                                    <tr>
-                                        <td>column1</td>
-                                        <td>column2</td>
-                                        <td>column3</td>
-                                        <td>column4</td>
-                                        <td>column5</td>
-                                        <td>column6</td>
-                                        <td>column1</td>
-                                        <td>column2</td>
-                                        <td>column3</td>
-                                        <td>column4</td>
-                                        <td>column5</td>
-                                        <td>column6</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <a class="btn btn-sm btn-warning pull-right">刷新结构</a>
                     </div>
                 </form>
             </div>
