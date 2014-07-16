@@ -86,7 +86,7 @@ namespace Model
         /// <summary>
         /// 报表指令
         /// </summary>
-        public ReportCommand Command
+        public string SqlCommand
         {
             get;
             set;
@@ -145,22 +145,6 @@ namespace Model
         /// 每页数据条数
         /// </summary>
         public int PageSize
-        {
-            get;
-            set;
-        }
-    }
-
-    public class ReportCommand
-    {
-
-        public decimal ReportID
-        {
-            get;
-            set;
-        }
-
-        public string SqlCommand
         {
             get;
             set;
@@ -244,6 +228,24 @@ namespace Model
             set;
         }
 
+        public string ParamTypeName
+        {
+            get
+            {
+                switch (ParamType)
+                {
+                    case 0:
+                        return "文本类型";
+                    case 1:
+                        return "数值类型";
+                    case 2:
+                        return "日期类型";
+                    default:
+                        return "类型错误";
+                }
+            }
+        }
+
         /// <summary>
         /// 参数输入方式
         /// 手动输入 = 0,
@@ -255,6 +257,21 @@ namespace Model
             set;
         }
 
+        public string ParamInputTypeName
+        {
+            get
+            {
+                switch (ParamInputType)
+                {
+                    case 0:
+                        return "手动输入";
+                    case 1:
+                        return "列表输入";
+                    default:
+                        return "输入类型错误";
+                }
+            }
+        }
         /// <summary>
         /// 列表参数集合
         /// </summary>
@@ -262,6 +279,36 @@ namespace Model
         {
             get;
             set;
+        }
+
+        public string ParamItemString
+        {
+            get
+            {
+                if (ParamItems == null || ParamItems.Count == 0)
+                {
+                    return string.Empty;
+                }
+                StringBuilder strb=new StringBuilder(256);
+                
+                    switch (ParamInputType)
+                    {
+                        case 0:
+                            foreach (ReportParamItem item in ParamItems)
+                            {
+                                strb.AppendFormat("{0}=\"{1}\";", item.OptionName, item.OptionValue);
+                            }
+                            return strb.ToString();
+                        case 1:
+                            foreach (ReportParamItem item in ParamItems)
+                            {
+                                strb.AppendFormat("{0}={1};", item.OptionName, item.OptionValue);
+                            }
+                            return strb.ToString();
+                        default:
+                            return string.Empty;
+                    }
+            }
         }
     }
 

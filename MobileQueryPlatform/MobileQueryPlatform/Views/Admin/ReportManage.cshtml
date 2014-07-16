@@ -24,8 +24,9 @@
             <div class="modal-body">
                 <form role="form">
                     <div class="form-group">
-                        <label for="userCode">报表名称</label>
-                        <input id="userCode" type="text" class="form-control" name="UserCode" placeholder="输入报表名称" autofocus="autofocus" required="required" />
+                        <label for="reportName">报表名称</label>
+                        <input id="reportID" name="ID" type="hidden" value="<%=report.ID%>"/>
+                        <input id="reportName" type="text" class="form-control" name="ReportName" value="<%=report.ReportName%>" placeholder="输入报表名称" autofocus="autofocus" required="required" />
                     </div>
                     <hr />
                     <div class="row">
@@ -34,15 +35,19 @@
                                 <label for="userName">数据源</label>
                                 <br />
                                 <div class="btn-group">
+                                    <input id="DbId" type="hidden" name="DBID" value="<%=report.DBID%>"/>
                                     <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-                                        选择数据源 <span class="caret"></span>
+                                        <% if(report.DBID==null){ %>
+                                          选择数据源 
+                                        <%} else{%>
+                                          <%=report.DBName%>
+                                        <%}%>
+                                        <span class="caret"></span>
                                     </button>
-                                    <ul class="dropdown-menu" role="menu">
-                                        <li><a>QueryMobile</a></li>
-                                        <li><a>Another action</a></li>
-                                        <li><a>Something else here</a></li>
-                                        <li class="divider"></li>
-                                        <li><a>Separated link</a></li>
+                                    <ul id="DBList" class="dropdown-menu" role="menu">
+                                        <% _.each(dbList,function(db){ %>
+                                            <li data-value="<%=db.ID%>"><a><%=db.DbCode+'-'+db.DbName%></a></li>
+                                        <% });%>
                                     </ul>
                                 </div>
                             </div>
@@ -52,11 +57,11 @@
                                 <label>页合计</label>
                                 <br />
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label id="isAdmin_t" class="btn btn-info">
-                                        <input name="IsAdmin" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                                    <label id="pageSumabled_t" class="btn btn-info <%=report.Result.PageSumabled==true?'active':''%>">
+                                        <input name="PageSumabled" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
                                     </label>
-                                    <label id="isAdmin_f" class="btn btn-info active">
-                                        <input name="IsAdmin" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                                    <label id="pageSumabled_f" class="btn btn-info  <%=report.Result.PageSumabled==false?'active':''%>">
+                                        <input name="PageSumabled" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
                                     </label>
                                 </div>
                             </div>
@@ -66,11 +71,11 @@
                                 <label>总合计</label>
                                 <br />
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label id="isAdmin_t" class="btn btn-info">
-                                        <input name="IsAdmin" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                                    <label id="allSumabled_t" class="btn btn-info <%=report.Result.AllSumabled==true?'active':''%>">
+                                        <input name="AllSumabled" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
                                     </label>
-                                    <label id="isAdmin_f" class="btn btn-info active">
-                                        <input name="IsAdmin" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                                    <label id="allSumabled_f" class="btn btn-info  <%=report.Result.AllSumabled==false?'active':''%>">
+                                        <input name="AllSumabled" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
                                     </label>
                                 </div>
                             </div>
@@ -80,19 +85,19 @@
                                 <label>分页</label>
                                 <br />
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label id="isAdmin_t" class="btn btn-info">
-                                        <input name="IsAdmin" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                                    <label id="pagingabled_t" class="btn btn-info  <%=report.Result.Pagingabled==true?'active':''%>">
+                                        <input name="Pagingabled" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
                                     </label>
-                                    <label id="isAdmin_f" class="btn btn-info active">
-                                        <input name="IsAdmin" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                                    <label id="pagingabled_f" class="btn btn-info  <%=report.Result.Pagingabled==false?'active':''%>">
+                                        <input name="Pagingabled" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
                                     </label>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-4">
                             <div class="form-group">
-                                <label for="userName">每页显示条数</label>
-                                <input id="userName" type="text" class="form-control" name="UserName" placeholder="输入条数" autofocus="autofocus" required="required" />
+                                <label for="pageSize">每页显示条数</label>
+                                <input id="pageSize" type="text" class="form-control" name="PageSize" value="<%=report.Result.PageSize%>" placeholder="输入条数" autofocus="autofocus" required="required" />
                             </div>
                         </div>
                     </div>
@@ -111,35 +116,38 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <% for(var i=0;i<=report.Params.length-1;i++ ){ %>
                                     <tr>
-                                        <td>name</td>
-                                        <td><input type="text" class="form-control" value="" placeholder="name" /></td>
+                                        <td><%=report.Params[i].ParamCode%></td>
+                                        <td><input type="text" class="form-control" value="<%=report.Params[i].ParamName%>" placeholder="name" /></td>
                                         <td>
                                             <div class="btn-group">
+                                                <input id="paramType_<%=i%>" type="hidden" value="<%=report.Params[i].ParamType%>" />
                                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-                                                    字符型 <span class="caret"></span>
+                                                    <%=report.Params[i].ParamTypeName%> <span class="caret"></span>
                                                 </button>
                                                 <ul class="dropdown-menu" role="menu">
-                                                    <li class="active"><a>字符型</a></li>
-                                                    <li><a>日期型</a></li>
-                                                    <li><a>小数型</a></li>
-                                                    <li><a>整数型</a></li>
+                                                    <li class="<%=report.Params[i].ParamCode=='0'?'active':''%>"><a>字符型</a></li>
+                                                    <li class="<%=report.Params[i].ParamCode=='1'?'active':''%>"><a>数值型</a></li>
+                                                    <li class="<%=report.Params[i].ParamCode=='2'?'active':''%>"><a>日期型</a></li>
                                                 </ul>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="btn-group">
+                                                <input type="hidden" id="paramInputType_<%=i%>" value="<%report.Params[i].ParamInputType%>" />
                                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-                                                    手动输入 <span class="caret"></span>
+                                                    <%=report.Params[i].ParamInputTypeName%> <span class="caret"></span>
                                                 </button>
                                                 <ul class="dropdown-menu" role="menu">
-                                                    <li class="active"><a>手动输入</a></li>
-                                                    <li><a>列表选择</a></li>
+                                                    <li class="<%=report.Params[i].ParamInputType=='0'?'active':''%>"><a>手动输入</a></li>
+                                                    <li class="<%=report.Params[i].ParamInputType=='1'?'active':''%>"><a>列表选择</a></li>
                                                 </ul>
                                             </div>
                                         </td>
-                                        <td><input type="text" class="form-control" readonly placeholder="多个参数以分号隔开" /></td>
+                                        <td><input id="paramItemString_<%=i%>" value="<%report.Params[i].ParamItemString%>" type="text" class="form-control"><%=report.Params[i].ParamInputType=='1'?'':'readonly'%> placeholder="数字1=123;字符1='123'" /></td>
                                     </tr>
+                                    <% }); %>
                                 </tbody>
                             </table>
                         </div>
@@ -157,25 +165,26 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <% for(var i=0;i<=report.Columns.length-1;i++){ %>
                                     <tr>
-                                        <td>name</td>
-                                        <td><input type="text" class="form-control" value="" placeholder="name" /></td>
+                                        <td><%=report.Columns[i].ColumnCode%></td>
+                                        <td><input type="text" class="form-control" value="<%=ColumnName%>" placeholder="name" /></td>
                                         <td>
-                                            <input type="checkbox" value="">
+                                            <input type="checkbox" <%=report.Columns[i].Sumabled==true?'checked':''%> >
                                         </td>
                                         <td>
-                                            <input type="checkbox" value="">
+                                            <input type="checkbox" <%=report.Columns[i].Sumabled==false?'checked':''%> >
                                         </td>
                                     </tr>
+                                    <%}%>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="sqlCommand">SQL语句</label>
-                        <textarea id="sqlCommand" class="form-control" rows="3">select * from tDatabase</textarea>
-                        <a class="btn btn-sm btn-warning pull-right">刷新结构</a>
+                        <label for="sqlCommand">SQL语句</label><a class="btn btn-sm btn-warning pull-right">重构</a>  
+                        <textarea id="sqlCommand" class="form-control" name="SqlCommand" rows="3"><%=report.SqlCommand%></textarea>                     
                     </div>
                 </form>
             </div>
@@ -220,17 +229,22 @@
                 "ReportName": "",
                 "Enabled": true,
                 "Remark": "",
-                "Columns": null,
-                "Params": null,
-                "Command": null,
-                "Result": null
+                "Columns": [],
+                "Params": [],
+                "SqlCommand": "",
+                "Result": {
+                    "ReportID": null,
+                    "PageSumabled": false,
+                    "AllSumabled": false,
+                    "Pagingabled": false,
+                    "PageSize": 10
+                }
             },
             idAttribute:"ID",
             urlRoot:"/api/Report"
         });
     }
 
-    
     if (window.ReportManage.ReportList == undefined) {
         window.ReportManage.ReportList = Backbone.Collection.extend({
             model: window.ReportManage.Report,
@@ -260,12 +274,18 @@
 
     if (window.ReportManage.ReportView == undefined) {
         window.ReportManage.ReportView = Backbone.View.extend({
+            curReport:null,
             template: _.template($("#tempReportView").html()),
-            render: function (data) {
-                this.$el.html(this.template(data));
+            render: function () {
+                this.$el.html(this.template({
+                    "report": this.curReport.toJSON(this.curReport),
+                    "dbList": []//此处添加数据源变量
+                }));
             },
+            //传入的data是window.ReportManage.Report的实例
             show: function (data) {
-                this.render(null);
+                this.curReport = data==null?new window.ReportManage.Report():data;
+                this.render();
                 this.$el.modal({
                     show: true,
                     keyboard: false,

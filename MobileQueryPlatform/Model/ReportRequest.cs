@@ -10,7 +10,6 @@ namespace Model
     /// </summary>
     public class ReportRequest
     {
-
         /// <summary>
         /// 报表ID
         /// </summary>
@@ -19,6 +18,8 @@ namespace Model
             get;
             set;
         }
+
+
 
         /// <summary>
         /// 页码

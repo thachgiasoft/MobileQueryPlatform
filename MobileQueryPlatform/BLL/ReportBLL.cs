@@ -30,7 +30,7 @@ namespace BLL
                 {
                     
                     StringBuilder sql = new StringBuilder(256);
-                    sql.Append("SELECT A.ID,DbName, DBID ,ReportName ,Enabled ,A.Remark");
+                    sql.AppendFormat("SELECT A.ID,DbName, DBID ,ReportName ,{0}Enabled ,A.Remark",forEdit?"SqlCommand,":"");
                     sql.Append(" FROM tReport A, tDatabase B where A.DBID=B.ID AND ID=@ID ");
                     dal.OpenReader(sql.ToString(),
                         dal.CreateParameter("@ID", id)
@@ -106,23 +106,6 @@ namespace BLL
                         };
                     }
                     dal.DataReader.Close();
-                    if (forEdit)
-                    {
-                        //读取指令项
-                        sql.Clear();
-                        sql.Append("SELECT * FROM tReportCommand WHERE ReportID=@ReportID");
-                        dal.OpenReader(sql.ToString(),
-                            dal.CreateParameter("@ReportID", rpt.ID)
-                            );
-                        if (dal.DataReader.Read())
-                        {
-                            rpt.Command = new ReportCommand()
-                            {
-                                ReportID = Convert.ToDecimal(dal.DataReader["ReportID"]),
-                                SqlCommand = Convert.ToString(dal.DataReader["SqlCommand"])
-                            };
-                        }
-                    }
                     return rpt;
                 }
             }
@@ -174,16 +157,17 @@ namespace BLL
                     int i;
                     dal.BeginTran();
                     StringBuilder sql = new StringBuilder(256);
-                    sql.Append(" INSERT INTO tReport( DBID ,ReportName ,Enabled ,Remark)");
+                    sql.Append(" INSERT INTO tReport( DBID ,ReportName ,Enabled ,Remark,SqlCommand )");
                     sql.Append(" VALUES( ");
-                    sql.Append(" @DBID ,@ReportName ,@Enabled ,@Remark");
+                    sql.Append(" @DBID ,@ReportName ,@Enabled ,@Remark,@SqlCommand");
                     sql.Append(" ) ");
 
                     dal.Execute(sql.ToString(), out i,
                         dal.CreateParameter("@DBID", report.DBID),
                         dal.CreateParameter("@ReportName", report.ReportName),
                         dal.CreateParameter("@Enabled",Convert.ToInt16(report.Enabled)),
-                        dal.CreateParameter("@Remark",report.Remark)
+                        dal.CreateParameter("@Remark",report.Remark),
+                        dal.CreateParameter("@SqlCommand,",report.SqlCommand)
                         );
                     if (i != 1)
                     {
@@ -271,21 +255,6 @@ namespace BLL
                         }
                         
                     }
-
-                    //保存报表指令
-                    sql.Clear();
-                    sql.Append(" INSERT INTO tReportCommand( ReportID, SqlCommand ) ");
-                    sql.Append(" VALUES( ");
-                    sql.Append(" @ReportID, @SqlCommand )");
-                    dal.Execute(sql.ToString(),out i,
-                        dal.CreateParameter("@ReportID", report.ID),
-                        dal.CreateParameter("@SqlCommand", report.Command.SqlCommand)
-                        );
-                    if (i != 1)
-                    {
-                        dal.RollBackTran();
-                        throw new Exception("报表指令项插入失败");
-                    }
                     //保存报表结果
                     sql.Clear();
                     sql.Append(" INSERT INTO tReportResult( ReportID ,AllSumabled ,PageSumabled ,Pagingabled ,PageSize) ");
@@ -329,7 +298,7 @@ namespace BLL
                 {
                     StringBuilder sql = new StringBuilder(256);
                     dal.BeginTran();
-                    sql.Append(" UPDATE tReport SET DBID=@DBID, ReportName=@ReportName, Enabled=@Enabled, Remark =@Remark WHERE ID=@ID");
+                    sql.Append(" UPDATE tReport SET DBID=@DBID, ReportName=@ReportName, Enabled=@Enabled, Remark =@Remark,SqlCommand=@SqlCommand WHERE ID=@ID");
                     int i;
                     //更新主表
                     dal.Execute(sql.ToString(), out i,
@@ -337,7 +306,8 @@ namespace BLL
                         dal.CreateParameter("@ReportName", report.ReportName),
                         dal.CreateParameter("@Enabled", report.Enabled),
                         dal.CreateParameter("@Remark", report.Remark),
-                        dal.CreateParameter("@ID", id)
+                        dal.CreateParameter("@ID", id),
+                        dal.CreateParameter("@SqlCommand",report.SqlCommand)
                         );
                     if (i != 1)
                     {
@@ -440,21 +410,6 @@ namespace BLL
                             }
                         }
 
-                    }
-
-                    //保存报表指令
-                    sql.Clear();
-                    sql.Append(" INSERT INTO tReportCommand( ReportID, SqlCommand ) ");
-                    sql.Append(" VALUES( ");
-                    sql.Append(" @ReportID, @SqlCommand )");
-                    dal.Execute(sql.ToString(), out i,
-                        dal.CreateParameter("@ReportID", id),
-                        dal.CreateParameter("@SqlCommand", report.Command.SqlCommand)
-                        );
-                    if (i != 1)
-                    {
-                        dal.RollBackTran();
-                        throw new Exception("报表指令项插入失败");
                     }
                     //保存报表结果
                     sql.Clear();
