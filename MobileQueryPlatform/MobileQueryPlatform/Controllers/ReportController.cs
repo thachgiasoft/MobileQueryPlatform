@@ -30,10 +30,10 @@ namespace MobileQueryPlatform.Controllers
         /// <param name="id"></param>
         /// <param name="sql"></param>
         /// <returns></returns>
-        public Report Get(decimal id,string sql)
+        public Report Get(decimal id, decimal DBID, string sql)
         {
             string msg;
-            return ReportBLL.RebuildReport(id, sql,out msg);
+            return ReportBLL.RebuildReport(id, DBID,sql, out msg);
         }
 
         // POST api/report

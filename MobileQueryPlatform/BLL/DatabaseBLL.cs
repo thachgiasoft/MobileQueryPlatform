@@ -211,31 +211,25 @@ namespace BLL
         /// 获取数据库连接
         /// </summary>
         /// <returns></returns>
-        public static int GetConnectionString(decimal ID, out string connectionString, out string msg)
+        public static int GetConnectionString(decimal ID, out string connectionString, out short dbType,out string msg)
         {
             try
             {
                 using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
                 {
-                    decimal DbType;
                     string DataSource, DbName, UserID, Password;
                     dal.OpenReader("SELECT DbType, DataSource,DbName,UserID,Password FROM dbo.tDatabase WHERE ID=@ID",
                         dal.CreateParameter("@ID", ID));
                     if (dal.DataReader.Read())
                     {
-                        DbType = Convert.ToDecimal(dal.DataReader["DbType"]);
+                        dbType = Convert.ToInt16(dal.DataReader["DbType"]);
                         DataSource = Convert.ToString(dal.DataReader["DataSource"]).TrimEnd();
                         DbName = Convert.ToString(dal.DataReader["DbName"]).TrimEnd();
                         UserID = Convert.ToString(dal.DataReader["UserID"]).TrimEnd();
                         Password = Convert.ToString(dal.DataReader["Password"]).TrimEnd();
                         Password = Des.DecryStrHex(Password, UserID);
-                        connectionString = DbType == 0 ?
-                            MSSQL_CONNECTIONSTRING :
-                            ORACLE_CONNECTIONSTRING;
-                        connectionString.Replace("@DataSource", DataSource);
-                        connectionString.Replace("@DbName", DbName);
-                        connectionString.Replace("@UserID", UserID);
-                        connectionString.Replace("@Password", Password);
+                        connectionString = dbType == 0 ?MSSQL_CONNECTIONSTRING :ORACLE_CONNECTIONSTRING;
+                        connectionString=connectionString.Replace("@DataSource", DataSource).Replace("@DbName", DbName).Replace("@UserID", UserID).Replace("@Password", Password);
                         msg = "success";
                         return 1;
                     }
@@ -243,6 +237,7 @@ namespace BLL
                     {
                         connectionString = null;
                         msg = "error";
+                        dbType = -1;
                         return 0;
                     }
 
@@ -252,6 +247,7 @@ namespace BLL
             {
                 msg = ex.Message;
                 connectionString = null;
+                dbType = -1;
                 return -1;
             }
         }

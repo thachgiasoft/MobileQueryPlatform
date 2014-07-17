@@ -44,6 +44,7 @@ namespace BLL
                             ReportName = Convert.ToString(dal.DataReader["ReportName"]).TrimEnd(),
                             Enabled = Convert.ToBoolean(dal.DataReader["Enabled"]),
                             Remark = Convert.ToString(dal.DataReader["Remark"]).TrimEnd(),
+                            SqlCommand=Convert.ToString(dal.DataReader["SqlCommand"]).TrimEnd(),
                             AllSumabled=Convert.ToBoolean(dal.DataReader["AllSumabled"]),
                             PageSumabled = Convert.ToBoolean(dal.DataReader["PageSumabled"]),
                             Pagingabled = Convert.ToBoolean(dal.DataReader["Pagingabled"]),
@@ -113,7 +114,7 @@ namespace BLL
                 {
                     ICollection<Report> rst;
                     StringBuilder sql = new StringBuilder(256);
-                    sql.Append(" SELECT A.ID,DBID,DbName ,ReportName ,Enabled ,A.Remark ");
+                    sql.Append(" SELECT A.ID,DBID,DBCode ,ReportName ,Enabled ,A.Remark ");
                     sql.Append(" FROM tReport A, tDatabase B ");
                     sql.Append(" WHERE A.DBID=B.ID ");
                     dal.OpenReader(sql.ToString());
@@ -459,20 +460,28 @@ namespace BLL
         /// <param name="SQL"></param>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public static Report RebuildReport(decimal id, string SQL,out string msg)
+        public static Report RebuildReport(decimal id,decimal dbID, string SQL,out string msg)
         {
-
-            Report report=new Report();
+            Report report,reportdb;
+            report = new Report();
+            report.Columns = new List<ReportColumn>();
+            report.Params = new List<ReportParam>();
             report.SqlCommand = SQL;
-            report.Columns=new List<ReportColumn>();
-            report.Params=new List<ReportParam>();
+            
 
             string tmpSql = Regex.Replace(SQL, REGEX_PARAMS_2, "NULL");//将所有参数设置为null，获取表结构
             try
             {
-                using(IDAL dal=DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString,0))
+                string tarConn;
+                short dbType;
+                if (DatabaseBLL.GetConnectionString(dbID, out tarConn,out dbType, out msg) != 1)
                 {
-                     //获取SQL语句中的Column
+                    throw new Exception(msg);
+                }
+
+                using (IDAL dal = DALBuilder.CreateDAL(tarConn, dbType))
+                {
+                    //获取SQL语句中的Column
                     DataSet ds = dal.Select(tmpSql);
                     if (ds.Tables.Count != 1)
                     {
@@ -480,93 +489,66 @@ namespace BLL
                     }
                     else
                     {
-                        
+
                         foreach (DataColumn c in ds.Tables[0].Columns)
                         {
                             report.Columns.Add(new ReportColumn()
                             {
                                 ReportID = id,
                                 ColumnCode = c.ColumnName
-                            });                         
+                            });
                         }
                     }
-
-                    //获取SQL语句中的Param
-                    MatchCollection pms = Regex.Matches(SQL, REGEX_PARAMS);
-                    foreach (Match m in pms)
-                    {
-                        //获取SQL语句中的参数
-                        report.Params.Add(new ReportParam()
-                        {
-                            ReportID = id,
-                            ParamCode = m.Value,
-                            ParamItems = new List<ReportParamItem>()
-                        });
-                    }
-
-                    //id为0，说明是新建报表
-                    if (id != 0)
-                    {
-                        //获取数据库中的Params 
-                        StringBuilder sql = new StringBuilder(256);
-                        sql.Append("SELECT * FROM tReportParam WHERE ReportID=@ReportID");
-                        dal.OpenReader(sql.ToString(),
-                            dal.CreateParameter("@ReportID", id));
-                        while (dal.DataReader.Read())
-                        {
-                            string pcode = Convert.ToString(dal.DataReader["ParamCode"]);
-                            IEnumerable<ReportParam> paramCollection=report.Params.Where(p => p.ParamCode == pcode);
-                            if (paramCollection.Count() == 1)
-                            {
-                                //从sql语句中找到数据库中已存参数
-                                ReportParam rp = paramCollection.First();
-                                rp.ParamCode = pcode;
-                                rp.ParamName = Convert.ToString(dal.DataReader["ParamName"]);
-                                rp.ParamInputType = Convert.ToInt16(dal.DataReader["ParamInputType"]);
-                                rp.ParamType = Convert.ToInt16(dal.DataReader["ParamType"]);
-                            }
-
-                        }
-                        dal.DataReader.Close();
-                        //获取数据库中ParamItem
-                        foreach (ReportParam p in report.Params)
-                        {
-                            if (p.ParamInputType == 1)
-                            {
-                                sql.Clear();
-                                sql.Append("SELECT * FROM tReportParamItem WHERE ReportID=@ReportID AND ParamCode=@ParamCode");
-                                dal.OpenReader(sql.ToString(),
-                                    dal.CreateParameter("@ReportID", report.ID),
-                                    dal.CreateParameter("@ParamCode", p.ParamCode)
-                                    );
-                                p.ParamItems = ObjectHelper.BuildObject<ReportParamItem>(dal.DataReader);
-                                dal.DataReader.Close();
-                            }
-                        }
-                        //获取数据库中Column
-                        sql.Clear();
-                        sql.Append("SELECT * FROM tReportColumn WHERE ReportID=@ReportID");
-                        dal.OpenReader(sql.ToString(),
-                            dal.CreateParameter("@ReportID", id)
-                            );
-                        while (dal.DataReader.Read())
-                        {
-                            string ccode = Convert.ToString(dal.DataReader["ColumnCode"]);
-                            IEnumerable<ReportColumn> columnCollection = report.Columns.Where(c => c.ColumnCode == ccode);
-                            if (columnCollection.Count() == 1)
-                            {
-                                //从sql语句中找到数据库中已存字段
-                                ReportColumn rc = columnCollection.First();
-                                rc.ColumnCode = ccode;
-                                rc.ColumnName = Convert.ToString(dal.DataReader["ColumnName"]);
-                                rc.Sortabled = Convert.ToBoolean(dal.DataReader["Sortabled"]);
-                                rc.Sumabled = Convert.ToBoolean(dal.DataReader["Sumabled"]);
-                            }
-                        }
-                    }
-                    msg = "success";
-                    return report;
                 }
+
+                //获取SQL语句中的Param
+                MatchCollection pms = Regex.Matches(SQL, REGEX_PARAMS);
+                foreach (Match m in pms)
+                {
+                    //获取SQL语句中的参数
+                    report.Params.Add(new ReportParam()
+                    {
+                        ReportID = id,
+                        ParamCode = m.Value
+                    });
+                }
+
+                if (id != 0)
+                {
+                    //获取到数据库report
+                    reportdb = GetReport(id);
+                    //两个report进行比较
+                    //比较params
+                    foreach (ReportParam rp in report.Params)
+                    {
+                        IEnumerable<ReportParam> dbrps = reportdb.Params.Where(p => p.ParamCode == rp.ParamCode);
+                        if (dbrps.Count() == 0)
+                        {
+                            continue;
+                        }
+                        ReportParam dbrp = dbrps.First();
+                        rp.ParamInputType = dbrp.ParamInputType;
+                        rp.ParamItems = dbrp.ParamItems;
+                        rp.ParamName = dbrp.ParamName;
+                        rp.ParamType = dbrp.ParamType;
+                    }
+
+                    //比较columns
+                    foreach (ReportColumn rc in report.Columns)
+                    {
+                        IEnumerable<ReportColumn> dbclms = reportdb.Columns.Where(c => c.ColumnCode == rc.ColumnCode);
+                        if (dbclms.Count() == 0)
+                        {
+                            continue;
+                        }
+                        ReportColumn dbclm = dbclms.First();
+                        rc.ColumnName = dbclm.ColumnName;
+                        rc.Sortabled = dbclm.Sortabled;
+                        rc.Sumabled = dbclm.Sumabled;
+                    }
+                }
+                msg = "success";
+                return report;
                 
             }
             catch (Exception ex)
@@ -574,8 +556,6 @@ namespace BLL
                 msg = ex.Message;
                 return null;
             }
-           
-            
         }
     }
 }

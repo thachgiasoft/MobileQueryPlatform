@@ -2,7 +2,7 @@
     <%for(var i=0;i<=data.length-1;i++){ %>
         <tr>
             <td><%=data[i].ReportName%></td>
-            <td><%=data[i].DBName%></td>
+            <td><%=data[i].DBCode%></td>
             <td><%=data[i].Enabled==true?"是":"否"%></td>
             <td><%=data[i].Remark%></td>
             <td>
@@ -37,7 +37,7 @@
                                 <div class="btn-group">
                                     <input id="DbId" type="hidden" name="DBID" value="<%=report.DBID%>"/>
                                     <input id="DbCode" type="hidden" name="DBCode" value="<%=report.DBCode%>"/>
-                                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                                    <button type="button" class="btn btn-info dropdown-toggle <%=report.DBID==null?'':'disabled'%>" data-toggle="dropdown">
                                         <% if(report.DBID==null){ %>
                                           选择数据源 
                                         <%} else{%>
@@ -185,7 +185,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="sqlCommand">SQL语句</label><a id="btnRebuild" class="btn btn-sm btn-warning pull-right">重构</a>  
+                        <label for="sqlCommand">SQL语句</label><a id="btnRebuild" class="btn btn-sm btn-warning pull-right">生成参数和列 </a>  
                         <textarea id="sqlCommand" class="form-control" name="SqlCommand" rows="3"><%=report.SqlCommand%></textarea>                     
                     </div>
                 </form>
@@ -313,28 +313,34 @@
                 });
             },
             events: {
-                "click #btnRebuild": function () {
-                    this.buildReport();
-                },
-                "click #btnSave": function () {
-                    var rpt = Tools.serializeObject($("#formReport"));
-                    console.info(rpt);
-                    //此处开始编码提取页面数据
-                }
+                "click #btnRebuild": "buildReport",
+                "click #btnSave": "saveReport"
+            },
+            saveReport: function () {
+                var rpt = Tools.serializeObject($("#formReport"));
+                this.curReport.set(rpt);
+                console.info(this.curReport.toJSON(this.curReport));
             },
             buildReport: function () {
-                var sql=$("#sqlCommand").val()
+                var sql=$("#sqlCommand").val();
+                var dbid=$("#DbId").val();
                 if ( sql=="") {
                     alert("请先输入SQL语句");
+                    return;
+                }
+                if(dbid==""){
+                    alert("请选择数据库");
                     return;
                 }
                 var rpt = this.curReport.clone();
                 if (rpt.get("ID") == null) {
                     @*将id设为0*@
+                    console.info("id=0");
                     rpt.set({ "ID": 0 });
                 }
                 rpt.fetch({
                     data: {
+                        DBID:1,//临时赋值1
                         sql:sql
                     },
                     success: function (model, rst, status) {
@@ -343,6 +349,7 @@
                             alert("重构失败，请检查SQL语句");
                             return;
                         }
+
                         reportView.curReport.set(rst);
                         reportView.render();
                     },
