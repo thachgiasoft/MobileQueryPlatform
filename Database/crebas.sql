@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-/* Created on:     2014-07-16 19:52:11                          */
+/* Created on:     2014-07-17 08:45:50                          */
 /*==============================================================*/
 
 
@@ -16,13 +16,6 @@ if exists (select 1
    where r.fkeyid = object_id('dbo.tReportColumn') and o.name = 'FK_TREPORTCOLUMN_REFERENCE_TREPORT')
 alter table dbo.tReportColumn
    drop constraint FK_TREPORTCOLUMN_REFERENCE_TREPORT
-go
-
-if exists (select 1
-   from dbo.sysreferences r join dbo.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('dbo.tReportCommand') and o.name = 'FK_TREPORTCOMMAND_REFERENCE_TREPORT')
-alter table dbo.tReportCommand
-   drop constraint FK_TREPORTCOMMAND_REFERENCE_TREPORT
 go
 
 if exists (select 1
@@ -108,13 +101,6 @@ if exists (select 1
    drop table dbo.tReportColumn
 go
 
-if exists (select 1
-            from  sysobjects
-           where  id = object_id('dbo.tReportCommand')
-            and   type = 'U')
-   drop table dbo.tReportCommand
-go
-
 alter table dbo.tReportParam
    drop constraint PK_TREPORTPARAM
 go
@@ -135,10 +121,6 @@ if exists (select 1
            where  id = object_id('dbo.tReportParamItem')
             and   type = 'U')
    drop table dbo.tReportParamItem
-go
-
-alter table dbo.tReportResult
-   drop constraint PK_TREPORTRESULT
 go
 
 if exists (select 1
@@ -219,6 +201,10 @@ create table tReport (
    Enabled              numeric(1)           not null default 1,
    Remark               char(500)            null,
    SqlCommand           char(5000)           not null,
+   AllSumabled          numeric(1)           not null default 0,
+   PageSumabled         numeric(1)           not null default 0,
+   Pagingabled          numeric(1)           not null default 0,
+   PageSize             numeric              not null default 10,
    constraint PK_TREPORT primary key (ID)
 )
 go
@@ -259,19 +245,6 @@ create table tReportParamItem (
    OptionName           char(128)            not null,
    OptionValue          char(128)            not null,
    constraint PK_TREPORTPARAMITEM primary key (ReportID, ParamCode, OptionName)
-)
-go
-
-/*==============================================================*/
-/* Table: tReportResult                                         */
-/*==============================================================*/
-create table tReportResult (
-   ReportID             numeric              not null,
-   AllSumabled          numeric(1)           not null default 0,
-   PageSumabled         numeric(1)           not null default 0,
-   Pagingabled          numeric(1)           not null default 0,
-   PageSize             numeric              not null default 10,
-   constraint PK_TREPORTRESULT primary key (ReportID)
 )
 go
 
@@ -335,11 +308,6 @@ go
 alter table tReportParamItem
    add constraint FK_TREPORTP_REFERENCE_TREPORTP foreign key (ReportID, ParamCode)
       references tReportParam (ReportID, ParamCode)
-go
-
-alter table tReportResult
-   add constraint FK_TREPORTR_REFERENCE_TREPORT foreign key (ReportID)
-      references tReport (ID)
 go
 
 alter table tUserReport

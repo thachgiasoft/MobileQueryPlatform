@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Model
 {
@@ -34,7 +35,7 @@ namespace Model
         /// <summary>
         /// 数据库名称
         /// </summary>
-        public string DBName
+        public string DBCode
         {
             get;
             set;
@@ -87,28 +88,6 @@ namespace Model
         /// 报表指令
         /// </summary>
         public string SqlCommand
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 报表结果
-        /// </summary>
-        public ReportResult Result
-        {
-            get;
-            set;
-        }
-    }
-
-    /// <summary>
-    /// 报表体
-    /// 报表主要配置内容
-    /// </summary>
-    public class ReportResult
-    {
-        public decimal ReportID
         {
             get;
             set;
@@ -218,9 +197,9 @@ namespace Model
 
         /// <summary>
         /// 参数类型
-        /// 文本类型 = 0,
-        /// 数值类型 = 1,
-        /// 日期类型 = 2
+        /// 字符型 = 0,
+        /// 数值型 = 1,
+        /// 日期型 = 2
         /// </summary>
         public short ParamType
         {
@@ -235,11 +214,11 @@ namespace Model
                 switch (ParamType)
                 {
                     case 0:
-                        return "文本类型";
+                        return "字符型";
                     case 1:
-                        return "数值类型";
+                        return "数值型";
                     case 2:
-                        return "日期类型";
+                        return "日期型";
                     default:
                         return "类型错误";
                 }
@@ -281,6 +260,7 @@ namespace Model
             set;
         }
 
+        const string REPORT_PARAM_ITEM_REGEX = @"[^\d;]\w*=\w*";
         public string ParamItemString
         {
             get
@@ -308,6 +288,21 @@ namespace Model
                         default:
                             return string.Empty;
                     }
+            }
+            set
+            {
+                ParamItems = new List<ReportParamItem>();
+                MatchCollection ms = Regex.Matches(value, REPORT_PARAM_ITEM_REGEX);
+                foreach (Match m in ms)
+                {
+                    string[] p = m.Value.Split('=');
+                    ParamItems.Add(new ReportParamItem() { 
+                        ReportID=ReportID,
+                        ParamCode=ParamCode,
+                        OptionName=p[0],
+                        OptionValue=p[1]
+                    });
+                }
             }
         }
     }

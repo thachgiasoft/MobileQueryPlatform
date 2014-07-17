@@ -38,7 +38,7 @@ namespace MobileQueryPlatform.Controllers
         }
 
         // PUT api/user/5
-        public ResultModel<object> Put(int id, User value)
+        public ResultModel<object> Put(decimal id, User value)
         {
             ResultModel<object> rst = new ResultModel<object>();
             if (HttpContext.Current.Session["SigninedUser"] == null)
@@ -52,7 +52,7 @@ namespace MobileQueryPlatform.Controllers
         }
 
         // DELETE api/user/5
-        public ResultModel<object> Delete(int id)
+        public ResultModel<object> Delete(decimal id)
         {
             ResultModel<object> rst = new ResultModel<object>();
             if (HttpContext.Current.Session["SigninedUser"] == null)

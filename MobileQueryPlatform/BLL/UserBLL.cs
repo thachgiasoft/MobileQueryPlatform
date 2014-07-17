@@ -42,8 +42,8 @@ namespace BLL
                         user = new User()
                         {
                             ID = Convert.ToDecimal(dal.DataReader["ID"]),
-                            UserCode = Convert.ToString(dal.DataReader["UserCode"]),
-                            UserName = Convert.ToString(dal.DataReader["UserName"]),
+                            UserCode = Convert.ToString(dal.DataReader["UserCode"]).TrimEnd(),
+                            UserName = Convert.ToString(dal.DataReader["UserName"]).TrimEnd(),
                             IsAdmin = Convert.ToDecimal(dal.DataReader["IsAdmin"]) == 1 ? true : false
                         };
                         msg = "登录成功";
@@ -127,8 +127,8 @@ namespace BLL
                             user = new User()
                             {
                                 ID = Convert.ToDecimal(dal.DataReader["ID"]),
-                                UserCode = Convert.ToString(dal.DataReader["UserCode"]),
-                                UserName = Convert.ToString(dal.DataReader["UserName"]),
+                                UserCode = Convert.ToString(dal.DataReader["UserCode"]).TrimEnd(),
+                                UserName = Convert.ToString(dal.DataReader["UserName"]).TrimEnd(),
                                 IsAdmin = Convert.ToDecimal(dal.DataReader["IsAdmin"]) == 1 ? true : false
                             };
                             return 1;
@@ -316,7 +316,7 @@ namespace BLL
         /// <param name="ID"></param>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public static int DeleteUser(int ID, out string msg)
+        public static int DeleteUser(decimal ID, out string msg)
         {
             try
             {

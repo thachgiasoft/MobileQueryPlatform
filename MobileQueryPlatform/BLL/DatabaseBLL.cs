@@ -15,7 +15,46 @@ namespace BLL
     {
         const string ORACLE_CONNECTIONSTRING = "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = @DataSource)(PORT = 1521)))(CONNECT_DATA = (SERVICE_NAME = @DbName)));Persist Security Info=True;User ID=@USERID;Password=@Password";
         const string MSSQL_CONNECTIONSTRING = "Data Source=@DataSource;Initial Catalog=@DbName;Persist Security Info=True;User ID=@UserID;Password=@Password";
-        
+
+        /// <summary>
+        /// 获取指定数据源明细
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <returns></returns>
+        public static Database GetDatabase(decimal ID)
+        {
+            try
+            {
+                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
+                {
+                    StringBuilder sql = new StringBuilder(256);
+                    sql.Append("SELECT * FROM dbo.tDatabase WHERE ID=@ID");
+                    dal.OpenReader(sql.ToString(),
+                        dal.CreateParameter("@ID", ID)
+                        );
+                    Database db=null;
+                    if (dal.DataReader.Read())
+                    {
+                        db = new Database()
+                        {
+                            ID = Convert.ToDecimal(dal.DataReader["ID"]),
+                            DbCode = Convert.ToString(dal.DataReader["DbCode"]).TrimEnd(),
+                            DbType = Convert.ToInt16(dal.DataReader["DbType"]),
+                            DataSource = Convert.ToString(dal.DataReader["DataSource"]).TrimEnd(),
+                            DbName = Convert.ToString(dal.DataReader["DbName"]).TrimEnd(),
+                            UserID = Convert.ToString(dal.DataReader["UserID"]).TrimEnd(),
+                            Remark = Convert.ToString(dal.DataReader["Remark"]).TrimEnd()
+                        };
+                    }
+                    return db;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         /// <summary>
         /// 保存数据库
         /// </summary>
@@ -69,7 +108,7 @@ namespace BLL
         /// <param name="id"></param>
         /// <param name="db"></param>
         /// <returns></returns>
-        public static int UpdateDatabase(int ID, Database db,out string msg)
+        public static int UpdateDatabase(decimal ID, Database db,out string msg)
         {
             try
             {
@@ -116,7 +155,7 @@ namespace BLL
         /// </summary>
         /// <param name="ID"></param>
         /// <returns></returns>
-        public static int DeleteDatabase(int ID,out string msg)
+        public static int DeleteDatabase(decimal ID, out string msg)
         {
             try
             {
@@ -157,7 +196,7 @@ namespace BLL
             {
                 using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
                 {
-                    dal.OpenReader("SELECT ID,DbCode,DbType,DataSource,DbName,UserID,Remark  FROM tDatabase");
+                    dal.OpenReader("SELECT ID,DbCode,DbName,DbType,Remark  FROM tDatabase");
                     ICollection<Database> rst = ObjectHelper.BuildObject<Database>(dal.DataReader);
                     return rst;
                 }
@@ -172,7 +211,7 @@ namespace BLL
         /// 获取数据库连接
         /// </summary>
         /// <returns></returns>
-        public static int GetConnectionString(int ID,out string connectionString,out string msg)
+        public static int GetConnectionString(decimal ID, out string connectionString, out string msg)
         {
             try
             {
@@ -185,10 +224,10 @@ namespace BLL
                     if (dal.DataReader.Read())
                     {
                         DbType = Convert.ToDecimal(dal.DataReader["DbType"]);
-                        DataSource = Convert.ToString(dal.DataReader["DataSource"]);
-                        DbName = Convert.ToString(dal.DataReader["DbName"]);
-                        UserID = Convert.ToString(dal.DataReader["UserID"]);
-                        Password = Convert.ToString(dal.DataReader["Password"]);
+                        DataSource = Convert.ToString(dal.DataReader["DataSource"]).TrimEnd();
+                        DbName = Convert.ToString(dal.DataReader["DbName"]).TrimEnd();
+                        UserID = Convert.ToString(dal.DataReader["UserID"]).TrimEnd();
+                        Password = Convert.ToString(dal.DataReader["Password"]).TrimEnd();
                         Password = Des.DecryStrHex(Password, UserID);
                         connectionString = DbType == 0 ?
                             MSSQL_CONNECTIONSTRING :

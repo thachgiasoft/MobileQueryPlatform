@@ -1,5 +1,5 @@
 ﻿<script type="text/template" id="tempReportList">
-    <%for(var i=0;i<data.length;i++){ %>
+    <%for(var i=0;i<=data.length-1;i++){ %>
         <tr>
             <td><%=data[i].ReportName%></td>
             <td><%=data[i].DBName%></td>
@@ -22,7 +22,7 @@
                 <h4 class="modal-title">报表编辑</h4>
             </div>
             <div class="modal-body">
-                <form role="form">
+                <form role="form" id="formReport">
                     <div class="form-group">
                         <label for="reportName">报表名称</label>
                         <input id="reportID" name="ID" type="hidden" value="<%=report.ID%>"/>
@@ -36,17 +36,18 @@
                                 <br />
                                 <div class="btn-group">
                                     <input id="DbId" type="hidden" name="DBID" value="<%=report.DBID%>"/>
+                                    <input id="DbCode" type="hidden" name="DBCode" value="<%=report.DBCode%>"/>
                                     <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
                                         <% if(report.DBID==null){ %>
                                           选择数据源 
                                         <%} else{%>
-                                          <%=report.DBName%>
+                                          <%=report.DBCode%>
                                         <%}%>
                                         <span class="caret"></span>
                                     </button>
                                     <ul id="DBList" class="dropdown-menu" role="menu">
                                         <% _.each(dbList,function(db){ %>
-                                            <li data-value="<%=db.ID%>"><a><%=db.DbCode+'-'+db.DbName%></a></li>
+                                            <li data-value="<%=db.ID%>"><a><%=db.DbCode%></a></li>
                                         <% });%>
                                     </ul>
                                 </div>
@@ -57,11 +58,11 @@
                                 <label>页合计</label>
                                 <br />
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label id="pageSumabled_t" class="btn btn-info <%=report.Result.PageSumabled==true?'active':''%>">
-                                        <input name="PageSumabled" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                                    <label class="btn btn-info <%=report.PageSumabled==true?'active':''%>">
+                                        <input name="PageSumabled" type="radio" value="true" <%=report.PageSumabled==true?'checked':''%>>&nbsp;&nbsp;是&nbsp;&nbsp;
                                     </label>
-                                    <label id="pageSumabled_f" class="btn btn-info  <%=report.Result.PageSumabled==false?'active':''%>">
-                                        <input name="PageSumabled" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                                    <label class="btn btn-info  <%=report.PageSumabled==false?'active':''%>">
+                                        <input name="PageSumabled" type="radio" value="false" <%=report.PageSumabled==false?'checked':''%>>&nbsp;&nbsp;否&nbsp;&nbsp;
                                     </label>
                                 </div>
                             </div>
@@ -71,11 +72,11 @@
                                 <label>总合计</label>
                                 <br />
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label id="allSumabled_t" class="btn btn-info <%=report.Result.AllSumabled==true?'active':''%>">
-                                        <input name="AllSumabled" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                                    <label class="btn btn-info <%=report.AllSumabled==true?'active':''%>">
+                                        <input name="AllSumabled" type="radio" value="true" <%=report.AllSumabled==true?'checked':''%>>&nbsp;&nbsp;是&nbsp;&nbsp;
                                     </label>
-                                    <label id="allSumabled_f" class="btn btn-info  <%=report.Result.AllSumabled==false?'active':''%>">
-                                        <input name="AllSumabled" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                                    <label class="btn btn-info  <%=report.AllSumabled==false?'active':''%>">
+                                        <input name="AllSumabled" type="radio" value="false" <%=report.AllSumabled==false?'checked':''%>>&nbsp;&nbsp;否&nbsp;&nbsp;
                                     </label>
                                 </div>
                             </div>
@@ -85,11 +86,11 @@
                                 <label>分页</label>
                                 <br />
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label id="pagingabled_t" class="btn btn-info  <%=report.Result.Pagingabled==true?'active':''%>">
-                                        <input name="Pagingabled" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
+                                    <label id="pagingabled_t" class="btn btn-info  <%=report.Pagingabled==true?'active':''%>">
+                                        <input name="Pagingabled" type="radio" value="true" <%=report.Pagingabled==true?'checked':''%>>&nbsp;&nbsp;是&nbsp;&nbsp;
                                     </label>
-                                    <label id="pagingabled_f" class="btn btn-info  <%=report.Result.Pagingabled==false?'active':''%>">
-                                        <input name="Pagingabled" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
+                                    <label id="pagingabled_f" class="btn btn-info  <%=report.Pagingabled==false?'active':''%>">
+                                        <input name="Pagingabled" type="radio" value="false" <%=report.Pagingabled==false?'checked':''%>>&nbsp;&nbsp;否&nbsp;&nbsp;
                                     </label>
                                 </div>
                             </div>
@@ -97,7 +98,7 @@
                         <div class="col-sm-4">
                             <div class="form-group">
                                 <label for="pageSize">每页显示条数</label>
-                                <input id="pageSize" type="text" class="form-control" name="PageSize" value="<%=report.Result.PageSize%>" placeholder="输入条数" autofocus="autofocus" required="required" />
+                                <input id="pageSize" type="text" class="form-control" name="PageSize" value="<%=report.PageSize%>" placeholder="输入条数" autofocus="autofocus" required="required" />
                             </div>
                         </div>
                     </div>
@@ -118,24 +119,24 @@
                                 <tbody>
                                     <% for(var i=0;i<=report.Params.length-1;i++ ){ %>
                                     <tr>
-                                        <td><%=report.Params[i].ParamCode%></td>
-                                        <td><input type="text" class="form-control" value="<%=report.Params[i].ParamName%>" placeholder="name" /></td>
+                                        <td style="vertical-align:middle"><%=report.Params[i].ParamCode%></td>
+                                        <td><input type="text" class="form-control" value="<%=report.Params[i].ParamName%>" placeholder="<%=report.Params[i].ParamCode%>" /></td>
                                         <td>
                                             <div class="btn-group">
-                                                <input id="paramType_<%=i%>" type="hidden" value="<%=report.Params[i].ParamType%>" />
+                                                <input id="paramType_<%=i%>" type="hidden" value="<%=report.Params[i].ParamType%>">
                                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
                                                     <%=report.Params[i].ParamTypeName%> <span class="caret"></span>
                                                 </button>
                                                 <ul class="dropdown-menu" role="menu">
-                                                    <li class="<%=report.Params[i].ParamCode=='0'?'active':''%>"><a>字符型</a></li>
-                                                    <li class="<%=report.Params[i].ParamCode=='1'?'active':''%>"><a>数值型</a></li>
-                                                    <li class="<%=report.Params[i].ParamCode=='2'?'active':''%>"><a>日期型</a></li>
+                                                    <li class="<%=report.Params[i].ParamType=='0'?'active':''%>"><a>字符型</a></li>
+                                                    <li class="<%=report.Params[i].ParamType=='1'?'active':''%>"><a>数值型</a></li>
+                                                    <li class="<%=report.Params[i].ParamType=='2'?'active':''%>"><a>日期型</a></li>
                                                 </ul>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="btn-group">
-                                                <input type="hidden" id="paramInputType_<%=i%>" value="<%report.Params[i].ParamInputType%>" />
+                                                <input type="hidden" id="paramInputType_<%=i%>" value="<%report.Params[i].ParamInputType%>">
                                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
                                                     <%=report.Params[i].ParamInputTypeName%> <span class="caret"></span>
                                                 </button>
@@ -145,9 +146,11 @@
                                                 </ul>
                                             </div>
                                         </td>
-                                        <td><input id="paramItemString_<%=i%>" value="<%report.Params[i].ParamItemString%>" type="text" class="form-control"><%=report.Params[i].ParamInputType=='1'?'':'readonly'%> placeholder="数字1=123;字符1='123'" /></td>
+                                        <td>
+                                        <input id="paramItemString_<%=i%>" value="<%report.Params[i].ParamItemString%>" type="text" class="form-control" <%=report.Params[i].ParamInputType=='1'?'':'readonly'%> placeholder="例：p1=123;p2=abc">
+                                        </td>
                                     </tr>
-                                    <% }); %>
+                                    <% }; %>
                                 </tbody>
                             </table>
                         </div>
@@ -167,13 +170,13 @@
                                 <tbody>
                                     <% for(var i=0;i<=report.Columns.length-1;i++){ %>
                                     <tr>
-                                        <td><%=report.Columns[i].ColumnCode%></td>
-                                        <td><input type="text" class="form-control" value="<%=ColumnName%>" placeholder="name" /></td>
+                                        <td style="vertical-align:middle"><%=report.Columns[i].ColumnCode%></td>
+                                        <td><input type="text" class="form-control" value="<%=report.Columns[i].ColumnName%>" placeholder="<%=report.Columns[i].ColumnCode%>" /></td>
                                         <td>
                                             <input type="checkbox" <%=report.Columns[i].Sumabled==true?'checked':''%> >
                                         </td>
                                         <td>
-                                            <input type="checkbox" <%=report.Columns[i].Sumabled==false?'checked':''%> >
+                                            <input type="checkbox" <%=report.Columns[i].Sumabled==true?'checked':''%> >
                                         </td>
                                     </tr>
                                     <%}%>
@@ -181,16 +184,15 @@
                             </table>
                         </div>
                     </div>
-
                     <div class="form-group">
-                        <label for="sqlCommand">SQL语句</label><a class="btn btn-sm btn-warning pull-right">重构</a>  
+                        <label for="sqlCommand">SQL语句</label><a id="btnRebuild" class="btn btn-sm btn-warning pull-right">重构</a>  
                         <textarea id="sqlCommand" class="form-control" name="SqlCommand" rows="3"><%=report.SqlCommand%></textarea>                     
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <a class="btn btn-default" data-dismiss="modal">关闭</a>
-                <a class="btn btn-primary" id="save">保存</a>
+                <a class="btn btn-primary" id="btnSave">保存</a>
             </div>
         </div>
     </div>
@@ -225,20 +227,17 @@
             defaults: {
                 "ID": null,
                 "DBID": null,
-                "DBName": "",
+                "DBCode": "",
                 "ReportName": "",
                 "Enabled": true,
                 "Remark": "",
                 "Columns": [],
                 "Params": [],
                 "SqlCommand": "",
-                "Result": {
-                    "ReportID": null,
-                    "PageSumabled": false,
-                    "AllSumabled": false,
-                    "Pagingabled": false,
-                    "PageSize": 10
-                }
+                "PageSumabled": false,
+                "AllSumabled": false,
+                "Pagingabled": false,
+                "PageSize": 10
             },
             idAttribute:"ID",
             urlRoot:"/api/Report"
@@ -268,10 +267,31 @@
                         alert(e.responseJSON.Message);
                     }
                 });
+            },
+            events: {
+                "click a": function (e) {
+                    switch ($(e.currentTarget).attr("data-action")) {
+                        case "del":
+                            break;
+                        case "edit":
+                            var rpt = reportList.at($(e.currentTarget).attr("data-id"));
+                            rpt.fetch({
+                                success: function () {
+                                    reportView.show(rpt);
+                                },
+                                error: function () {
+                                    alert("报表明细读取失败");
+                                }
+                            });
+                            
+                            break;
+                        case "enabled":
+                            break;
+                    }
+                }
             }
         });
     }
-
     if (window.ReportManage.ReportView == undefined) {
         window.ReportManage.ReportView = Backbone.View.extend({
             curReport:null,
@@ -279,7 +299,7 @@
             render: function () {
                 this.$el.html(this.template({
                     "report": this.curReport.toJSON(this.curReport),
-                    "dbList": []//此处添加数据源变量
+                    "dbList": dbList.toJSON(dbList)//此处添加数据源变量
                 }));
             },
             //传入的data是window.ReportManage.Report的实例
@@ -291,7 +311,66 @@
                     keyboard: false,
                     backdrop: false
                 });
+            },
+            events: {
+                "click #btnRebuild": function () {
+                    this.buildReport();
+                },
+                "click #btnSave": function () {
+                    var rpt = Tools.serializeObject($("#formReport"));
+                    console.info(rpt);
+                    //此处开始编码提取页面数据
+                }
+            },
+            buildReport: function () {
+                var sql=$("#sqlCommand").val()
+                if ( sql=="") {
+                    alert("请先输入SQL语句");
+                    return;
+                }
+                var rpt = this.curReport.clone();
+                if (rpt.get("ID") == null) {
+                    @*将id设为0*@
+                    rpt.set({ "ID": 0 });
+                }
+                rpt.fetch({
+                    data: {
+                        sql:sql
+                    },
+                    success: function (model, rst, status) {
+                        if (rst==null) {
+                            @*重构失败*@
+                            alert("重构失败，请检查SQL语句");
+                            return;
+                        }
+                        reportView.curReport.set(rst);
+                        reportView.render();
+                    },
+                    error: function () {
+                        alert("重构失败");
+                    }
+                });
+                
             }
+        });
+    }
+
+    //Database
+    if (window.ReportManage.DbModel == undefined) {
+        window.ReportManage.DbModel = Backbone.Model.extend({
+            defaults: {
+                "ID": null,
+                "DbCode": null,
+                "DbName": null
+            },
+            idAttribute: "ID",
+            urlRoot: "/api/Database"
+        });
+    }
+    if (window.ReportManage.DbList == undefined) {
+        window.ReportManage.DbList = Backbone.Collection.extend({
+            model: window.ReportManage.DbModel,
+            url: "/api/Database"
         });
     }
 </script>
@@ -301,6 +380,7 @@
     var reportList;
     var reportListView;
     var reportView;
+    var dbList;
     $(function () {
         
         toolbar = new window.ReportManage.Toolbar({
@@ -312,6 +392,12 @@
         });
         reportView = new window.ReportManage.ReportView({
             el: "#reportView"
+        });
+        dbList = new window.ReportManage.DbList();
+        dbList.fetch({
+            error: function () {
+                alert("获取数据库列表失败");
+            }
         });
         reportListView.refresh();
     })

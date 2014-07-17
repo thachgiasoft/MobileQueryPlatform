@@ -12,6 +12,10 @@ namespace MobileQueryPlatform.Controllers
 {
     public class DatabaseController : ApiController
     {
+        public Database Get(decimal ID)
+        {
+            return DatabaseBLL.GetDatabase(ID);
+        }
         // GET api/database
         public IEnumerable<Database> Get()
         {
@@ -34,7 +38,7 @@ namespace MobileQueryPlatform.Controllers
         }
 
         // PUT api/database/5
-        public ResultModel<object> Put(int id, Database value)
+        public ResultModel<object> Put(decimal id, Database value)
         {
             ResultModel<object> rst = new ResultModel<object>();
             if (HttpContext.Current.Session["SigninedUser"] == null)
@@ -48,7 +52,7 @@ namespace MobileQueryPlatform.Controllers
         }
 
         // DELETE api/database/5
-        public ResultModel<object> Delete(int id)
+        public ResultModel<object> Delete(decimal id)
         {
             ResultModel<object> rst = new ResultModel<object>();
             if (HttpContext.Current.Session["SigninedUser"] == null)

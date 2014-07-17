@@ -120,7 +120,15 @@
                 "click a": function (e) {
                     switch ($(e.currentTarget).attr("data-action")) {
                         case "edit":
-                            dbEditView.edit(dbList.at($(e.currentTarget).attr("data-id")));
+                            var db = dbList.at($(e.currentTarget).attr("data-id"));
+                            db.fetch({
+                                success: function () {
+                                    dbEditView.edit(db);
+                                },
+                                error: function () {
+                                    alert("数据源明细获取失败");
+                                }
+                            });
                             break;
                         case "del":
                             if (!confirm("确认删除该数据源？")) {
@@ -236,6 +244,7 @@
         dbListView.refresh();
     })
 </script>
+
 <div class="table-responsive">
     <table class="table table-bordered table-hover">
         <thead>
@@ -249,7 +258,6 @@
         <tbody id="dbListView"></tbody>
     </table>
 </div>
-
 
 <div class="modal fade" id="editView" />
 

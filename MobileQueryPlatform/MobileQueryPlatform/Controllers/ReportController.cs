@@ -19,9 +19,21 @@ namespace MobileQueryPlatform.Controllers
         }
 
         // GET api/report/5
-        public Report Get(int id ,bool forEdit)
+        public Report Get(decimal id)
         {
-            return ReportBLL.GetReport(id, forEdit);
+            return ReportBLL.GetReport(id);
+        }
+
+        /// <summary>
+        /// 重构报表结构
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        public Report Get(decimal id,string sql)
+        {
+            string msg;
+            return ReportBLL.RebuildReport(id, sql,out msg);
         }
 
         // POST api/report
@@ -39,7 +51,7 @@ namespace MobileQueryPlatform.Controllers
         }
 
         // PUT api/report/5
-        public ResultModel<object> Put(int id, Report value)
+        public ResultModel<object> Put(decimal id, Report value)
         {
             ResultModel<object> rst = new ResultModel<object>();
             if (HttpContext.Current.Session["SigninedUser"] == null)
@@ -53,7 +65,7 @@ namespace MobileQueryPlatform.Controllers
         }
 
         // DELETE api/report/5
-        public ResultModel<object> Delete(int id)
+        public ResultModel<object> Delete(decimal id)
         {
             ResultModel<object> rst = new ResultModel<object>();
             if (HttpContext.Current.Session["SigninedUser"] == null)
