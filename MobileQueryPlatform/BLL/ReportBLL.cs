@@ -516,6 +516,7 @@ namespace BLL
                 if (id != 0)
                 {
                     //获取到数据库report
+                    report.ID = id;
                     reportdb = GetReport(id);
                     //两个report进行比较
                     //比较params

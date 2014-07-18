@@ -38,17 +38,19 @@
                                     <input id="DbId" type="hidden" name="DBID" value="<%=report.DBID%>"/>
                                     <input id="DbCode" type="hidden" name="DBCode" value="<%=report.DBCode%>"/>
                                     <button type="button" class="btn btn-info dropdown-toggle <%=report.DBID==null?'':'disabled'%>" data-toggle="dropdown">
-                                        <% if(report.DBID==null){ %>
-                                          选择数据源 
-                                        <%} else{%>
-                                          <%=report.DBCode%>
-                                        <%}%>
+                                        <span id="chooseDbText">
+                                            <% if(report.DBID==null){ %>
+                                            选择数据源
+                                            <%} else{%>
+                                            <%=report.DBCode%>
+                                            <%}%>
+                                        </span>
                                         <span class="caret"></span>
                                     </button>
                                     <ul id="DBList" class="dropdown-menu" role="menu">
-                                        <% _.each(dbList,function(db){ %>
-                                            <li data-value="<%=db.ID%>"><a><%=db.DbCode%></a></li>
-                                        <% });%>
+                                        <% for(var i=0;i<=dbList.length-1;i++){ %>
+                                            <li data-action="chooseDb" data-value="<%=i%>"><a><%=dbList[i].DbCode%></a></li>
+                                        <% };%>
                                     </ul>
                                 </div>
                             </div>
@@ -58,11 +60,11 @@
                                 <label>页合计</label>
                                 <br />
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-info <%=report.PageSumabled==true?'active':''%>">
+                                    <label id="PageSumabled_t" class="btn btn-info <%=report.PageSumabled==true?'active':''%>">
                                         <input name="PageSumabled" type="radio" value="true" <%=report.PageSumabled==true?'checked':''%>>&nbsp;&nbsp;是&nbsp;&nbsp;
                                     </label>
-                                    <label class="btn btn-info  <%=report.PageSumabled==false?'active':''%>">
-                                        <input name="PageSumabled" type="radio" value="false" <%=report.PageSumabled==false?'checked':''%>>&nbsp;&nbsp;否&nbsp;&nbsp;
+                                    <label id="PageSumabled_t" class=" btn btn-info <%=report.PageSumabled==false?'active':''%>">
+                                        <input name="PageSumabled" type="radio" value="false"<%=report.PageSumabled==false?'checked':''%>>&nbsp;&nbsp;否&nbsp;&nbsp;
                                     </label>
                                 </div>
                             </div>
@@ -72,10 +74,10 @@
                                 <label>总合计</label>
                                 <br />
                                 <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-info <%=report.AllSumabled==true?'active':''%>">
+                                    <label id="AllSumabled_t"class="btn btn-info <%=report.AllSumabled==true?'active':''%>">
                                         <input name="AllSumabled" type="radio" value="true" <%=report.AllSumabled==true?'checked':''%>>&nbsp;&nbsp;是&nbsp;&nbsp;
                                     </label>
-                                    <label class="btn btn-info  <%=report.AllSumabled==false?'active':''%>">
+                                    <label id="AllSumabled_f" class="btn btn-info  <%=report.AllSumabled==false?'active':''%>">
                                         <input name="AllSumabled" type="radio" value="false" <%=report.AllSumabled==false?'checked':''%>>&nbsp;&nbsp;否&nbsp;&nbsp;
                                     </label>
                                 </div>
@@ -120,34 +122,33 @@
                                     <% for(var i=0;i<=report.Params.length-1;i++ ){ %>
                                     <tr>
                                         <td style="vertical-align:middle"><%=report.Params[i].ParamCode%></td>
-                                        <td><input type="text" class="form-control" value="<%=report.Params[i].ParamName%>" placeholder="<%=report.Params[i].ParamCode%>" /></td>
+                                        <td><input type="text" class="form-control" data-index="<%=i%>" data-action="paramNameChanged" value="<%=report.Params[i].ParamName%>" placeholder="<%=report.Params[i].ParamCode%>" /></td>
                                         <td>
                                             <div class="btn-group">
-                                                <input id="paramType_<%=i%>" type="hidden" value="<%=report.Params[i].ParamType%>">
                                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-                                                    <%=report.Params[i].ParamTypeName%> <span class="caret"></span>
+                                                    <span id="paramTypeText_<%=i%>"> <%=report.Params[i].ParamTypeName%></span> <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu" role="menu">
-                                                    <li class="<%=report.Params[i].ParamType=='0'?'active':''%>"><a>字符型</a></li>
-                                                    <li class="<%=report.Params[i].ParamType=='1'?'active':''%>"><a>数值型</a></li>
-                                                    <li class="<%=report.Params[i].ParamType=='2'?'active':''%>"><a>日期型</a></li>
+                                                <ul id="paramTypeList_<%=i%>" class="dropdown-menu" role="menu">
+                                                    <li data-action="chooseParamType" data-index="<%=i%>" data-value="0" class="<%=report.Params[i].ParamType=='0'?'active':''%>"><a>字符型</a></li>
+                                                    <li data-action="chooseParamType" data-index="<%=i%>" data-value="1" class="<%=report.Params[i].ParamType=='1'?'active':''%>"><a>数值型</a></li>
+                                                    <li data-action="chooseParamType" data-index="<%=i%>" data-value="2" class="<%=report.Params[i].ParamType=='2'?'active':''%>"><a>日期型</a></li>
                                                 </ul>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="btn-group">
                                                 <input type="hidden" id="paramInputType_<%=i%>" value="<%report.Params[i].ParamInputType%>">
-                                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-                                                    <%=report.Params[i].ParamInputTypeName%> <span class="caret"></span>
+                                                <button id="btn_InputType_<%=i%>" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                                                    <span id="paramInputTypeText_<%=i%>"><%=report.Params[i].ParamInputTypeName%></span> <span class="caret"></span>
                                                 </button>
-                                                <ul class="dropdown-menu" role="menu">
-                                                    <li class="<%=report.Params[i].ParamInputType=='0'?'active':''%>"><a>手动输入</a></li>
-                                                    <li class="<%=report.Params[i].ParamInputType=='1'?'active':''%>"><a>列表选择</a></li>
+                                                <ul id="paramInputTypeList_<%=i%>" class="dropdown-menu" role="menu">
+                                                    <li data-action="chooseParamInputType" data-index="<%=i%>" data-value="0" class="<%=report.Params[i].ParamInputType=='0'?'active':''%>"><a>手动输入</a></li>
+                                                    <li data-action="chooseParamInputType" data-index="<%=i%>" data-value="1" class="<%=report.Params[i].ParamInputType=='1'?'active':''%>"><a>列表选择</a></li>
                                                 </ul>
                                             </div>
                                         </td>
                                         <td>
-                                        <input id="paramItemString_<%=i%>" value="<%report.Params[i].ParamItemString%>" type="text" class="form-control" <%=report.Params[i].ParamInputType=='1'?'':'readonly'%> placeholder="例：p1=123;p2=abc">
+                                        <input id="paramItemsString_<%=i%>" data-action="paramItemsStringChanged" data-index="<%=i%>" value="<%report.Params[i].ParamItemString%>" type="text" class="form-control" <%=report.Params[i].ParamInputType=='0'?'readonly':''%> placeholder="例：p1=123;p2=abc">
                                         </td>
                                     </tr>
                                     <% }; %>
@@ -171,7 +172,7 @@
                                     <% for(var i=0;i<=report.Columns.length-1;i++){ %>
                                     <tr>
                                         <td style="vertical-align:middle"><%=report.Columns[i].ColumnCode%></td>
-                                        <td><input type="text" class="form-control" value="<%=report.Columns[i].ColumnName%>" placeholder="<%=report.Columns[i].ColumnCode%>" /></td>
+                                        <td><input  type="text" class="form-control" value="<%=report.Columns[i].ColumnName%>" placeholder="<%=report.Columns[i].ColumnCode%>" /></td>
                                         <td>
                                             <input type="checkbox" <%=report.Columns[i].Sumabled==true?'checked':''%> >
                                         </td>
@@ -314,7 +315,95 @@
             },
             events: {
                 "click #btnRebuild": "buildReport",
-                "click #btnSave": "saveReport"
+                "click #btnSave": "saveReport",
+                "click li": "choose",
+                "change input":"valueChanged"
+            },
+            valueChanged: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "paramNameChanged":
+                        @*参数名改变*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        var param = this.curReport.get("Params")[index];
+                        param.ParamName = $(e.currentTarget).val();
+                        break;
+                    case "paramItemsStringChanged":
+                        @*参数列表值改变*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        var param = this.curReport.get("Params")[index];
+                        param.ParamItemString = $(e.currentTarget).val();
+                        break;
+                }
+                
+            },
+            choose: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "chooseDb":
+                        @*选择数据源*@
+                        var db = dbList.at( $(e.currentTarget).attr("data-value"));
+                        $("#DbId").val(db.get("ID"));
+                        $("#DbCode").val(db.get("DbCode"));
+                        $("#chooseDbText").html(db.get("DbCode"));
+                        $("#DBList li").removeClass("active");
+                        $(e.currentTarget).addClass("active");
+                        break;
+                    case "chooseParamType":
+                        @*选择参数类型*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        var value = $(e.currentTarget).attr("data-value");
+                        var text;
+                        switch (value) {
+                            case "0":
+                                text = "字符型";
+                                break;
+                            case "1":
+                                text = "数值型";
+                                break;
+                            case "2":
+                                text = "日期型";
+                                break;
+                        }
+                        if (value == "2") {
+                            $("#btn_InputType_"+index).addClass("disabled");
+                        }
+                        else {
+                            $("#btn_InputType_" + index).removeClass("disabled");
+                        }
+                        var params = this.curReport.get("Params");
+                        params[index].ParamType = value;
+                        params[index].ParamTypeName = text;
+                        $("#paramTypeText_" + index).html(text);
+                        $("#paramTypeList_" + index +" li").removeClass("active");
+                        $(e.currentTarget).addClass("active");
+                        break;
+                    case "chooseParamInputType":
+                        @*选择参数输入类型*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        var value = $(e.currentTarget).attr("data-value");
+                        var text;
+                        switch (value) {
+                            case "0":
+                                text = "手动输入";
+                                break;
+                            case "1":
+                                text = "列表选择";
+                                break;
+                        }
+                        if (value == "0") {
+                            $("#paramItemsString_" + index).attr("readonly", "readonly");
+                        }
+                        else {
+                            $("#paramItemsString_" + index).removeAttr("readonly");
+                        }
+                        var params = this.curReport.get("Params");
+                        params[index].ParamInputType = value;
+                        params[index].ParamInputTypeName = text;
+                        $("#paramInputTypeText_" + index).html(text);
+                        $("#paramInputTypeList_" + index + " li").removeClass("active");
+                        $(e.currentTarget).addClass("active");
+                        break;
+
+                }
             },
             saveReport: function () {
                 var rpt = Tools.serializeObject($("#formReport"));
@@ -335,7 +424,6 @@
                 var rpt = this.curReport.clone();
                 if (rpt.get("ID") == null) {
                     @*将id设为0*@
-                    console.info("id=0");
                     rpt.set({ "ID": 0 });
                 }
                 rpt.fetch({
@@ -349,7 +437,13 @@
                             alert("重构失败，请检查SQL语句");
                             return;
                         }
-
+                        rst.DBID = $("#DbId").val();
+                        rst.DBCode = $("#DbCode").val();
+                        rst.ReportName = $("#reportName").val();
+                        rst.AllSumabled = $("#AllSumabled_t").hasClass("active");
+                        rst.PageSumabled = $("#PageSumabled_t").hasClass("active");
+                        rst.PageSize = $("#pageSize").val();
+                        rst.Pagingabled = $("#Pagingabled_t").hasClass("active");
                         reportView.curReport.set(rst);
                         reportView.render();
                     },
