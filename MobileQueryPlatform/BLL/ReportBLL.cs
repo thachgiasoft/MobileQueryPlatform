@@ -151,13 +151,13 @@ namespace BLL
                     dal.Execute(sql.ToString(), out i,
                         dal.CreateParameter("@DBID", report.DBID),
                         dal.CreateParameter("@ReportName", report.ReportName),
-                        dal.CreateParameter("@Enabled",Convert.ToInt16(report.Enabled)),
-                        dal.CreateParameter("@Remark",report.Remark),
-                        dal.CreateParameter("@SqlCommand,",report.SqlCommand),
-                        dal.CreateParameter("@AllSumabled,", report.AllSumabled),
-                        dal.CreateParameter("@PageSumabled,", report.PageSumabled),
-                        dal.CreateParameter("@Pagingabled,", report.Pagingabled),
-                        dal.CreateParameter("@PageSize,", report.PageSize)
+                        dal.CreateParameter("@Enabled",report.Enabled),
+                        dal.CreateParameter("@Remark",report.Remark==null?"":report.Remark),
+                        dal.CreateParameter("@SqlCommand",report.SqlCommand),
+                        dal.CreateParameter("@AllSumabled", report.AllSumabled),
+                        dal.CreateParameter("@PageSumabled", report.PageSumabled),
+                        dal.CreateParameter("@Pagingabled", report.Pagingabled),
+                        dal.CreateParameter("@PageSize", report.PageSize)
                         );
                     if (i != 1)
                     {
@@ -166,7 +166,7 @@ namespace BLL
                     }
                     else{
                         sql.Clear();
-                        sql.Append("SELECT IDENT_CURRENT('tReport')-1 AS ID ");
+                        sql.Append("SELECT IDENT_CURRENT('tReport') AS ID ");
                         dal.OpenReader(sql.ToString());
                         if (dal.DataReader.Read())
                         {
@@ -184,17 +184,18 @@ namespace BLL
                     foreach (ReportColumn c in report.Columns)
                     {
                         sql.Clear();
-                        sql.Append("INSERT INTO tReportColumn( ReportID , ColumnCode , ColumnName ,Sumabled  ,Sortabled) ");
+                        sql.Append("INSERT INTO tReportColumn( ReportID , ColumnCode , ColumnName ,ColumnType,Sumabled  ,Sortabled) ");
                         sql.Append("VALUES( ");
-                        sql.Append(" @ReportID ,@ColumnCode ,@ColumnName ,@Sumabled ,@Sortabled ");
+                        sql.Append(" @ReportID ,@ColumnCode ,@ColumnName ,@ColumnType,@Sumabled ,@Sortabled ");
                         sql.Append(" ) ");
 
                         dal.Execute(sql.ToString(), out i,
                             dal.CreateParameter("@ReportID", report.ID),
                             dal.CreateParameter("@ColumnCode", c.ColumnCode),
-                            dal.CreateParameter("@ColumnName", c.ColumnName),
-                            dal.CreateParameter("@Sumabled", Convert.ToInt16(c.Sumabled)),
-                            dal.CreateParameter("@Sortabled", Convert.ToInt16(c.Sortabled))
+                            dal.CreateParameter("@ColumnName", c.ColumnName==null?"":c.ColumnName),
+                            dal.CreateParameter("@ColumnType",c.ColumnType),
+                            dal.CreateParameter("@Sumabled", c.Sumabled),
+                            dal.CreateParameter("@Sortabled", c.Sortabled)
                             );
                         if (i != 1)
                         {
@@ -214,7 +215,7 @@ namespace BLL
                         dal.Execute(sql.ToString(), out i,
                             dal.CreateParameter("@ReportID", report.ID),
                             dal.CreateParameter("@ParamCode", p.ParamCode),
-                            dal.CreateParameter("@ParamName", p.ParamName),
+                            dal.CreateParameter("@ParamName", p.ParamName==null?"":p.ParamName),
                             dal.CreateParameter("@ParamType", p.ParamType),
                             dal.CreateParameter("@ParamInputType", p.ParamInputType)
                             );
@@ -234,7 +235,7 @@ namespace BLL
                             dal.Execute(sql.ToString(), out i,
                                 dal.CreateParameter("@ReportID", report.ID),
                                 dal.CreateParameter("@ParamCode", op.ParamCode),
-                                dal.CreateParameter("@OptionName", op.OptionName),
+                                dal.CreateParameter("@OptionName", op.OptionName==null?"":op.OptionName),
                                 dal.CreateParameter("@OptionValue", op.OptionValue)
                                 );
                             if (i != 1)
@@ -278,13 +279,13 @@ namespace BLL
                         dal.CreateParameter("@DBID", report.DBID),
                         dal.CreateParameter("@ReportName", report.ReportName),
                         dal.CreateParameter("@Enabled", report.Enabled),
-                        dal.CreateParameter("@Remark", report.Remark),
+                        dal.CreateParameter("@Remark", report.Remark==null?"":report.Remark),
                         dal.CreateParameter("@ID", id),
-                        dal.CreateParameter("@SqlCommand",report.SqlCommand),
-                        dal.CreateParameter("@AllSumabled,", report.AllSumabled),
-                        dal.CreateParameter("@PageSumabled,", report.PageSumabled),
-                        dal.CreateParameter("@Pagingabled,", report.Pagingabled),
-                        dal.CreateParameter("@PageSize,", report.PageSize)
+                        dal.CreateParameter("@SqlCommand",report.SqlCommand==null?"":report.SqlCommand),
+                        dal.CreateParameter("@AllSumabled", report.AllSumabled),
+                        dal.CreateParameter("@PageSumabled", report.PageSumabled),
+                        dal.CreateParameter("@Pagingabled", report.Pagingabled),
+                        dal.CreateParameter("@PageSize", report.PageSize)
                         );
                     if (i != 1)
                     {
@@ -314,15 +315,16 @@ namespace BLL
                     foreach (ReportColumn c in report.Columns)
                     {
                         sql.Clear();
-                        sql.Append("INSERT INTO tReportColumn( ReportID , ColumnCode , ColumnName ,Sumabled  ,Sortabled) ");
+                        sql.Append("INSERT INTO tReportColumn( ReportID , ColumnCode , ColumnName ,ColumnType,Sumabled  ,Sortabled) ");
                         sql.Append("VALUES( ");
-                        sql.Append(" @ReportID ,@ColumnCode ,@ColumnName ,@Sumabled ,@Sortabled ");
+                        sql.Append(" @ReportID ,@ColumnCode ,@ColumnName ,@ColumnType,@Sumabled ,@Sortabled ");
                         sql.Append(" ) ");
 
                         dal.Execute(sql.ToString(), out i,
                             dal.CreateParameter("@ReportID", id),
                             dal.CreateParameter("@ColumnCode", c.ColumnCode),
-                            dal.CreateParameter("@ColumnName", c.ColumnName),
+                            dal.CreateParameter("@ColumnName", c.ColumnName==null?"":c.ColumnName),
+                            dal.CreateParameter("@ColumnType",c.ColumnType),
                             dal.CreateParameter("@Sumabled", Convert.ToInt16(c.Sumabled)),
                             dal.CreateParameter("@Sortabled", Convert.ToInt16(c.Sortabled))
                             );
@@ -344,7 +346,7 @@ namespace BLL
                         dal.Execute(sql.ToString(), out i,
                             dal.CreateParameter("@ReportID", id),
                             dal.CreateParameter("@ParamCode", p.ParamCode),
-                            dal.CreateParameter("@ParamName", p.ParamName),
+                            dal.CreateParameter("@ParamName", p.ParamName==null?"":p.ParamName),
                             dal.CreateParameter("@ParamType", p.ParamType),
                             dal.CreateParameter("@ParamInputType", p.ParamInputType)
                             );
@@ -364,7 +366,7 @@ namespace BLL
                             dal.Execute(sql.ToString(), out i,
                                 dal.CreateParameter("@ReportID", id),
                                 dal.CreateParameter("@ParamCode", op.ParamCode),
-                                dal.CreateParameter("@OptionName", op.OptionName),
+                                dal.CreateParameter("@OptionName", op.OptionName==null?"":op.OptionName),
                                 dal.CreateParameter("@OptionValue", op.OptionValue)
                                 );
                             if (i != 1)

@@ -172,12 +172,12 @@
                                     <% for(var i=0;i<=report.Columns.length-1;i++){ %>
                                     <tr>
                                         <td style="vertical-align:middle"><%=report.Columns[i].ColumnCode%></td>
-                                        <td><input  type="text" class="form-control" value="<%=report.Columns[i].ColumnName%>" placeholder="<%=report.Columns[i].ColumnCode%>" /></td>
+                                        <td><input data-action="columnNameChanged" data-index="<%=i%>" type="text" class="form-control" value="<%=report.Columns[i].ColumnName%>" placeholder="<%=report.Columns[i].ColumnCode%>" /></td>
                                         <td>
-                                            <input type="checkbox" <%=report.Columns[i].Sumabled==true?'checked':''%> >
+                                            <input data-action="columnSortabledChecked" data-index="<%=i%>" type="checkbox"<%=report.Columns[i].Sortabled==true?'checked':''%> >
                                         </td>
                                         <td>
-                                            <input type="checkbox" <%=report.Columns[i].Sumabled==true?'checked':''%> >
+                                            <input data-action="columnSumabledChecked" data-index="<%=i%>" type="checkbox" <%=report.Columns[i].Sumabled==true?'checked':''%> >
                                         </td>
                                     </tr>
                                     <%}%>
@@ -313,6 +313,11 @@
                     backdrop: false
                 });
             },
+            hide:function(){
+                this.$el.modal({
+                    show: false
+                });
+            },
             events: {
                 "click #btnRebuild": "buildReport",
                 "click #btnSave": "saveReport",
@@ -332,6 +337,21 @@
                         var index = $(e.currentTarget).attr("data-index");
                         var param = this.curReport.get("Params")[index];
                         param.ParamItemString = $(e.currentTarget).val();
+                        break;
+                    case "columnSortabledChecked":
+                        @*字段排序改变*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        this.curReport.get("Columns")[index].Sortabled = $(e.currentTarget).is(":checked");
+                        break;
+                    case "columnSumabledChecked":
+                        @*字段求和发生改变*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        this.curReport.get("Columns")[index].Sumabled = $(e.currentTarget).is(":checked");
+                        break;
+                    case "columnNameChanged":
+                        @*字段名称改变*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        this.curReport.get("Columns")[index].ColumnName = $(e.currentTarget).val();
                         break;
                 }
                 
@@ -408,7 +428,18 @@
             saveReport: function () {
                 var rpt = Tools.serializeObject($("#formReport"));
                 this.curReport.set(rpt);
+                if (this.curReport.get("ID") == "") {
+                    this.curReport.set({ ID: null });
+                }
                 console.info(this.curReport.toJSON(this.curReport));
+                this.curReport.save(null, {
+                    success: function () {
+                        reportView.hide();
+                    },
+                    error: function () {
+                        alert("保存失败");
+                    }
+                });
             },
             buildReport: function () {
                 var sql=$("#sqlCommand").val();
@@ -436,6 +467,9 @@
                             @*重构失败*@
                             alert("重构失败，请检查SQL语句");
                             return;
+                        }
+                        if (rst.ID == 0) {
+                            rst.ID = null;
                         }
                         rst.DBID = $("#DbId").val();
                         rst.DBCode = $("#DbCode").val();

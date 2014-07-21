@@ -153,6 +153,14 @@ namespace Model
             set;
         }
 
+        public short ColumnType
+        {
+            get;
+            set;
+        }
+
+
+
         /// <summary>
         /// 是否启用求和
         /// </summary>
