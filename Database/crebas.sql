@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-/* Created on:     2014-07-17 08:45:50                          */
+/* Created on:     2014-07-21 10:34:07                          */
 /*==============================================================*/
 
 
@@ -37,13 +37,6 @@ if exists (select 1
    where r.fkeyid = object_id('dbo.tReportParamItem') and o.name = 'FK_TREPORTP_REFERENCE_TREPORTP')
 alter table dbo.tReportParamItem
    drop constraint FK_TREPORTP_REFERENCE_TREPORTP
-go
-
-if exists (select 1
-   from dbo.sysreferences r join dbo.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('dbo.tReportResult') and o.name = 'FK_TREPORTR_REFERENCE_TREPORT')
-alter table dbo.tReportResult
-   drop constraint FK_TREPORTR_REFERENCE_TREPORT
 go
 
 if exists (select 1
@@ -121,13 +114,6 @@ if exists (select 1
            where  id = object_id('dbo.tReportParamItem')
             and   type = 'U')
    drop table dbo.tReportParamItem
-go
-
-if exists (select 1
-            from  sysobjects
-           where  id = object_id('dbo.tReportResult')
-            and   type = 'U')
-   drop table dbo.tReportResult
 go
 
 alter table dbo.tSysCfg
@@ -216,6 +202,7 @@ create table tReportColumn (
    ReportID             numeric              not null,
    ColumnCode           char(128)            not null,
    ColumnName           char(128)            not null,
+   ColumnType           numeric(1)           not null,
    Sumabled             numeric(1)           not null default 0,
    Sortabled            numeric(1)           not null default 0,
    constraint PK_TREPORTCOLUMN primary key (ReportID, ColumnCode),
