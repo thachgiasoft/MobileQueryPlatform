@@ -70,6 +70,12 @@ namespace DAL.Helper
                     case "String":
                         p.SetValue(obj, Convert.ToString(row[p.Name]).TrimEnd(), null);
                         break;
+                    case "Int16":
+                         p.SetValue(obj, Convert.ToInt16(row[p.Name]), null);
+                        break;
+                    case "Int64":
+                         p.SetValue(obj, Convert.ToInt64(row[p.Name]), null);
+                        break;
                     case "Int32":
                         p.SetValue(obj, Convert.ToInt32(row[p.Name]), null);
                         break;
