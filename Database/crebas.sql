@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-/* Created on:     2014-07-21 10:34:07                          */
+/* Created on:     2014-07-22 10:16:20                          */
 /*==============================================================*/
 
 
@@ -255,6 +255,7 @@ create table tUser (
    UserName             char(128)            not null,
    UPassword            char(128)            not null,
    IsAdmin              numeric(1)           not null default 0,
+   Enabled              numeric(1)           not null default 1,
    constraint PK_TUSER primary key (ID),
    constraint AK_KEY_2_TUSER unique (UserCode)
 )
