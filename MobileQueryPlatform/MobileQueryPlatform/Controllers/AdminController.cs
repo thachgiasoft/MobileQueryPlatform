@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using MobileQueryPlatform.Attribute;
 using Model;
+using BLL;
 
 namespace MobileQueryPlatform.Controllers
 {
@@ -16,6 +17,7 @@ namespace MobileQueryPlatform.Controllers
         public ActionResult Index()
         {
             User user = Session["SigninedUser"] as User;
+            ViewBag.IsAdmin = user.UserCode=="admin";
             if (!user.IsAdmin)
             {
                 return new RedirectResult("/Signin/AdminSignin");
@@ -68,5 +70,23 @@ namespace MobileQueryPlatform.Controllers
             return PartialView();
         }
 
+        public PartialViewResult UserReport()
+        {
+            return PartialView();
+        }
+
+        public PartialViewResult ChangePassword()
+        {
+            User user = Session["SigninedUser"] as User;
+            ViewBag.UserID = user.ID;
+            return PartialView();
+        }
+
+        public JsonResult DoChangePassword(string oldPwd, string newPwd, decimal id)
+        {
+            ResultModel<object> rst = new ResultModel<object>();
+            rst.ResultStatus = UserBLL.ChangePwd(id, oldPwd, newPwd, out rst.ResultMessage);
+            return Json(rst);
+        }
     }
 }

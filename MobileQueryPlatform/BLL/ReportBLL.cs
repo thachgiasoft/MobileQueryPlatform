@@ -268,6 +268,12 @@ namespace BLL
         {
             try
             {
+                if (report.Columns == null && report.Params == null)
+                {
+                    //无字段、参数集合，确定为更改状态
+                    return SetEnabled(id, report.Enabled, out msg);
+                }
+
                 using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
                 {
                     StringBuilder sql = new StringBuilder(256);
@@ -292,7 +298,6 @@ namespace BLL
                         dal.RollBackTran();
                         throw new Exception("更新报表头错误");
                     }
-
                     sql.Clear();
                     //清除Column
                     sql.Append("DELETE FROM tReportColumn WHERE ReportID=@ReportID");
@@ -558,6 +563,48 @@ namespace BLL
             {
                 msg = ex.Message;
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// 设置可用状态
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="enabled"></param>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        public static int SetEnabled(decimal id, bool enabled, out string msg)
+        {
+            try
+            {
+                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
+                {
+                    StringBuilder sql = new StringBuilder(128);
+                    sql.Append("UPDATE tReport SET Enabled=@Enabled WHERE ID=@ID");
+                    int i;
+                    dal.BeginTran();
+                    dal.Execute(sql.ToString(), out i,
+                        dal.CreateParameter("@Enabled", enabled),
+                        dal.CreateParameter("@ID", id)
+                        );
+                    if (i == 1)
+                    {
+                        dal.CommitTran();
+                        msg = "success";
+                        return 1;
+                    }
+                    else
+                    {
+                        dal.RollBackTran();
+                        msg = "error";
+                        return 0;
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                msg = ex.Message;
+                return -1;
             }
         }
     }

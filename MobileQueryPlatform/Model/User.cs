@@ -35,5 +35,10 @@ namespace Model
             get;
             set;
         }
+        public bool Enabled
+        {
+            get;
+            set;
+        }
     }
 }

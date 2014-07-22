@@ -6,7 +6,7 @@
             window.Admin.Router = Backbone.Router.extend({
                 routes: {
                     "":"Index",
-                    "Goto/:id": "Goto",
+                    "Goto/:id": "Goto"
                 },
                 Index:function(){
                     $("#mainPanel").load("/admin/Menu");
@@ -24,6 +24,7 @@
             Backbone.history.start();
         })
     </script>
+
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
             <div class="navbar-header" id="header">
@@ -40,9 +41,14 @@
                     <li>
                         <a href="/Admin"><span class="glyphicon glyphicon-th-list"></span>&nbsp;&nbsp;菜单</a>
                     </li>
-                    <li>
-                        <a href="#"><span class="glyphicon glyphicon-lock"></span>&nbsp;&nbsp;修改密码</a>
-                    </li>
+                    @{
+                        if (!ViewBag.IsAdmin)
+                        {
+                            <li>
+                                <a href="#Goto/ChangePassword"><span class="glyphicon glyphicon-lock"></span>&nbsp;&nbsp;修改密码</a>
+                            </li>
+                        }
+                    }
                     <li>
                         <a href="#"><span class="glyphicon glyphicon-info-sign"></span>&nbsp;&nbsp;关于</a>
                     </li>

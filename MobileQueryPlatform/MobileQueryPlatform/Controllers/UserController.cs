@@ -17,12 +17,6 @@ namespace MobileQueryPlatform.Controllers
             return UserBLL.ListUser();
         }
 
-        //// GET api/user
-        //public IEnumerable<User> Get(string UserCode,string UserName,string IsAdmin)
-        //{
-        //    return UserBLL.ListUser(UserCode,UserName,IsAdmin);
-        //}
-
         // POST api/user
         public ResultModel<object> Post(User value)
         {

@@ -7,7 +7,7 @@
         <td>
             <a class="btn btn-default" data-action="del" data-id="<%=i%>"><span class="glyphicon glyphicon-trash"></span></a>
             <a class="btn btn-default" data-action="edit" data-id="<%=i%>"><span class="glyphicon glyphicon-pencil"></span></a>
-            <a class="btn btn-default" data-action="auth" data-id="<%=i%>"><span class="glyphicon glyphicon-eye-open"></span></a>
+            <a class="btn btn-default" data-action="enabled" data-id="<%=i%>"><span class="glyphicon <%=data[i].Enabled?'glyphicon-eye-open':'glyphicon-eye-close'%>"></span></a>
         </td>
     </tr>
     <%}%>
@@ -205,6 +205,27 @@
                             }
                         })
                         break;
+                    case "enabled":
+                        var curUser = userList.at($(e.currentTarget).attr("data-id"));
+                        curUser.set({
+                            Enabled:!curUser.get("Enabled")
+                        });
+                        curUser.save(null,
+                            {
+                                success: function (model, rst) {
+                                    if (rst.ResultStatus != 1) {
+                                        alert(rst.ResultMessage);
+                                        return;
+                                    }
+                                    else {
+                                        userListView.refresh();
+                                    }
+                                },
+                                error: function () {
+                                    alert("设置失败");
+                                }
+                            });
+                        break;
                 }
             }
         });
@@ -217,7 +238,8 @@
                 "UserCode": "",
                 "UserName": "",
                 "UPassword": "",
-                "IsAdmin":false
+                "IsAdmin": false,
+                "Enabled":true
             },
             idAttribute: "ID",
             urlRoot:"/api/User"
