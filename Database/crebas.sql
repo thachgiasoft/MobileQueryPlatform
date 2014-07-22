@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-/* Created on:     2014-07-22 10:16:20                          */
+/* Created on:     2014-07-22 16:24:16                          */
 /*==============================================================*/
 
 
@@ -265,10 +265,8 @@ go
 /* Table: tUserReport                                           */
 /*==============================================================*/
 create table tUserReport (
-   ID                   numeric              identity,
    UserID               numeric              not null,
    ReportID             numeric              not null,
-   constraint PK_TUSERREPORT primary key (ID),
    constraint AK_KEY_2_TUSERREP unique (UserID, ReportID)
 )
 go
@@ -299,7 +297,7 @@ alter table tReportParamItem
 go
 
 alter table tUserReport
-   add constraint FK_TUSERREP_REFERENCE_TREPORT foreign key (ID)
+   add constraint FK_TUSERREP_REFERENCE_TREPORT foreign key (ReportID)
       references tReport (ID)
 go
 
