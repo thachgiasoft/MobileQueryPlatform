@@ -135,7 +135,7 @@
     <Compile Include="Controllers\DatabaseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
-    <Compile Include="Controllers\ReportRequestController.cs" />
+    <Compile Include="Controllers\QueryRequestController.cs" />
     <Compile Include="Controllers\SignController.cs" />
     <Compile Include="Controllers\SyscfgController.cs" />
     <Compile Include="Controllers\UserController.cs" />
@@ -225,10 +225,10 @@
     <Content Include="Views\Admin\DatabaseManage.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Report\Report.cshtml" />
+    <Content Include="Views\QueryRequest\ReportView.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Report\ReportMenu.cshtml" />
+    <Content Include="Views\QueryRequest\ReportMenu.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\PublishProfiles\MobileQuery.pubxml" />

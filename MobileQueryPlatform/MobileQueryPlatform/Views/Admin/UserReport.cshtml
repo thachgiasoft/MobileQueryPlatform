@@ -1,16 +1,177 @@
-﻿<div class="row">
+﻿<script type="text/template" id="tempUserListView">
+    <%for(var i=0;i<=data.length-1;i++){%>
+    <a class="list-group-item" href="#do" data-index="<%=i%>" <%=data[i].Enabled?'':'disabled'%>> <span class="glyphicon glyphicon-<%=data[i].IsAdmin?'cog':'user'%>"></span> <%=data[i].UserCode%>-<%=data[i].UserName%></a>
+    <%}%>
+</script>
+<script type="text/ng-template" id="tempReportListView">
+    <%for(var i=0;i<=data.length-1;i++){%>
+    <a class="list-group-item" href="#do" data-index="<%=i%>"><%=data[i].ReportName%><span class="glyphicon glyphicon-eye-<%=data[i].Enabled?'open':'close'%> pull-right"></span></a>
+    <%}%>
+</script>
+<script>
+    if (window.UserReport == undefined) {
+        Tools.Namespace.register("window.UserReport");
+    }
+    if (window.UserReport.Toolbar == undefined) {
+        window.UserReport.Toolbar = Backbone.View.extend({
+            events: {
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "refresh":
+                        if (needSave && !confirm("还没有保存设定，是否放弃当前修改？")) {
+                            return;
+                        }
+                        
+                        userListView.refresh();
+                        break;
+                    case "save":
+                        if (!needSave) {
+                            return;
+                        }
+                        reportList.sync("create", reportList, {
+                            success: function (rst) {
+                                if (rst.ResultStatus == 1) {
+                                    alert("保存成功");
+                                    needSave = false;
+                                }
+                                else {
+                                    alert(rst.ResultMessage);
+                                }
+                            },
+                            error: function () {
+                                alert("保存失败");
+                            }
+                        })
+                        break;
+                }
+            }
+        });
+    }
+
+    if (window.UserReport.UserList == undefined) {
+        window.UserReport.UserList = Backbone.Collection.extend({
+            url: "/api/User"
+        });
+    }
+    if (window.UserReport.ReportList == undefined) {
+        window.UserReport.ReportList = Backbone.Collection.extend({
+            url:"/api/UserReport"
+        });
+    }
+    if (window.UserReport.UserListView == undefined) {
+        window.UserReport.UserListView = Backbone.View.extend({
+            template: _.template($("#tempUserListView").html()),
+            render: function () {
+                this.$el.html(this.template(
+                    {
+                        "data": userList.toJSON(userList)
+                    }
+                    ));
+            },
+            events: {
+                "click a":"clickUser"
+            },
+            clickUser: function (e) {
+                if (needSave && !confirm("还没有保存设定，是否放弃当前修改？")) {
+                    return;
+                }
+                needSave = false;
+                this.$el.children("a").removeClass("active");
+                $(e.currentTarget).addClass("active");
+                var index = $(e.currentTarget).attr("data-index");
+                reportList.fetch(
+                    {
+                        data: { userID: userList.at(index).get("ID") },
+                        success: function (collection, rst) {
+                            reportListView.render();
+                        },
+                        error: function () {
+                            alert("获取报表信息失败");
+                        }
+                    })
+            },
+            refresh: function () {
+                userList.fetch(
+                    {
+                        success: function () {
+                            userListView.render();
+                            reportListView.clear();
+                        },
+                        error: function () {
+                            alert("刷新失败");
+                        }
+                    }
+                    );
+
+            }
+        });
+    }
+    if (window.UserReport.ReportListView == undefined) {
+        window.UserReport.ReportListView = Backbone.View.extend({
+            template: _.template($("#tempReportListView").html()),
+            render: function () {
+                this.$el.html(this.template(
+                    {
+                        data:reportList.toJSON(reportList)
+                    }
+                    ))
+            },
+            events: {
+                "click a":"clickReport"
+            },
+            clickReport: function (e) {
+                needSave = true;
+                var index = $(e.currentTarget).attr("data-index");
+                var oldValue=reportList.at(index).get("Enabled");
+                reportList.at(index).set({ "Enabled": !oldValue });
+                $(e.currentTarget).children("span").removeClass();
+                $(e.currentTarget).children("span").addClass("glyphicon glyphicon-eye-" + (oldValue ? "close" : "open") + " pull-right");
+            },
+            clear: function () {
+                reportList.reset();
+                this.render();
+            }
+        });
+    }
+</script>
+<script>
+    var userList ;
+    var userListView;
+    var reportList;
+    var reportListView;
+    var needSave = false;
+    var toolbar;
+    $(function () {
+        userList = new window.UserReport.UserList();
+        reportList = new window.UserReport.ReportList();
+        userListView = new window.UserReport.UserListView({
+            el: "#userListView"
+        });
+        reportListView = new window.UserReport.ReportListView({
+            el: "#reportListView"
+        });
+        toolbar = new window.UserReport.Toolbar({
+            el: "#toolbar"
+        });
+        userList.fetch({
+            success: function (collection, rst) {
+                userListView.render();
+            },
+            error: function () {
+                alert("获取用户列表失败");
+            }
+        });
+    })
+</script>
+<div class="row">
     <div class="col-sm-4">
         <div class="panel panel-default" >
             <div class="panel-heading">
                 <span class="panel-title">用户</span>
             </div>
-            <div class="list-group">
-                <a class="list-group-item">0001-张三<span class="badge pull-right">1</span></a>
-                <a class="list-group-item">0001-张三<span class="badge pull-right">1</span></a>
-                <a class="list-group-item">0001-张三<span class="badge pull-right">2</span></a>
-                <a class="list-group-item">0001-张三<span class="badge pull-right">3</span></a>
-                <a class="list-group-item">0001-张三<span class="badge pull-right">4</span></a>
-            </div>
+            <div id="userListView" class="list-group"/>
         </div>
     </div>
     <div class="col-sm-8">
@@ -20,9 +181,15 @@
                     报表
                 </span>
             </div>
-            <ul class="list-group">
-                <li class="list-group-item">供应商报表<span class="badge"><span class="glyphicon glyphicon-eye-close"></span></span></li>
-            </ul>
+            <div id="reportListView" class="list-group"/>
         </div>
     </div>
 </div>
+<div class="navbar navbar-fixed-bottom">
+    <div class="navbar-header">
+        <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
+            <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a>
+            <a class="btn btn-default" data-action="save"><span class="glyphicon glyphicon-plus"></span>保存</a>
+        </div>
+    </div>
+</div> 

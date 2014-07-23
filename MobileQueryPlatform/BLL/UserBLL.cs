@@ -174,30 +174,6 @@ namespace BLL
         }
 
         /// <summary>
-        /// 获取用户权限报表
-        /// </summary>
-        /// <returns></returns>
-        public static ICollection<UserReport> ListUserReport(decimal userID)
-        {
-            try
-            {
-                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
-                {
-                    StringBuilder sql = new StringBuilder(128);
-                    sql.Append("SELECT * FROM tUserReport WHERE UserID=@UserID");
-                    dal.OpenReader(sql.ToString(),
-                        dal.CreateParameter("@UserID", userID)
-                        );
-                    return ObjectHelper.BuildObject<UserReport>(dal.DataReader);
-                }
-            }
-            catch 
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
         /// 增加用户
         /// </summary>
         /// <returns></returns>

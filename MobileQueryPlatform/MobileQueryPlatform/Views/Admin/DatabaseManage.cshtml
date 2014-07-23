@@ -50,16 +50,16 @@
                         <%}%>
                     </div>
                     <div class="form-group">
-                        <label for="dataSource">数据源</label>
-                        <input id="dataSource" type="text" class="form-control" name="DataSource" value="<%=data.DataSource%>" placeholder="输入数据源" autofocus="autofocus" required="required" />
+                        <label for="dataSource">服务器地址</label>
+                        <input id="dataSource" type="text" class="form-control" name="DataSource" value="<%=data.DataSource%>" placeholder="输入服务器地址，如:172.16.0.1" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
                         <label for="dbName">数据库名称</label>
-                        <input id="dbName" type="text" class="form-control" name="DbName" value="<%=data.DbName%>" placeholder="输入数据库名称" autofocus="autofocus" required="required" />
+                        <input id="dbName" type="text" class="form-control" name="DbName" value="<%=data.DbName%>" placeholder="MsSql填写数据库名，Oracle填写服务名" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
-                        <label for="userID">用户ID</label>
-                        <input id="userID" type="text" class="form-control" name="UserID" value="<%=data.UserID%>" placeholder="输入用户ID" autofocus="autofocus" required="required" />
+                        <label for="userID">登录ID</label>
+                        <input id="userID" type="text" class="form-control" name="UserID" value="<%=data.UserID%>" placeholder="输入登录用户id,如：sa" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
                         <label for="password">登录密码</label>
@@ -202,7 +202,8 @@
                 });
             },
             events: {
-                "click #btn_save": "save"
+                "click #btn_save": "save",
+                "change [name='DbType']": "dbTypeChange"
             },
             save: function () {
                 this.curDb.set(Tools.serializeObject($("#db_form")));

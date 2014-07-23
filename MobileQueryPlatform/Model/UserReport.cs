@@ -18,5 +18,20 @@ namespace Model
             get;
             set;
         }
+
+        /// <summary>
+        /// 报表是否可见
+        /// </summary>
+        public bool Enabled
+        {
+            get;
+            set;
+        }
+
+        public string ReportName
+        {
+            get;
+            set;
+        }
     }
 }

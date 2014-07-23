@@ -16,11 +16,11 @@
                         "UPassword": $("#UPassword").val()
                     },
                     function (data) {
-                        $("#btnSignin").button("reset");
                         if (data.ResultStatus == "1") {
                             location.href="@ViewBag.Success";
                         }
                         else {
+                            $("#btnSignin").button("reset");
                             alert(data.ResultMessage);
                         }
                     });

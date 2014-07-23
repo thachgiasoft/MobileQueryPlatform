@@ -129,6 +129,82 @@ namespace BLL
         }
 
         /// <summary>
+        /// 获取用户权限报表
+        /// </summary>
+        /// <returns></returns>
+        public static ICollection<UserReport> ListUserReport(decimal userID)
+        {
+            try
+            {
+                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
+                {
+                    StringBuilder sql = new StringBuilder(128);
+                    sql.Append(" SELECT ID AS ReportID,@UserID AS UserID,CASE ISNULL(B.ReportID,0) WHEN 0 THEN 0 ELSE 1 END AS Enabled ,A.ReportName ");
+                    sql.Append(" FROM ");
+                    sql.Append(" (SELECT * FROM dbo.tReport WHERE Enabled=1) A LEFT JOIN ");
+                    sql.Append(" (SELECT * FROM dbo.tUserReport WHERE UserID=@userid) B ON A.ID=B.ReportID ");
+                    dal.OpenReader(sql.ToString(),
+                        dal.CreateParameter("@UserID", userID)
+                        );
+                    return ObjectHelper.BuildObject<UserReport>(dal.DataReader);
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 保存用户报表
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="userReports"></param>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        public static int SaveUserReport(decimal userID, UserReport[] userReports,out string msg)
+        {
+            try
+            {
+                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
+                {
+                    StringBuilder sql = new StringBuilder(256);
+                    sql.Append("DELETE FROM tUserReport WHERE UserID=@UserID");
+                    dal.BeginTran();
+                    int i;
+                    dal.Execute(sql.ToString(),out i,
+                        dal.CreateParameter("@UserID",userID)
+                        );
+                    sql.Clear();
+                    sql.Append("INSERT INTO tUserReport( UserID, ReportID ) VALUES  ( @UserID, @ReportID )");
+                    foreach(UserReport ur in userReports){
+                        if (ur.Enabled)
+                        {
+                            dal.Execute(sql.ToString(), out i,
+                                dal.CreateParameter("@UserID", ur.UserID),
+                                dal.CreateParameter("@ReportID", ur.ReportID)
+                                );
+                            if (i == 0)
+                            {
+                                dal.RollBackTran();
+                                msg = "保存失败";
+                                return 0;
+                            }
+                        }
+                    }
+                    dal.CommitTran();
+                    msg = "success";
+                    return 1;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                msg = ex.Message;
+                return -1;
+            }
+        }
+
+        /// <summary>
         /// 添加报表
         /// </summary>
         /// <param name="report"></param>

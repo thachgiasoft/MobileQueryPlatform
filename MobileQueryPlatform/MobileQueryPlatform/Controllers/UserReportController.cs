@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using BLL;
+using System.Web;
 
 namespace MobileQueryPlatform.Controllers
 {
@@ -13,22 +15,21 @@ namespace MobileQueryPlatform.Controllers
         // GET api/userreport
         public IEnumerable<UserReport> Get(decimal userID)
         {
-            return null;
+            return ReportBLL.ListUserReport(userID);
         }
 
         // POST api/userreport
-        public void Post(UserReport value)
+        public ResultModel<object> Post(UserReport[] collection)
         {
-        }
-
-        // PUT api/userreport/5
-        public void Put(decimal id, UserReport value)
-        {
-        }
-
-        // DELETE api/userreport/5
-        public void Delete(decimal id)
-        {
+            ResultModel<object> rst = new ResultModel<object>();
+            if (HttpContext.Current.Session["SigninedUser"] == null)
+            {
+                rst.ResultMessage = "用户登录失效";
+                rst.ResultStatus = -1;
+                return rst;
+            }
+            rst.ResultStatus = ReportBLL.SaveUserReport(collection[0].UserID, collection, out rst.ResultMessage);
+            return rst;
         }
     }
 }
