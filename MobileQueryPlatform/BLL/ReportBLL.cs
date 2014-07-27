@@ -132,7 +132,7 @@ namespace BLL
         /// 获取用户权限报表
         /// </summary>
         /// <returns></returns>
-        public static ICollection<UserReport> ListUserReport(decimal userID)
+        public static ICollection<UserReport> ListAllUserReport(decimal userID)
         {
             try
             {
@@ -143,6 +143,26 @@ namespace BLL
                     sql.Append(" FROM ");
                     sql.Append(" (SELECT * FROM dbo.tReport WHERE Enabled=1) A LEFT JOIN ");
                     sql.Append(" (SELECT * FROM dbo.tUserReport WHERE UserID=@userid) B ON A.ID=B.ReportID ");
+                    dal.OpenReader(sql.ToString(),
+                        dal.CreateParameter("@UserID", userID)
+                        );
+                    return ObjectHelper.BuildObject<UserReport>(dal.DataReader);
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static ICollection<UserReport> ListUserReport(decimal userID)
+        {
+            try
+            {
+                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
+                {
+                    StringBuilder sql = new StringBuilder(128);
+                    sql.Append(" SELECT B.ID as ReportID,ReportName,UserID,Enabled FROM tUserReport A,tReport B WHERE A.ReportID=B.ID AND UserID=@UserID");
                     dal.OpenReader(sql.ToString(),
                         dal.CreateParameter("@UserID", userID)
                         );

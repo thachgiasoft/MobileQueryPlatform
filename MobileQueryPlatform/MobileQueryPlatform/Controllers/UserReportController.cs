@@ -13,9 +13,23 @@ namespace MobileQueryPlatform.Controllers
     public class UserReportController : ApiController
     {
         // GET api/userreport
-        public IEnumerable<UserReport> Get(decimal userID)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="model">0-仅本用户菜单，1-全部菜单</param>
+        /// <returns></returns>
+        public IEnumerable<UserReport> Get(decimal userID,short model)
         {
-            return ReportBLL.ListUserReport(userID);
+            switch (model)
+            {
+                case 0:
+                    return ReportBLL.ListUserReport(userID);
+                case 1:
+                    return ReportBLL.ListAllUserReport(userID);
+                default:
+                    return null;
+            }
         }
 
         // POST api/userreport

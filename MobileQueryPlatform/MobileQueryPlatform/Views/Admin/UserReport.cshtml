@@ -83,7 +83,10 @@
                 var index = $(e.currentTarget).attr("data-index");
                 reportList.fetch(
                     {
-                        data: { userID: userList.at(index).get("ID") },
+                        data: {
+                            userID: userList.at(index).get("ID"),
+                            model:1
+                        },
                         success: function (collection, rst) {
                             reportListView.render();
                         },
@@ -189,7 +192,7 @@
     <div class="navbar-header">
         <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
             <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a>
-            <a class="btn btn-default" data-action="save"><span class="glyphicon glyphicon-plus"></span>保存</a>
+            <a class="btn btn-default" data-action="save"><span class="glyphicon glyphicon-floppy-save"></span>保存</a>
         </div>
     </div>
 </div> 

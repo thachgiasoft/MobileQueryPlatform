@@ -1,31 +1,30 @@
 ﻿<script type="text/javascript">
-        if (window.Admin == undefined) {
-            Tools.Namespace.register("window.Admin");
+        if (window.Report == undefined) {
+            Tools.Namespace.register("window.Report");
         }
-        if (window.Admin.Router == undefined) {
-            window.Admin.Router = Backbone.Router.extend({
+        if (window.Report.Router == undefined) {
+            window.Report.Router = Backbone.Router.extend({
                 routes: {
                     "":"Index",
-                    "Query/:id": "Query"
+                    "Goto/:id": "Goto",
+                    "Report/:id": "Report"
                 },
                 Index:function(){
-                    $("#mainPanel").load("/QueryRequest/ReportMenu");
+                    $("#mainPanel").load("/Home/ReportMenu");
                 },
-                Query: function (id) {
-                    $("#mainPanel").load("/QueryRequest/ReportView/" + id);
+                Goto: function (id) {
+                    $("#mainPanel").load("/Home/" + id);
+                },
+                Report: function (id) {
+                    $("#mainPanel").load("/Home/ReportView/" + id);
                 }
             });
         }
 </script>
-<script id="tempMenuListView" type="text/template">
-    <li>
-        <a href="/Home"><span class="glyphicon glyphicon-th-list"></span>&nbsp;&nbsp;菜单</a>
-    </li>
-</script>
 <script type="text/javascript">
         var router;
         $(function () {
-            router = new window.Admin.Router();
+            router = new window.Report.Router();
             Backbone.history.start();
         })
 </script>    
@@ -41,8 +40,19 @@
             <a class="navbar-brand" href="#">移动查询平台</a>
         </div>
         <div class="collapse navbar-collapse">
-            <ul class="nav navbar-nav" id="tempMenuListView">
-
+            <ul class="nav navbar-nav">
+                <li>
+                    <a href="/Home"><span class="glyphicon glyphicon-th-list"></span>&nbsp;&nbsp;报表</a>
+                </li>
+                <li>
+                    <a href="#Goto/ChangePassword"><span class="glyphicon glyphicon-lock"></span>&nbsp;&nbsp;修改密码</a>
+                </li>
+                <li>
+                    <a href="#"><span class="glyphicon glyphicon-info-sign"></span>&nbsp;&nbsp;关于</a>
+                </li>
+                <li>
+                    <a href="/Sign/Signoff"><span class="glyphicon glyphicon-off"></span>&nbsp;&nbsp;退出</a>
+                </li>
             </ul>
         </div>
     </div>
