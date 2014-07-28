@@ -39,6 +39,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="dotless.Core">
+      <HintPath>..\packages\dotless.1.4.0.0\lib\dotless.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -146,6 +149,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\css\bootstrap-datetimepicker.css" />
+    <Content Include="Content\css\bootstrap-datetimepicker.min.css" />
     <Content Include="Content\css\bootstrap-theme.css" />
     <Content Include="Content\css\bootstrap-theme.min.css" />
     <Content Include="Content\css\bootstrap.css" />
@@ -162,8 +167,11 @@
     <Content Include="Global.asax" />
     <Content Include="Scripts\Backbone\backbone-min.js" />
     <Content Include="Scripts\Backbone\backbone.js" />
+    <Content Include="Scripts\Bootstrap\bootstrap-datetimepicker.js" />
+    <Content Include="Scripts\Bootstrap\bootstrap-datetimepicker.min.js" />
     <Content Include="Scripts\Bootstrap\bootstrap.js" />
     <Content Include="Scripts\Bootstrap\bootstrap.min.js" />
+    <Content Include="Scripts\Bootstrap\bootstrap-datetimepicker.zh-CN.js" />
     <Content Include="Scripts\JQuery\jquery-2.1.0.js" />
     <Content Include="Scripts\JQuery\jquery-2.1.0.min.js" />
     <Content Include="Scripts\Tools.js" />
@@ -230,6 +238,9 @@
     <Content Include="Views\Home\ReportMenu.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\less\build.less" />
+    <Content Include="Content\less\build_standalone.less" />
+    <Content Include="Content\less\datetimepicker.less" />
     <None Include="Properties\PublishProfiles\MobileQuery.pubxml" />
     <Content Include="Views\Admin\Menu.cshtml" />
     <Content Include="Views\Home\About.cshtml" />

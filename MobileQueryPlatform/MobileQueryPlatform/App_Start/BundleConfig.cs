@@ -17,7 +17,7 @@ namespace MobileQueryPlatform
                        "~/Scripts/Underscore/underscore.js"
                 ));
             bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
-                        "~/Scripts/bootstrap/bootstrap.js"
+                        "~/Scripts/Bootstrap/bootstrap.js"
 
                 ));                        
             bundles.Add(new StyleBundle("~/bundles/css").Include(
@@ -30,26 +30,28 @@ namespace MobileQueryPlatform
             bundles.Add(new ScriptBundle("~/bundles/tool").Include(
                         "~/Scripts/Tools.js"
                 ));
-            // 使用要用于开发和学习的 Modernizr 的开发版本。然后，当你做好
-            // 生产准备时，请使用 http://modernizr.com 上的生成工具来仅选择所需的测试。
-        //    bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
-        //                "~/Scripts/modernizr-*"));
-
-        //    bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/site.css"));
-
-        //    bundles.Add(new StyleBundle("~/Content/themes/base/css").Include(
-        //                "~/Content/themes/base/jquery.ui.core.css",
-        //                "~/Content/themes/base/jquery.ui.resizable.css",
-        //                "~/Content/themes/base/jquery.ui.selectable.css",
-        //                "~/Content/themes/base/jquery.ui.accordion.css",
-        //                "~/Content/themes/base/jquery.ui.autocomplete.css",
-        //                "~/Content/themes/base/jquery.ui.button.css",
-        //                "~/Content/themes/base/jquery.ui.dialog.css",
-        //                "~/Content/themes/base/jquery.ui.slider.css",
-        //                "~/Content/themes/base/jquery.ui.tabs.css",
-        //                "~/Content/themes/base/jquery.ui.datepicker.css",
-        //                "~/Content/themes/base/jquery.ui.progressbar.css",
-        //                "~/Content/themes/base/jquery.ui.theme.css"));
+            bundles.Add(new ScriptBundle("~/bundles/datetimepickerJs").Include(
+                    "~/Scripts/Bootstrap/bootstrap-datetimepicker.js",
+                    "~/Scripts/Bootstrap/bootstrap-datetimepicker.zh-CN.js"
+                ));
+            bundles.Add(new StyleBundle("~/bundles/datetimepickerCss").Include(
+                    "~/Content/css/bootstrap-datetimepicker.css"
+                ));
+            var lessBundles = new Bundle("~/bundles/less").Include(
+                "~/Content/less/build_standalone.less",
+                "~/Content/less/build.less",
+                "~/Content/less/datetimepicker.less");
+            lessBundles.Transforms.Add(new LessTransform());
+            lessBundles.Transforms.Add(new CssMinify());
+            bundles.Add(lessBundles);
         }
     }
+      public class LessTransform : IBundleTransform
+    {
+         public void Process(BundleContext context, BundleResponse response)
+         {
+             response.Content = dotless.Core.Less.Parse(response.Content);
+             response.ContentType = "text/css";
+         }
+     }
 }

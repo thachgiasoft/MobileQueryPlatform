@@ -1,11 +1,58 @@
-﻿<div class="container">
+﻿@Scripts.Render("~/bundles/datetimepickerJs")
+@Styles.Render("~/bundles/datetimepickerCss")
+@*@Styles.Render("~/bundles/less")*@
+<script>
+    $(function () {
+        $(".form_datetime").datetimepicker({
+            format: "yyyy-MM-dd hh:ii",
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight:true,
+            language: "zh-CN"
+        });
+    })
+</script>
+<div class="container">
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="panel-title">
                 @ViewBag.Report.ReportName
             </div>
         </div>
-
+        <div class="panel-body">
+            <form class="form-inline" role="form">
+                <div class="form-group">
+                    <label class="sr-only" for="input1">条件1</label>
+                    <input id="iput1" class="form-control" type="datetime" placeholder="输入条件1" />
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="input1">条件2</label>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            Action <span class="caret"></span>
+                        </button>
+                        <input type="hidden" />
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#">Action</a></li>
+                            <li><a href="#">Another action</a></li>
+                            <li><a href="#">Something else here</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#">Separated link</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="dtp_input1" class="sr-only ">DateTime Picking</label>
+                    <input type="hidden" id="dtp_input1" value="" />
+                    <div class="input-group date form_datetime" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                        <input class="form-control" size="18" placeholder="输入时间" type="text" value="" readonly>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                    </div>
+                    
+                </div>
+            </form>
+        </div>
         <div class="table-responsive">
             <table class="table table-striped table-hover table-bordered">
                 <thead>
@@ -104,3 +151,11 @@
     </center>
     
 </div>
+
+<div class="navbar navbar-fixed-bottom">
+    <div class="navbar-header">
+        <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
+            <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-search"></span>查询</a>
+        </div>
+    </div>
+</div> 
