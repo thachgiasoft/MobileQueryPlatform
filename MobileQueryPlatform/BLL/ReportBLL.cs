@@ -84,7 +84,7 @@ namespace BLL
                             continue;
                         }
                         sql.Clear();
-                        sql.Append("SELECT * FROM tReportParamOption WHERE ReportID=@ReportID AND ParamCode=@ParamCode");
+                        sql.Append("SELECT * FROM tReportParamItem WHERE ReportID=@ReportID AND ParamCode=@ParamCode");
                         dal.OpenReader(sql.ToString(),
                             dal.CreateParameter("@ReportID", rpt.ID),
                             dal.CreateParameter("@ParamCode",rp.ParamCode)
@@ -101,6 +101,88 @@ namespace BLL
             }
         }
 
+        /// <summary>
+        /// 获取报表查询结构
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static Report GetReportForQuery(decimal id)
+        {
+            try
+            {
+                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
+                {
+                    StringBuilder sql = new StringBuilder(256);
+                    sql.Append("SELECT ID, DBID ,ReportName ,Enabled ,Remark,AllSumabled ,PageSumabled ,Pagingabled ,PageSize ");
+                    sql.Append(" FROM tReport  where ID=@ID AND Enabled=1 ");
+                    dal.OpenReader(sql.ToString(),
+                        dal.CreateParameter("@ID", id)
+                        );
+                    Report rpt;
+                    if (dal.DataReader.Read())
+                    {
+                        rpt = new Report()
+                        {
+                            ID = Convert.ToDecimal(dal.DataReader["ID"]),
+                            DBID = Convert.ToDecimal(dal.DataReader["DBID"]),
+                            ReportName = Convert.ToString(dal.DataReader["ReportName"]).TrimEnd(),
+                            Enabled = Convert.ToBoolean(dal.DataReader["Enabled"]),
+                            Remark = Convert.ToString(dal.DataReader["Remark"]).TrimEnd(),
+                            AllSumabled = Convert.ToBoolean(dal.DataReader["AllSumabled"]),
+                            PageSumabled = Convert.ToBoolean(dal.DataReader["PageSumabled"]),
+                            Pagingabled = Convert.ToBoolean(dal.DataReader["Pagingabled"]),
+                            PageSize = Convert.ToInt16(dal.DataReader["PageSize"])
+                        };
+                        dal.DataReader.Close();
+                    }
+                    else
+                    {
+                        throw new Exception("未找到报表");
+                    }
+
+
+                    //读取字段集合
+                    sql.Clear();
+                    sql.Append("SELECT * FROM tReportColumn WHERE ReportID=@ReportID");
+                    dal.OpenReader(sql.ToString(),
+                        dal.CreateParameter("@ReportID", rpt.ID)
+                        );
+                    rpt.Columns = ObjectHelper.BuildObject<ReportColumn>(dal.DataReader);
+                    dal.DataReader.Close();
+
+                    //读取参数集合
+                    sql.Clear();
+                    sql.Append("SELECT * FROM tReportParam WHERE ReportID=@ReportID");
+                    dal.OpenReader(sql.ToString(),
+                        dal.CreateParameter("@ReportID", rpt.ID)
+                        );
+                    rpt.Params = ObjectHelper.BuildObject<ReportParam>(dal.DataReader);
+                    dal.DataReader.Close();
+
+                    //读取参数列表项集合
+                    foreach (ReportParam rp in rpt.Params)
+                    {
+                        if (rp.ParamInputType == 0)
+                        {
+                            continue;
+                        }
+                        sql.Clear();
+                        sql.Append("SELECT * FROM tReportParamItem WHERE ReportID=@ReportID AND ParamCode=@ParamCode");
+                        dal.OpenReader(sql.ToString(),
+                            dal.CreateParameter("@ReportID", rpt.ID),
+                            dal.CreateParameter("@ParamCode", rp.ParamCode)
+                            );
+                        rp.ParamItems = ObjectHelper.BuildObject<ReportParamItem>(dal.DataReader);
+                        dal.DataReader.Close();
+                    }
+                    return rpt;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
         /// <summary>
         /// 列表报表
         /// 仅报表头信息，不包含数据，字段等
@@ -162,7 +244,7 @@ namespace BLL
                 using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
                 {
                     StringBuilder sql = new StringBuilder(128);
-                    sql.Append(" SELECT B.ID as ReportID,ReportName,UserID,Enabled FROM tUserReport A,tReport B WHERE A.ReportID=B.ID AND UserID=@UserID");
+                    sql.Append(" SELECT B.ID as ReportID,ReportName,UserID,Enabled FROM tUserReport A,tReport B WHERE A.ReportID=B.ID AND UserID=@UserID AND Enabled=1");
                     dal.OpenReader(sql.ToString(),
                         dal.CreateParameter("@UserID", userID)
                         );
@@ -595,11 +677,29 @@ namespace BLL
 
                         foreach (DataColumn c in ds.Tables[0].Columns)
                         {
-                            report.Columns.Add(new ReportColumn()
-                            {
+                            ReportColumn column = new ReportColumn() {
                                 ReportID = id,
                                 ColumnCode = c.ColumnName
-                            });
+                            };
+                            switch (c.DataType.Name) {
+                                case "Int16":
+                                case "Int32":
+                                case "Int64":
+                                case "Decimal":
+                                case "Float":
+                                    column.ColumnType = 1;
+                                    break;
+                                case "String":
+                                    column.ColumnType = 0;
+                                    break;
+                                case "Datetime":
+                                    column.ColumnType = 2;
+                                    break;
+                                default:
+                                    column.ColumnType = 0;
+                                    break;
+                            }
+                            report.Columns.Add(column);
                         }
                     }
                 }

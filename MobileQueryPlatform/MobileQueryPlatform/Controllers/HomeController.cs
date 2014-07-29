@@ -34,8 +34,7 @@ namespace MobileQueryPlatform.Controllers
 
         public PartialViewResult ReportView(short id)
         {
-            Report report = ReportBLL.GetReport(id);
-            ViewBag.Report = report;
+            ViewBag.ReportID = id;
             return PartialView();
         }
 

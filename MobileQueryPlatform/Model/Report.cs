@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -153,6 +154,11 @@ namespace Model
             set;
         }
 
+        /// <summary>
+        /// 字符型 = 0,
+        /// 数值型 = 1,
+        /// 日期型 = 2
+        /// </summary>
         public short ColumnType
         {
             get;
@@ -174,6 +180,19 @@ namespace Model
         /// 是否允许排序
         /// </summary>
         public bool Sortabled
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 当前排序值
+        /// 0 -不排序
+        /// 1 -升序
+        /// 2 -降序
+        /// </summary>
+        [DefaultValue(0)]
+        public short SortValue
         {
             get;
             set;

@@ -24,6 +24,10 @@ namespace MobileQueryPlatform.Controllers
             return ReportBLL.GetReport(id);
         }
 
+        public Report Get(decimal id, bool forQuery)
+        {
+            return ReportBLL.GetReportForQuery(id);
+        }
         /// <summary>
         /// 重构报表结构
         /// </summary>

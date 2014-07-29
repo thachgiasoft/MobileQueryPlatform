@@ -1,156 +1,220 @@
 ﻿@Scripts.Render("~/bundles/datetimepickerJs")
 @Styles.Render("~/bundles/datetimepickerCss")
-@*@Styles.Render("~/bundles/less")*@
-<script>
-    $(function () {
-        $(".form_datetime").datetimepicker({
-            format: "yyyy-MM-dd hh:ii",
-            autoclose: true,
-            todayBtn: true,
-            todayHighlight:true,
-            language: "zh-CN"
-        });
-    })
-</script>
-<div class="container">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <div class="panel-title">
-                @ViewBag.Report.ReportName
-            </div>
-        </div>
-        <div class="panel-body">
-            <form class="form-inline" role="form">
+@Styles.Render("~/bundles/less")
+
+<script type="text/template" id="tempQueryCondition">
+    <% for(var i=0;i<=data.length-1;i++){%>
+        <% if(data[i].ParamType==0 || data[i].ParamType==1) {%>
+            <% if(data[i].ParamInputType==0) {%>
                 <div class="form-group">
-                    <label class="sr-only" for="input1">条件1</label>
-                    <input id="iput1" class="form-control" type="datetime" placeholder="输入条件1" />
+                    <label class="sr-only" for="<%=data[i].ParamCode%>"><%=data[i].ParamName==''?data[i].ParamCode:data[i].ParamName%></label>
+                    <input id="<%=data[i].ParamCode%>" data-paramtype="<%=data[i].ParamType%>" data-paraminputtype="<%=data[i].ParamInputType%>" class="form-control" name="<%=data[i].ParamCode%>" type="text" placeholder="输入<%=data[i].ParamName==''? data[i].ParamCode:data[i].ParamName%>" />
                 </div>
+            <%} else if(data[i].ParamInputType==1) {%>
                 <div class="form-group">
-                    <label class="sr-only" for="input1">条件2</label>
+                    <label class="sr-only" for="<%=data[i].ParamCode%>"><%=data[i].ParamName%></label>
                     <div class="btn-group">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                            Action <span class="caret"></span>
+                            请选择<%=data[i].ParamName==""?data[i].ParamCode:data[i].ParamName%> <span class="caret"></span>
                         </button>
-                        <input type="hidden" />
+                        <input type="hidden" name="<%=data[i].ParamCode%>" id="<%=data[i].ParamCode%>" />
                         <ul class="dropdown-menu" role="menu">
-                            <li><a href="#">Action</a></li>
-                            <li><a href="#">Another action</a></li>
-                            <li><a href="#">Something else here</a></li>
-                            <li class="divider"></li>
-                            <li><a href="#">Separated link</a></li>
+                            <% for(var j=0;j<=data[i].ParamItems.length-1;j++) {%>
+                                <li><a data-paramitemvalue="<%=data[i].ParamItems[j].OptionValue%>" data-paramcode="<%=data[i].ParamItems[j].ParamCode%>" href="#do"><%=data[i].ParamItems[j].OptionName%></a></li>
+                            <%}%>
                         </ul>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="dtp_input1" class="sr-only ">DateTime Picking</label>
-                    <input type="hidden" id="dtp_input1" value="" />
-                    <div class="input-group date form_datetime" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
-                        <input class="form-control" size="18" placeholder="输入时间" type="text" value="" readonly>
-                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                    </div>
-                    
+                <%}%>
+        <%} else if(data[i].ParamType==2) {%>
+            <div class="form-group">
+                <label for="<%=data[i].ParamCode%>" class="sr-only "><%=data[i].ParamName%></label>
+                <input type="hidden" id="<%=data[i].ParamCode%>" value="" />
+                <div class="input-group date form_datetime" data-link-field="<%=data[i].ParamCode%>">
+                    <input class="form-control" size="18" placeholder="输入<%=data[i].ParamName==''?data[i].ParamCode:data[i].ParamName%>" type="text" value="" readonly>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                 </div>
-            </form>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover table-bordered">
-                <thead>
-                    <tr>
-                        <th><span class="glyphicon glyphicon-list-alt"></span></th>
-                        <th>colmn2&nbsp;<span class="glyphicon glyphicon-sort"></span></th>
-                        <th>colmn1&nbsp;<span class="glyphicon glyphicon-sort-by-alphabet"></span></th>
-                        <th>colmn1</th>
-                        <th>colmn1</th>
-                        <th>colmn1</th>
-                        <th>colmn1</th>
-                        <th>colmn1</th>
-                        <th>colmn1</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td>页合计</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                    </tr>
-                    <tr>
-                        <td>总合计</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                        <td>colmn1</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+            </div>
+        <%}%>
+    <%}%>
+</script>
 
+<script type="text/template" id="tempQueryHeader">
+    <% for(var i=0 ;i<=data.length-1;i++) {%>
+        <%if(data[i].Sortabled){%>
+            <th data-index="<%=i%>" style="cursor:pointer">
+                <% if(data[i].SortValue==0){%>
+                    <span class="glyphicon glyphicon-sort"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
+                <%} else if(data[i].SortValue==1){%>
+                    <% if(data[i].ColumnType==0) {%>
+                        <span class="glyphicon glyphicon-sort-by-alphabet"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
+                    <%} else if(data[i].ColumnType==1){%>
+                        <span class="glyphicon glyphicon-sort-by-order"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
+                    <%} else if(data[i].ColumnType==2){%>
+                        <span class="glyphicon glyphicon-sort-by-attributes"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
+                    <%}%>
+
+                <%} else if(data[i].SortValue==2){%>
+                    <% if(data[i].ColumnType==0) {%>
+                         <span class="glyphicon glyphicon-sort-by-alphabet-alt"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
+                    <%} else if(data[i].ColumnType==1){%>
+                        <span class="glyphicon glyphicon-sort-by-order-alt"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
+                    <%} else if(data[i].ColumnType==2){%>
+                        <span class="glyphicon glyphicon-sort-by-attributes-alt"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
+                    <%}%>
+                <%}%>
+            </th>
+        <%} else {%>
+            <th data-index="<%=i%>" style="cursor:pointer"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></th>
+        <% }%>
+    <%}%>
+</script>
+
+<script type="text/template" id="tempQueryResult">
+    <tr>
+        <td>1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+    </tr>
+</script>
+
+<script type="text/template" id="tempQuerySum">
+    <tr>
+        <td>页合计</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+    </tr>
+    <tr>
+        <td>总合计</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+        <td>colmn1</td>
+    </tr>
+</script>
+
+<script type="text/javascript">
+    if (window.Report.Report == undefined) {
+        window.Report.Report = Backbone.Model.extend({
+            defaults: {
+                "ID": null,
+                "DBID": null,
+                "ReportName": "",
+                "Remark": "",
+                "Columns": [],
+                "Params": [],
+                "PageSumabled": false,
+                "AllSumabled": false,
+                "Pagingabled": false,
+                "PageSize": 10
+            },
+            idAttribute: "ID",
+            urlRoot: "/api/Report"
+        });
+    }
+    if (window.Report.QueryConditionView == undefined) {
+        window.Report.QueryConditionView = Backbone.View.extend({
+            template: _.template($("#tempQueryCondition").html()),
+            render: function () {
+                this.$el.html(this.template({ data: report.get("Params") }));
+            }
+        });
+    }
+    if (window.Report.QueryHeader == undefined) {
+        window.Report.QueryHeader = Backbone.View.extend({
+            template: _.template($("#tempQueryHeader").html()),
+            render: function () {
+                this.$el.html(this.template({ data: report.get("Columns") }));
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var report;
+    var queryConditionView;
+    var queryHeader;
+    $(function () {
+        report = new window.Report.Report();
+        queryConditionView = new window.Report.QueryConditionView({
+            el: "#queryCondition",
+        });
+        queryHeader = new window.Report.QueryHeader({
+            el: "#queryHeader"
+        });
+        report.fetch({
+            data: {
+                id:"@ViewBag.ReportID",
+                forQuery:true
+            },
+            success: function (model, rst) {
+                $("#queryTitle").html(rst.ReportName);
+                queryConditionView.render();
+                queryHeader.render();
+                $(".form_datetime").datetimepicker({
+                    format: "yyyy-MM-dd hh:ii",
+                    autoclose: true,
+                    todayBtn: true,
+                    todayHighlight: true,
+                    language: "zh-CN"
+                });
+            },
+            error: function () {
+                alert("获取报表信息失败");
+            }
+        });
+       
+    })
+</script>
+
+<div class="container">
+    <h2 class="text-info" id="queryTitle"></h2>
+    <hr />
+    <div class="row">
+        <form class="form-inline" role="form" id="queryCondition" />
     </div>
     <center>
-        <ul class="pagination">
-            <li><a href="#"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
-            <li><a href="#"><span class="glyphicon glyphicon-home"></span></a></li>
-            <li><a href="#"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+        <ul class="pagination" id="queryPager">
+            <li><a href="#prePage"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+            <li><a href="#goHome"><span class="glyphicon glyphicon-home"></span></a></li>
+            <li><a href="#nextPage"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
         </ul>
     </center>
-    
+    <div class="row" style="overflow-x:auto">
+        <table class="table table-striped table-hover table-bordered">
+            <thead>
+                <tr id="queryHeader" style="position:relative" />
+            </thead>
+            <tbody id="queryResult" />
+            <tfoot id="querySum" />
+        </table>
+    </div>
+    <center>
+        <ul class="pagination" id="queryPager">
+            <li><a href="#prePage"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+            <li><a href="#goHome"><span class="glyphicon glyphicon-home"></span></a></li>
+            <li><a href="#nextPage"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+        </ul>
+    </center>
 </div>
+
 
 <div class="navbar navbar-fixed-bottom">
     <div class="navbar-header">
