@@ -629,8 +629,57 @@ namespace BLL
         /// <param name="id">报表ID</param>
         /// <param name="request">请求信息</param>
         /// <returns></returns>
-        public static int QueryReport(decimal id,ReportRequest request,out string result,out string msg)
+        public static int QueryReport(decimal userID,ReportRequest request,out string result,out string msg)
         {
+            try
+            {
+                Report rpt=GetReport(request.ReportID);//获取报表
+                Database db = DatabaseBLL.GetDatabase(rpt.DBID);
+                //开始组装sql
+                StringBuilder sql = new StringBuilder(256);
+                if (rpt.Pagingabled)
+                {
+                    StringBuilder sql_rowNumber=new StringBuilder(128);
+                    sql_rowNumber.AppendFormat(" ROW_NUMBER() over(order by {0} {1} ) as RowNO, ",
+                        string.IsNullOrEmpty(request)
+                        );
+                    //分页请求
+                    sql.AppendFormat("SELECT * FROM ({0}) t where RowNO between {1} and {2}",
+                        rpt.SqlCommand.Insert(6, ""),
+                        rpt.PageSize*(request.Page-1),
+                        rpt.PageSize
+                        );
+                }
+                else
+                {
+                    sql.Append(rpt.SqlCommand);
+                }
+                if (!string.IsNullOrEmpty(request.SortColumn))
+                {
+                    //排序请求
+                    switch (db.DbType)
+                    {
+                        case 0:
+                            //MsSQL
+                            break;
+                        case 1:
+                            //Oracle
+                            break;
+                    }
+                }
+                if (rpt.PageSumabled)
+                {
+                    //页合计请求
+                }
+                if (rpt.AllSumabled)
+                {
+                    //总合计请求
+                }
+            }
+            catch (System.Exception ex)
+            {
+            	
+            }
             result = "";
             msg = "";
             return -1;

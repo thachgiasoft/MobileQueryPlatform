@@ -19,8 +19,6 @@ namespace Model
             set;
         }
 
-
-
         /// <summary>
         /// 页码
         /// </summary>
@@ -34,6 +32,24 @@ namespace Model
         /// 参数列表
         /// </summary>
         public ICollection<ReportParam> Params
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 排序字段
+        /// </summary>
+        public string SortColumn
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 排序方向
+        /// </summary>
+        public bool Desc
         {
             get;
             set;

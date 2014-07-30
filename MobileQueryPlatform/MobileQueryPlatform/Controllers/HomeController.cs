@@ -47,5 +47,15 @@ namespace MobileQueryPlatform.Controllers
         {
             return Redirect("/Admin/DoChangePassword");
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult QueryReport(decimal userID,ReportRequest request)
+        {
+            
+        }
     }
 }

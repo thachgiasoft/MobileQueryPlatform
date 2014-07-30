@@ -137,11 +137,20 @@
             }
         });
     }
-    if (window.Report.QueryHeader == undefined) {
-        window.Report.QueryHeader = Backbone.View.extend({
+    if (window.Report.QueryHeaderView == undefined) {
+        window.Report.QueryHeaderView = Backbone.View.extend({
             template: _.template($("#tempQueryHeader").html()),
             render: function () {
                 this.$el.html(this.template({ data: report.get("Columns") }));
+            }
+        });
+    }
+
+    if (window.Report.QueryResultView == undefined) {
+        window.Report.QueryResultView = Backbone.View.extend({
+            template: _.template($("queryResult").html()),
+            render: function () {
+
             }
         });
     }
@@ -150,13 +159,13 @@
 <script type="text/javascript">
     var report;
     var queryConditionView;
-    var queryHeader;
+    var queryHeaderView;
     $(function () {
         report = new window.Report.Report();
         queryConditionView = new window.Report.QueryConditionView({
             el: "#queryCondition",
         });
-        queryHeader = new window.Report.QueryHeader({
+        queryHeaderView = new window.Report.QueryHeaderView({
             el: "#queryHeader"
         });
         report.fetch({
@@ -167,7 +176,7 @@
             success: function (model, rst) {
                 $("#queryTitle").html(rst.ReportName);
                 queryConditionView.render();
-                queryHeader.render();
+                queryHeaderView.render();
                 $(".form_datetime").datetimepicker({
                     format: "yyyy-MM-dd hh:ii",
                     autoclose: true,
