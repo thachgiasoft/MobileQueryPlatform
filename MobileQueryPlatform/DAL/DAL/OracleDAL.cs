@@ -80,6 +80,32 @@ namespace DAL
                 throw;
             }
         }
+
+        /// <summary>
+        /// 查询
+        /// create by xuehuibo 2014-03-21
+        /// </summary>
+        /// <param name="OracleString">Oracle语句</param>
+        /// <param name="paramCollection">参数集合</param>
+        /// <returns></returns>
+        public DataTable Select(string OracleString,int startRecord,int maxRecords, out int i, params IDbDataParameter[] paramArray)
+        {
+            try
+            {
+                OracleCommand cmd = new OracleCommand(OracleString, Connection);
+                cmd.Transaction = Tran;
+                cmd.Parameters.AddRange(paramArray);
+                OracleDataAdapter adapter = new OracleDataAdapter(cmd);
+                DataTable dataTable = new DataTable();
+                i = adapter.Fill(startRecord,maxRecords,dataTable);
+                return dataTable;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public DataSet Select(string sqlString, params IDbDataParameter[] paramArray)
         {
             try

@@ -94,6 +94,17 @@ namespace Model
             set;
         }
 
+        const string ORDERBY_REGEX = @"\sorder\s+by\s";
+        /// <summary>
+        /// 语句中是否含有OrderBy
+        /// </summary>
+        public bool CommandHasOrderby
+        {
+            get
+            {
+                return SqlCommand==null?false:Regex.IsMatch(SqlCommand, ORDERBY_REGEX);
+            }
+        }
         /// <summary>
         /// 是否启用页合计
         /// </summary>
@@ -278,6 +289,16 @@ namespace Model
                 }
             }
         }
+
+        /// <summary>
+        /// 参数值
+        /// </summary>
+        public string ParamValue
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// 列表参数集合
         /// </summary>

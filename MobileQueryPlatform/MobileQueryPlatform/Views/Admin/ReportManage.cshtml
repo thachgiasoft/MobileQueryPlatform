@@ -174,7 +174,7 @@
                                         <td style="vertical-align:middle"><%=report.Columns[i].ColumnCode%></td>
                                         <td><input data-action="columnNameChanged" data-index="<%=i%>" type="text" class="form-control" value="<%=report.Columns[i].ColumnName%>" placeholder="<%=report.Columns[i].ColumnCode%>" /></td>
                                         <td>
-                                            <input data-action="columnSortabledChecked" data-index="<%=i%>" type="checkbox"<%=report.Columns[i].Sortabled==true?'checked':''%> >
+                                            <input data-action="columnSortabledChecked" data-index="<%=i%>" <%=report.CommandHasOrderby?'disabled':''%> type="checkbox"<%=report.Columns[i].Sortabled==true?'checked':''%> >
                                         </td>
                                         <td>
                                             <input data-action="columnSumabledChecked" data-index="<%=i%>" type="checkbox" <%=report.Columns[i].Sumabled==true?'checked':''%> >

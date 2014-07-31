@@ -53,9 +53,11 @@ namespace MobileQueryPlatform.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult QueryReport(decimal userID,ReportRequest request)
+        public JsonResult QueryReport(ReportRequest request)
         {
-            
+            ResultModel<string> rst=new ResultModel<string>();
+            rst.ResultStatus=ReportBLL.QueryReport(request,out rst.ResultObj,out rst.ResultMessage);
+            return Json(rst);
         }
     }
 }

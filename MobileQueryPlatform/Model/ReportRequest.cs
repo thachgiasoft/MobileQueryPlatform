@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -31,7 +31,7 @@ namespace Model
         /// <summary>
         /// 参数列表
         /// </summary>
-        public ICollection<ReportParam> Params
+        public ReportParam[] Params
         {
             get;
             set;
@@ -49,6 +49,7 @@ namespace Model
         /// <summary>
         /// 排序方向
         /// </summary>
+        [DefaultValue(false)]
         public bool Desc
         {
             get;

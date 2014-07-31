@@ -2,7 +2,7 @@
 @Styles.Render("~/bundles/datetimepickerCss")
 @Styles.Render("~/bundles/less")
 
-<script type="text/template" id="tempQueryCondition">
+<script type="text/template" id="tempQueryParams">
     <% for(var i=0;i<=data.length-1;i++){%>
         <% if(data[i].ParamType==0 || data[i].ParamType==1) {%>
             <% if(data[i].ParamInputType==0) {%>
@@ -129,9 +129,9 @@
             urlRoot: "/api/Report"
         });
     }
-    if (window.Report.QueryConditionView == undefined) {
-        window.Report.QueryConditionView = Backbone.View.extend({
-            template: _.template($("#tempQueryCondition").html()),
+    if (window.Report.QueryParamsView == undefined) {
+        window.Report.QueryParamsView = Backbone.View.extend({
+            template: _.template($("#tempQueryParams").html()),
             render: function () {
                 this.$el.html(this.template({ data: report.get("Params") }));
             }
@@ -148,7 +148,7 @@
 
     if (window.Report.QueryResultView == undefined) {
         window.Report.QueryResultView = Backbone.View.extend({
-            template: _.template($("queryResult").html()),
+            template: _.template($("#queryResult").html()),
             render: function () {
 
             }
@@ -158,12 +158,12 @@
 
 <script type="text/javascript">
     var report;
-    var queryConditionView;
+    var queryParamsView;
     var queryHeaderView;
     $(function () {
         report = new window.Report.Report();
-        queryConditionView = new window.Report.QueryConditionView({
-            el: "#queryCondition",
+        queryParamsView = new window.Report.QueryParamsView({
+            el: "#queryParams",
         });
         queryHeaderView = new window.Report.QueryHeaderView({
             el: "#queryHeader"
@@ -175,8 +175,8 @@
             },
             success: function (model, rst) {
                 $("#queryTitle").html(rst.ReportName);
-                queryConditionView.render();
-                queryHeaderView.render();
+                queryParamsView.render();
+                //queryHeaderView.render();
                 $(".form_datetime").datetimepicker({
                     format: "yyyy-MM-dd hh:ii",
                     autoclose: true,
@@ -197,10 +197,10 @@
     <h2 class="text-info" id="queryTitle"></h2>
     <hr />
     <div class="row">
-        <form class="form-inline" role="form" id="queryCondition" />
+        <form class="form-inline" role="form" id="queryParams" />
     </div>
     <center>
-        <ul class="pagination" id="queryPager">
+        <ul class="pagination">
             <li><a href="#prePage"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
             <li><a href="#goHome"><span class="glyphicon glyphicon-home"></span></a></li>
             <li><a href="#nextPage"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
@@ -216,7 +216,7 @@
         </table>
     </div>
     <center>
-        <ul class="pagination" id="queryPager">
+        <ul class="pagination">
             <li><a href="#prePage"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
             <li><a href="#goHome"><span class="glyphicon glyphicon-home"></span></a></li>
             <li><a href="#nextPage"><span class="glyphicon glyphicon-chevron-right"></span></a></li>

@@ -629,60 +629,153 @@ namespace BLL
         /// <param name="id">报表ID</param>
         /// <param name="request">请求信息</param>
         /// <returns></returns>
-        public static int QueryReport(decimal userID,ReportRequest request,out string result,out string msg)
+        public static int QueryReport(ReportRequest request,out string result,out string msg)
         {
             try
             {
                 Report rpt=GetReport(request.ReportID);//获取报表
-                Database db = DatabaseBLL.GetDatabase(rpt.DBID);
+                string connectionString;
+                short dbType;
+                int i = -1;
+                i=DatabaseBLL.GetConnectionString(rpt.DBID, out connectionString, out dbType, out msg);
+                if (i != 1)
+                {
+                    //获取数据库连接参数失败
+                    result = null;
+                    return i;
+                }
+
                 //开始组装sql
                 StringBuilder sql = new StringBuilder(256);
-                if (rpt.Pagingabled)
-                {
-                    StringBuilder sql_rowNumber=new StringBuilder(128);
-                    sql_rowNumber.AppendFormat(" ROW_NUMBER() over(order by {0} {1} ) as RowNO, ",
-                        string.IsNullOrEmpty(request)
-                        );
-                    //分页请求
-                    sql.AppendFormat("SELECT * FROM ({0}) t where RowNO between {1} and {2}",
-                        rpt.SqlCommand.Insert(6, ""),
-                        rpt.PageSize*(request.Page-1),
-                        rpt.PageSize
-                        );
-                }
-                else
-                {
-                    sql.Append(rpt.SqlCommand);
-                }
-                if (!string.IsNullOrEmpty(request.SortColumn))
+                if (!rpt.CommandHasOrderby && !string.IsNullOrEmpty(request.SortColumn))
                 {
                     //排序请求
-                    switch (db.DbType)
+                    sql.AppendFormat("{0} Order By {1} {2}",
+                        rpt.SqlCommand,
+                        request.SortColumn,
+                        request.Desc?"Desc":string.Empty
+                        );
+                }
+
+                if (rpt.AllSumabled)
+                {
+                    sql.Append(" Union All Select ");
+                    //总合计请求
+                    foreach (ReportColumn c in rpt.Columns)
                     {
-                        case 0:
-                            //MsSQL
-                            break;
-                        case 1:
-                            //Oracle
-                            break;
+                        if (c == rpt.Columns.Last())
+                        {
+                            if (c.Sumabled)
+                            {
+                                sql.AppendFormat(" Sum({0}) As {0} ",
+                                    c.ColumnCode
+                                    );
+                            }
+                            else
+                            {
+                                sql.AppendFormat(" null As {0}",
+                                    c.ColumnCode
+                                    );
+                            }
+                        }
+                        else
+                        {
+                            if (c.Sumabled)
+                            {
+                                sql.AppendFormat(" Sum({0}) As {0}, ",
+                                    c.ColumnCode
+                                    );
+                            }
+                            else
+                            {
+                                sql.AppendFormat(" null As {0} ,",
+                                    c.ColumnCode
+                                    );
+                            }
+                        }
                     }
                 }
+                DataTable rstTable;
+                using (IDAL dal = DALBuilder.CreateDAL(connectionString, dbType))
+                {
+                    //组成parameter
+                    IDbDataParameter[] pList = new IDbDataParameter[rpt.Params.Count];
+                    for (int index = 0; index < request.Params.Length;index++ )
+                    {
+                        IDbDataParameter dbp=null;
+                        switch (request.Params[index].ParamType)
+                        {
+                            case 0:
+                                dbp = dal.CreateParameter(request.Params[index].ParamCode, string.IsNullOrEmpty(request.Params[index].ParamValue) ? string.Empty : request.Params[index].ParamValue);
+                                break;
+                            case 1:
+                                decimal v;
+                                if (decimal.TryParse(request.Params[index].ParamValue, out v))
+                                {
+                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, v);
+                                }
+                                else
+                                {
+                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, 0);
+                                }
+                                break;
+                            case 2:
+                                DateTime d;
+                                if (DateTime.TryParse(request.Params[index].ParamValue, out d))
+                                {
+                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, d);
+                                }
+                                else
+                                {
+                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, DateTime.MinValue);
+                                }
+                                break;
+                        }
+                        if (dbp == null)
+                        {
+                            msg = "参数错误";
+                            result = null;
+                            return -1;
+                        }
+                        pList[index] = dbp;
+
+                    }
+                    if (rpt.Pagingabled)
+                    {
+                        //分页请求
+                        rstTable = dal.Select(sql.ToString(), rpt.PageSize * (request.Page - 1), rpt.PageSize, out i,pList);
+                    }
+                    else
+                    {
+                        rstTable = dal.Select(sql.ToString(),out i, pList);
+                    }
+
+                }
+
                 if (rpt.PageSumabled)
                 {
                     //页合计请求
+                    DataRow row = rstTable.NewRow();
+                    foreach (ReportColumn c in rpt.Columns)
+                    {
+                        if(!c.Sumabled){
+                            continue;
+                        }
+                        row[c.ColumnCode] = rstTable.Compute("sum(" + c.ColumnCode + ")", "");
+                    }
+                    rstTable.Rows.InsertAt(row, rstTable.Rows.Count - 2);
                 }
-                if (rpt.AllSumabled)
-                {
-                    //总合计请求
-                }
+
+                result = JsonHelper.DatatableToJson(rstTable);
+                return i-1;
             }
             catch (System.Exception ex)
             {
-            	
+                result = null;
+                msg = ex.Message;
+                return -1;
             }
-            result = "";
-            msg = "";
-            return -1;
+            
         }
 
         const string REGEX_PARAMS = @"(?<=@)\D\w+";
@@ -785,7 +878,6 @@ namespace BLL
                         rp.ParamName = dbrp.ParamName;
                         rp.ParamType = dbrp.ParamType;
                     }
-
                     //比较columns
                     foreach (ReportColumn rc in report.Columns)
                     {
@@ -796,7 +888,7 @@ namespace BLL
                         }
                         ReportColumn dbclm = dbclms.First();
                         rc.ColumnName = dbclm.ColumnName;
-                        rc.Sortabled = dbclm.Sortabled;
+                        rc.Sortabled =report.CommandHasOrderby?false:dbclm.Sortabled;//如果含有OrderBy 则不允许排序
                         rc.Sumabled = dbclm.Sumabled;
                     }
                 }

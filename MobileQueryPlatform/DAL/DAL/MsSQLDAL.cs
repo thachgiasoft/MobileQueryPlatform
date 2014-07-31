@@ -79,6 +79,24 @@ namespace DAL
             }
         }
 
+        public DataTable Select(string sqlString,int startRecord,int maxRecords, out int i, params IDbDataParameter[] paramArray)
+        {
+            try
+            {
+                SqlCommand cmd = new SqlCommand(sqlString, Connection);
+                cmd.Transaction = Tran;
+                cmd.Parameters.AddRange(paramArray);
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataTable dataTable = new DataTable();
+                i = adapter.Fill(startRecord,maxRecords, dataTable);
+                return dataTable;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public DataSet Select(string sqlString, params IDbDataParameter[] paramArray)
         {
             try
