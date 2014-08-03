@@ -67,7 +67,10 @@ namespace DAL
             {
                 SqlCommand cmd = new SqlCommand(sqlString, Connection);
                 cmd.Transaction = Tran;
-                cmd.Parameters.AddRange(paramArray);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 SqlDataAdapter adapter = new SqlDataAdapter(cmd);
                 DataTable dataTable = new DataTable();
                 i=adapter.Fill(dataTable);
@@ -85,7 +88,10 @@ namespace DAL
             {
                 SqlCommand cmd = new SqlCommand(sqlString, Connection);
                 cmd.Transaction = Tran;
-                cmd.Parameters.AddRange(paramArray);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 SqlDataAdapter adapter = new SqlDataAdapter(cmd);
                 DataTable dataTable = new DataTable();
                 i = adapter.Fill(startRecord,maxRecords, dataTable);
@@ -103,7 +109,10 @@ namespace DAL
             {
                 SqlCommand cmd = new SqlCommand(sqlString, Connection);
                 cmd.Transaction = Tran;
-                cmd.Parameters.AddRange(paramArray);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 SqlDataAdapter adapter = new SqlDataAdapter(cmd);
                 DataSet ds = new DataSet();
                 adapter.Fill(ds);
@@ -126,7 +135,10 @@ namespace DAL
                 }
                 SqlCommand cmd = new SqlCommand(sqlString, Connection);
                 cmd.Transaction = Tran;
-                cmd.Parameters.AddRange(paramArray);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 DataReader=cmd.ExecuteReader();
                 return true;
             }
@@ -153,7 +165,10 @@ namespace DAL
                 DataSet ds = new DataSet();
                 SqlTransaction tran = Tran;
                 SqlCommand cmd = new SqlCommand(procedureName, Connection);
-                cmd.Parameters.AddRange(paramArray);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 cmd.Transaction = tran;
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter sda = new SqlDataAdapter(cmd);
@@ -188,13 +203,16 @@ namespace DAL
         #endregion
 
         #region Execute
-        public void Execute(string sqlString, out int i, params IDbDataParameter[] Params)
+        public void Execute(string sqlString, out int i, params IDbDataParameter[] paramArray)
         {
             try
             {
                 SqlCommand cmd = new SqlCommand(sqlString, Connection);
                 cmd.Transaction = Tran;
-                cmd.Parameters.AddRange(Params);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 i = cmd.ExecuteNonQuery();
             }
             catch

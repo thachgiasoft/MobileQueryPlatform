@@ -340,16 +340,20 @@ namespace Model
             set
             {
                 ParamItems = new List<ReportParamItem>();
-                MatchCollection ms = Regex.Matches(value, REPORT_PARAM_ITEM_REGEX);
-                foreach (Match m in ms)
+                if (!string.IsNullOrEmpty(value))
                 {
-                    string[] p = m.Value.Split('=');
-                    ParamItems.Add(new ReportParamItem() { 
-                        ReportID=ReportID,
-                        ParamCode=ParamCode,
-                        OptionName=p[0],
-                        OptionValue=p[1]
-                    });
+                    MatchCollection ms = Regex.Matches(value, REPORT_PARAM_ITEM_REGEX);
+                    foreach (Match m in ms)
+                    {
+                        string[] p = m.Value.Split('=');
+                        ParamItems.Add(new ReportParamItem()
+                        {
+                            ReportID = ReportID,
+                            ParamCode = ParamCode,
+                            OptionName = p[0],
+                            OptionValue = p[1]
+                        });
+                    }
                 }
             }
         }

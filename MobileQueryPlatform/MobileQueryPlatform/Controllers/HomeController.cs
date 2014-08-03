@@ -47,17 +47,5 @@ namespace MobileQueryPlatform.Controllers
         {
             return Redirect("/Admin/DoChangePassword");
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        public JsonResult QueryReport(ReportRequest request)
-        {
-            ResultModel<string> rst=new ResultModel<string>();
-            rst.ResultStatus=ReportBLL.QueryReport(request,out rst.ResultObj,out rst.ResultMessage);
-            return Json(rst);
-        }
     }
 }

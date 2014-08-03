@@ -623,6 +623,7 @@ namespace BLL
             }
         }
 
+        const string PARAMS_REGEX = @"\w*\s*=\s*[@:]\w*";
         /// <summary>
         /// 执行报表
         /// </summary>
@@ -647,6 +648,7 @@ namespace BLL
 
                 //开始组装sql
                 StringBuilder sql = new StringBuilder(256);
+                sql.Append(rpt.SqlCommand);
                 if (!rpt.CommandHasOrderby && !string.IsNullOrEmpty(request.SortColumn))
                 {
                     //排序请求
@@ -656,7 +658,6 @@ namespace BLL
                         request.Desc?"Desc":string.Empty
                         );
                 }
-
                 if (rpt.AllSumabled)
                 {
                     sql.Append(" Union All Select ");
@@ -695,39 +696,48 @@ namespace BLL
                         }
                     }
                 }
+                string finalSql=sql.ToString();
                 DataTable rstTable;
                 using (IDAL dal = DALBuilder.CreateDAL(connectionString, dbType))
                 {
                     //组成parameter
-                    IDbDataParameter[] pList = new IDbDataParameter[rpt.Params.Count];
+                    List<IDbDataParameter> pList = new List<IDbDataParameter>();
                     for (int index = 0; index < request.Params.Length;index++ )
                     {
+                        if (request.Params[index].ParamValue == null)
+                        {
+                            finalSql=Regex.Replace(finalSql,PARAMS_REGEX.Replace(@"\w*",request.Params[index].ParamCode)," 1=1 ");
+                            continue;
+                        }
                         IDbDataParameter dbp=null;
                         switch (request.Params[index].ParamType)
                         {
                             case 0:
-                                dbp = dal.CreateParameter(request.Params[index].ParamCode, string.IsNullOrEmpty(request.Params[index].ParamValue) ? string.Empty : request.Params[index].ParamValue);
+                                dbp = dal.CreateParameter(request.Params[index].ParamCode,DbType.String);
+                                dbp.Value=string.IsNullOrEmpty(request.Params[index].ParamValue) ? string.Empty : request.Params[index].ParamValue;
                                 break;
                             case 1:
                                 decimal v;
+                                dbp = dal.CreateParameter(request.Params[index].ParamCode, DbType.Decimal);
                                 if (decimal.TryParse(request.Params[index].ParamValue, out v))
                                 {
-                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, v);
+                                    dbp.Value=v;
                                 }
                                 else
                                 {
-                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, 0);
+                                    dbp.Value = null;
                                 }
                                 break;
                             case 2:
                                 DateTime d;
+                                dbp=dal.CreateParameter(request.Params[index].ParamCode, DbType.DateTime);
                                 if (DateTime.TryParse(request.Params[index].ParamValue, out d))
                                 {
-                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, d);
+                                    dbp.Value = d;
                                 }
                                 else
                                 {
-                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, DateTime.MinValue);
+                                    dbp.Value = null;
                                 }
                                 break;
                         }
@@ -737,17 +747,17 @@ namespace BLL
                             result = null;
                             return -1;
                         }
-                        pList[index] = dbp;
+                        pList.Add(dbp);
 
                     }
                     if (rpt.Pagingabled)
                     {
                         //分页请求
-                        rstTable = dal.Select(sql.ToString(), rpt.PageSize * (request.Page - 1), rpt.PageSize, out i,pList);
+                        rstTable = dal.Select(finalSql, rpt.PageSize * (request.Page - 1), rpt.PageSize, out i,pList.ToArray());
                     }
                     else
                     {
-                        rstTable = dal.Select(sql.ToString(),out i, pList);
+                        rstTable = dal.Select(finalSql, out i, pList.ToArray());
                     }
 
                 }
@@ -763,7 +773,14 @@ namespace BLL
                         }
                         row[c.ColumnCode] = rstTable.Compute("sum(" + c.ColumnCode + ")", "");
                     }
-                    rstTable.Rows.InsertAt(row, rstTable.Rows.Count - 2);
+                    if (rpt.AllSumabled)
+                    {
+                        rstTable.Rows.InsertAt(row, rstTable.Rows.Count - 1);
+                    }
+                    else
+                    {
+                        rstTable.Rows.InsertAt(row, rstTable.Rows.Count);
+                    }
                 }
 
                 result = JsonHelper.DatatableToJson(rstTable);

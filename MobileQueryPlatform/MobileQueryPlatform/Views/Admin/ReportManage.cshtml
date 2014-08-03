@@ -137,8 +137,7 @@
                                         </td>
                                         <td>
                                             <div class="btn-group">
-                                                <input type="hidden" id="paramInputType_<%=i%>" value="<%report.Params[i].ParamInputType%>">
-                                                <button id="btn_InputType_<%=i%>" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                                                <button id="btn_InputType_<%=i%>" type="button" class="btn btn-info dropdown-toggle  <%=report.Params[i].ParamType==2?'disabled':''%> " data-toggle="dropdown">
                                                     <span id="paramInputTypeText_<%=i%>"><%=report.Params[i].ParamInputTypeName%></span> <span class="caret"></span>
                                                 </button>
                                                 <ul id="paramInputTypeList_<%=i%>" class="dropdown-menu" role="menu">
@@ -423,7 +422,13 @@
                                 break;
                         }
                         if (value == "2") {
-                            $("#btn_InputType_"+index).addClass("disabled");
+                            $("#paramInputTypeText_" + index).html("手动输入");
+                            $("#paramInputTypeList_" + index + " li").removeClass("active")
+                            $("#paramInputTypeList_" + index + " li:eq(0)").addClass("active")
+                            $("#btn_InputType_" + index).addClass("disabled");
+                            var params = this.curReport.get("Params");
+                            params[index].ParamInputType = 0;
+                            params[index].ParamInputTypeName = "手动输入";
                         }
                         else {
                             $("#btn_InputType_" + index).removeClass("disabled");

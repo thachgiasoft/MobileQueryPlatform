@@ -69,7 +69,10 @@ namespace DAL
             {
                 OracleCommand cmd = new OracleCommand(OracleString, Connection);
                 cmd.Transaction = Tran;
-                cmd.Parameters.AddRange(paramArray);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 OracleDataAdapter adapter = new OracleDataAdapter(cmd);
                 DataTable dataTable = new DataTable();
                 i=adapter.Fill(dataTable);
@@ -94,7 +97,10 @@ namespace DAL
             {
                 OracleCommand cmd = new OracleCommand(OracleString, Connection);
                 cmd.Transaction = Tran;
-                cmd.Parameters.AddRange(paramArray);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 OracleDataAdapter adapter = new OracleDataAdapter(cmd);
                 DataTable dataTable = new DataTable();
                 i = adapter.Fill(startRecord,maxRecords,dataTable);
@@ -112,7 +118,10 @@ namespace DAL
             {
                 OracleCommand cmd = new OracleCommand(sqlString, Connection);
                 cmd.Transaction = Tran;
-                cmd.Parameters.AddRange(paramArray);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 OracleDataAdapter adapter = new OracleDataAdapter(cmd);
                 DataSet ds = new DataSet();
                 adapter.Fill(ds);
@@ -135,7 +144,10 @@ namespace DAL
                 }
                 OracleCommand cmd = new OracleCommand(OracleString, Connection);
                 cmd.Transaction = Tran;
-                cmd.Parameters.AddRange(paramArray);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 DataReader= cmd.ExecuteReader();
                 return true;
             }
@@ -161,7 +173,10 @@ namespace DAL
             {
                 DataSet ds = new DataSet();
                 OracleCommand cmd = new OracleCommand(procedureName, Connection);
-                cmd.Parameters.AddRange(paramArray);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 cmd.Transaction = Tran;
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.ExecuteNonQuery();
@@ -228,13 +243,16 @@ namespace DAL
         #endregion
 
         #region Execute
-        public void Execute(string OracleString, out int i, params IDbDataParameter[] Params)
+        public void Execute(string OracleString, out int i, params IDbDataParameter[] paramArray)
         {
             try
             {
                 OracleCommand cmd = new OracleCommand(OracleString, Connection);
                 cmd.Transaction = Tran;
-                cmd.Parameters.AddRange(Params);
+                if (paramArray != null && paramArray.Length > 0)
+                {
+                    cmd.Parameters.AddRange(paramArray);
+                }
                 i = cmd.ExecuteNonQuery();
             }
             catch
