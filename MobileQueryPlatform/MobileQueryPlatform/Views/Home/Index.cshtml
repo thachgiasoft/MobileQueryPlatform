@@ -7,7 +7,8 @@
                 routes: {
                     "":"Index",
                     "Goto/:id": "Goto",
-                    "Report/:id": "Report"
+                    "Report/:id": "Report",
+                    "ToggleParamsContainer": "ToggleParamsContainer"
                 },
                 Index:function(){
                     $("#mainPanel").load("/Home/ReportMenu");
@@ -17,6 +18,12 @@
                 },
                 Report: function (id) {
                     $("#mainPanel").load("/Home/ReportView/" + id);
+                },
+                ToggleParamsContainer: function () {
+                    window.location.hash="#do";
+                    paramContainerView.toggleShow();
+                    $("#toggleParamsIcon").toggleClass("glyphicon-eye-open");
+                    $("#toggleParamsIcon").toggleClass("glyphicon-eye-close");
                 }
             });
         }

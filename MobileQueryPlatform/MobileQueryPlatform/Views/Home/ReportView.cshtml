@@ -2,49 +2,36 @@
 @Styles.Render("~/bundles/datetimepickerCss")
 @Styles.Render("~/bundles/less")
 
-<script type="text/template" id="tempQueryParams">
-    <% for(var i=0;i<=data.length-1;i++){%>
-        <% if(data[i].ParamType==0 || data[i].ParamType==1) {%>
-            <% if(data[i].ParamInputType==0) {%>
-                <div class="form-group">
-                    <label class="sr-only" for="<%=data[i].ParamCode%>"><%=data[i].ParamName==''?data[i].ParamCode:data[i].ParamName%></label>
-                    <input id="<%=data[i].ParamCode%>" data-index="<%=i%>" data-paramtype="<%=data[i].ParamType%>" class="form-control" name="<%=data[i].ParamCode%>" type="text" placeholder="输入<%=data[i].ParamName==''? data[i].ParamCode:data[i].ParamName%>" />
-                </div>
-            <%} else if(data[i].ParamInputType==1) {%>
-                <div class="form-group">
-                    <label class="sr-only"><%=data[i].ParamCode%></label>
-                    <div class="input-group">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="btn_<%=data[i].ParamCode%>">
-                                <%=data[i].ParamName==""?data[i].ParamCode:data[i].ParamName%> <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" role="menu">
-                                <% for(var j=0;j<=data[i].ParamItems.length-1;j++) {%>
-                                <li class="list_input" data-index="<%=i%>" data-display="<%=(data[i].ParamName==''?data[i].ParamCode:data[i].ParamName)+'--'+ (data[i].ParamItems[j].OptionName)%>" data-paramitemvalue="<%=data[i].ParamItems[j].OptionValue%>" data-paramcode="<%=data[i].ParamItems[j].ParamCode%>"><a href="#do"><%=data[i].ParamItems[j].OptionName%></a></li>
-                                <%}%>
-                            </ul>
-                        </div>
-                        <span class="input-group-btn">
-                            <a class="btn btn-default clearBtn"  data-paramcode="<%=data[i].ParamCode%>" data-index="<%=i%>">
-                                <span class="glyphicon glyphicon-remove"></span>
-                            </a>
-                        </span>
-                    </div>
-                    
-                </div>
+<script id="tempParamInputView" type="text/template">
+    <label class="sr-only"><%=ParamName==''?ParamCode:ParamName%></label>
+    <input class="form-control" type="text" placeholder="输入<%=ParamName==''? ParamCode:ParamName%>" />
+</script>
+
+<script id="tempParamListView" type="text/template">
+    <label class="sr-only"><%=ParamName=""?ParamCode:ParamName%></label>
+    <div class="input-group">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <span class="showTxtBtn"><%=ParamName==""?ParamCode:ParamName%></span> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li class="clearBtn"><a href="#do">无条件</a></li>
+                <% for(var j=0;j<=ParamItems.length-1;j++) {%>
+                <li  class="selectBtn" data-index="<%=j%>"><a href="#do"><%=ParamItems[j].OptionName%></a></li>
                 <%}%>
-        <%} else if(data[i].ParamType==2) {%>
-            <div class="form-group">
-                <label for="<%=data[i].ParamCode%>" class="sr-only "><%=data[i].ParamName%></label>
-                <input type="hidden" id="<%=data[i].ParamCode%>" value="" />
-                <div class="input-group date form_datetime" data-link-field="<%=data[i].ParamCode%>">
-                    <input class="form-control" size="18" data-index="<%=i%>" placeholder="输入<%=data[i].ParamName==''?data[i].ParamCode:data[i].ParamName%>" type="text" value="" readonly>
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                </div>
-            </div>
-        <%}%>
-    <%}%>
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script id="tempParamDatetimeView" type="text/template">
+    <label for="<%=ParamCode%>" class="sr-only "><%=ParamName==''?ParamCode:ParamName%></label>
+    <input type="hidden" id="<%=ParamCode%>" class="datetimeValue" value="" />
+    <div class="input-group date form_datetime" data-link-field="<%=ParamCode%>">
+        <input class="form-control datetimeLabel" size="18" placeholder="输入<%=ParamName==''?ParamCode:ParamName%>" type="text" value="" readonly>
+        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+    </div>
 </script>
 
 <script type="text/template" id="tempReportHeader">
@@ -128,6 +115,7 @@
 </script>
 
 <script type="text/javascript">
+    
     if (window.Report.Report == undefined) {
         window.Report.Report = Backbone.Model.extend({
             defaults: {
@@ -146,6 +134,7 @@
             urlRoot: "/api/Report"
         });
     }
+
     if (window.Report.Request == undefined) {
         window.Report.Request = Backbone.Model.extend({
             defaults: {
@@ -157,6 +146,7 @@
             }
         });
     }
+    
     if (window.Report.ToolbarView == undefined) {
         window.Report.ToolbarView = Backbone.View.extend({
             events: {
@@ -180,10 +170,10 @@
             }
         });
     }
-    if (window.Report.QueryParamsView == undefined) {
-        window.Report.QueryParamsView = Backbone.View.extend({
-            template: _.template($("#tempQueryParams").html()),
-            initialize:function(){
+
+    if (window.Report.ParamContainerView == undefined) {
+        window.Report.ParamContainerView = Backbone.View.extend({
+            initialize: function () {
                 report.fetch({
                     data: {
                         id: "@ViewBag.ReportID",
@@ -192,7 +182,7 @@
                     success: function (model, rst) {
                         $("#queryTitle").html(rst.ReportName);
                         request.set("Params", rst.Params);
-                        queryParamsView.render();
+                        paramContainerView.render();
                         $(".form_datetime").datetimepicker({
                             format: "yyyy-MM-dd hh:ii",
                             autoclose: true,
@@ -207,35 +197,109 @@
                 });
             },
             render: function () {
-                this.$el.html(this.template({ data: report.get("Params") }));
+                var params = request.get("Params");
+                for (var i = 0; i < params.length; i++) {
+                    switch (params[i].ParamType) {
+                        case 0:
+                        case 1:
+                            switch (params[i].ParamInputType) {
+                                case 0:
+                                    this.$el.append(new window.Report.ParamInputView(params[i]).render());
+                                    break;
+                                case 1:
+                                    this.$el.append(new window.Report.ParamListView(params[i]).render());
+                                    break;
+                            }
+                            break;
+                        case 2:
+                            this.$el.append(new window.Report.ParamDatetimeView(params[i]).render());
+                            break;
+                    }
+                    this.$el.append("&nbsp;&nbsp;&nbsp;")
+                }
             },
-            events: {
-                "change input": "valueChanged",
-                "click .list_input": "chooseListItem",
-                "click .clearBtn": "clearListChoose"
-            },
-            valueChanged: function (e) {
-                var input = $(e.currentTarget);
-                var index = input.attr("data-index");
-                request.get("Params")[index].ParamValue=input.val();
-            },
-            chooseListItem: function (e) {
-                var index = $(e.currentTarget).attr("data-index");
-                var value = $(e.currentTarget).attr("data-paramitemvalue");
-                request.get("Params")[index].ParamValue = value;
-                this.$el.find(".list_input").removeClass("active");
-                $(e.currentTarget).addClass("active");
-                $("#btn_" + $(e.currentTarget).attr("data-paramcode")).html($(e.currentTarget).attr("data-display"));
-            },
-            clearListChoose: function (e) {
-                var index = $(e.currentTarget).attr("data-index");
-                request.get("Params")[index].ParamValue = null;
-                this.$el.find(".list_input").removeClass("active");
-                $("#btn_" + $(e.currentTarget).attr("data-paramcode")).html(request.get("Params")[index].ParamName == "" ? request.get("Params")[index].ParamCode : request.get("Params")[index].ParamName);
+            toggleShow: function () {
+                this.$el.toggleClass("hide");
             }
-
         });
     }
+
+    if (window.Report.ParamInputView == undefined) {
+        window.Report.ParamInputView = Backbone.View.extend({
+            tagName:"div",
+            className:"form-group",
+            template: _.template($("#tempParamInputView").html()),
+            initialize:function(param){
+                this.model=param;
+            },
+            render: function () {
+                this.$el.html(this.template(this.model));
+                return this.el;
+            },
+            event: {
+                "change input":"valueChanged"
+            },
+            valueChanged: function () {
+                this.model.ParamValue = this.$el.find("input").val();
+            }
+        });
+    }
+    
+    if (window.Report.ParamListView == undefined) {
+        window.Report.ParamListView = Backbone.View.extend({
+            tagName: "div",
+            className: "form-group",
+            template: _.template($("#tempParamListView").html()),
+            initialize:function(param){
+                this.model = param;
+            },
+            render: function () {
+                this.$el.html(this.template(this.model));
+                return this.el;
+            },
+            showText: function (txt) {
+                this.$el.find(".showTxtBtn").html(txt);
+            },
+            events: {
+                "click .selectBtn": "selectValue",
+                "click .clearBtn":"clearParam"
+            },
+            selectValue: function (e) {
+                var index = $(e.currentTarget).attr("data-index");
+                this.model.ParamValue = this.model.ParamItems[index].OptionValue;
+                this.$el.find("li").removeClass("active");
+                $(e.currentTarget).addClass("active");
+                this.showText((this.model.ParamName == "" ? this.model.ParamCode : this.model.ParamName) + "--" + (this.model.ParamItems[index].OptionName));
+            },
+            clearParam: function () {
+                this.model.ParamValue = null;
+                this.$el.find("li").removeClass("active");
+                this.showText(this.model.ParamName == "" ? this.model.ParamCode : this.model.ParamName);
+            }
+        });
+    }
+    
+    if (window.Report.ParamDatetimeView == undefined) {
+        window.Report.ParamDatetimeView = Backbone.View.extend({
+            tagName: "div",
+            className: "form-group",
+            template: _.template($("#tempParamDatetimeView").html()),
+            initialize:function(param){
+                this.model = param;
+            },
+            render: function () {
+                this.$el.html(this.template(this.model));
+                return this.el;
+            },
+            events: {
+                "change .datetimeLabel": "selectDatetime"
+            },
+            selectDatetime: function () {
+                this.model.ParamValue = this.$el.find(".datetimeValue").val();
+            }
+        });
+    }
+    
     if (window.Report.ReportView == undefined) {
         window.Report.ReportView = Backbone.View.extend({
             template_header: _.template($("#tempReportHeader").html()),
@@ -254,7 +318,7 @@
 
 <script type="text/javascript">
     var report;
-    var queryParamsView;
+    var paramContainerView;
     var reportView;
     var reportResult;
     var toolbar;
@@ -262,8 +326,8 @@
     $(function () {
         report = new window.Report.Report();
         request = new window.Report.Request();
-        queryParamsView = new window.Report.QueryParamsView({
-            el: "#queryParams",
+        paramContainerView = new window.Report.ParamContainerView({
+            el: "#paramContainerView",
         });
         reportView = new window.Report.ReportView({
             el: "#queryHeader"
@@ -276,10 +340,10 @@
 </script>
 
 <div class="container">
-    <h2 class="text-info" id="queryTitle"></h2>
+    <h2 class="text-info" id="queryTitle"></h2><a  class="btn btn-default btn-xs pull-right" href="#ToggleParamsContainer"><span id="toggleParamsIcon" class="glyphicon glyphicon-eye-open">&nbsp;</span></a>
     <hr />
     <div class="row">
-        <form class="form-inline" role="form" id="queryParams" />
+        <form class="form-inline" role="form" id="paramContainerView" />
     </div>
     <div class="row" style="overflow-x:auto" id="reportView">
         <table class="table table-striped table-hover table-bordered">
