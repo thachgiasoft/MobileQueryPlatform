@@ -624,6 +624,7 @@ namespace BLL
         }
 
         const string PARAMS_REGEX = @"\w*\s*=\s*[@:]\w*";
+        const string ALLSUM_FROM_REGEX = @"(?<=from)[^$]*";
         /// <summary>
         /// 执行报表
         /// </summary>
@@ -657,44 +658,6 @@ namespace BLL
                         request.SortColumn,
                         request.Desc?"Desc":string.Empty
                         );
-                }
-                if (rpt.AllSumabled)
-                {
-                    sql.Append(" Union All Select ");
-                    //总合计请求
-                    foreach (ReportColumn c in rpt.Columns)
-                    {
-                        if (c == rpt.Columns.Last())
-                        {
-                            if (c.Sumabled)
-                            {
-                                sql.AppendFormat(" Sum({0}) As {0} ",
-                                    c.ColumnCode
-                                    );
-                            }
-                            else
-                            {
-                                sql.AppendFormat(" null As {0}",
-                                    c.ColumnCode
-                                    );
-                            }
-                        }
-                        else
-                        {
-                            if (c.Sumabled)
-                            {
-                                sql.AppendFormat(" Sum({0}) As {0}, ",
-                                    c.ColumnCode
-                                    );
-                            }
-                            else
-                            {
-                                sql.AppendFormat(" null As {0} ,",
-                                    c.ColumnCode
-                                    );
-                            }
-                        }
-                    }
                 }
                 string finalSql=sql.ToString();
                 DataTable rstTable;
@@ -760,31 +723,86 @@ namespace BLL
                         rstTable = dal.Select(finalSql, out i, pList.ToArray());
                     }
 
+                    if (rpt.Columns.Where(c => c.Sumabled).Count() > 0)
+                    {
+                        if (rpt.PageSumabled)
+                        {
+                            //页合计请求
+                            DataRow row = rstTable.NewRow();
+                            foreach (ReportColumn c in rpt.Columns)
+                            {
+                                if (!c.Sumabled)
+                                {
+                                    continue;
+                                }
+                                row[c.ColumnCode] = rstTable.Compute("sum(" + c.ColumnCode + ")", "");
+                            }
+                            rstTable.Rows.InsertAt(row, rstTable.Rows.Count);
+                        }
+
+                        if (rpt.AllSumabled)
+                        {
+                            sql.Clear();
+                            sql.Append("Select ");
+                            //总合计请求
+                            foreach (ReportColumn c in rpt.Columns)
+                            {
+                                if (c == rpt.Columns.Last())
+                                {
+                                    if (c.Sumabled)
+                                    {
+                                        sql.AppendFormat(" Sum({0}) AS{0} ",
+                                            c.ColumnCode
+                                            );
+                                    }
+                                    else
+                                    {
+                                        sql.AppendFormat(" null AS {0}",
+                                            c.ColumnCode
+                                            );
+                                    }
+                                }
+                                else
+                                {
+                                    if (c.Sumabled)
+                                    {
+                                        sql.AppendFormat(" Sum({0}) AS {0}, ",
+                                            c.ColumnCode
+                                            );
+                                    }
+                                    else
+                                    {
+                                        sql.AppendFormat(" null AS {0},",
+                                            c.ColumnCode
+                                            );
+                                    }
+                                }
+                            }
+                            sql.AppendFormat(" From {0}", Regex.Match(finalSql, ALLSUM_FROM_REGEX, RegexOptions.IgnoreCase).Value);
+
+                            dal.OpenReader(sql.ToString(), pList.ToArray());
+                            if (dal.DataReader.Read())
+                            {
+                                DataRow newrow = rstTable.NewRow();
+                                foreach (ReportColumn c in rpt.Columns)
+                                {
+                                    if (!c.Sumabled)
+                                    {
+                                        continue;
+                                    }
+                                    newrow[c.ColumnCode] = dal.DataReader[c.ColumnCode];
+                                }
+                                rstTable.Rows.Add(newrow);
+                            }
+                        }
+                    }
+
                 }
 
-                if (rpt.PageSumabled)
-                {
-                    //页合计请求
-                    DataRow row = rstTable.NewRow();
-                    foreach (ReportColumn c in rpt.Columns)
-                    {
-                        if(!c.Sumabled){
-                            continue;
-                        }
-                        row[c.ColumnCode] = rstTable.Compute("sum(" + c.ColumnCode + ")", "");
-                    }
-                    if (rpt.AllSumabled)
-                    {
-                        rstTable.Rows.InsertAt(row, rstTable.Rows.Count - 1);
-                    }
-                    else
-                    {
-                        rstTable.Rows.InsertAt(row, rstTable.Rows.Count);
-                    }
-                }
+               
 
                 result = JsonHelper.DatatableToJson(rstTable);
-                return i-1;
+                return 1;
             }
             catch (System.Exception ex)
             {

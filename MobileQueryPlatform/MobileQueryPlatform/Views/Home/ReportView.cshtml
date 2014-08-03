@@ -35,6 +35,9 @@
 </script>
 
 <script type="text/template" id="tempReportHeader">
+    <th>
+        N.O
+    </th>
     <% for(var i=0 ;i<=data.length-1;i++) {%>
     <%if(data[i].Sortabled){%>
     <th data-index="<%=i%>" style="cursor:pointer">
@@ -65,43 +68,18 @@
     <%}%>
 </script>
 
-<script type="text/template" id="tempReportBody">
-    <tr>
-        <td>1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-    </tr>
-</script>
-
 <script type="text/template" id="tempReportFooter">
-    <tr>
+    <%if(mode==0){%>
         <td>页合计</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-    </tr>
-    <tr>
+        <%for(var i=0;i<=columns.length-1;i++){%>
+        <td><%=data[columns[i].ColumnCode]%></td>
+        <%}%>
+    <%} else if(mode==1){%>
         <td>总合计</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-        <td>colmn1</td>
-    </tr>
+        <%for(var i=0;i<=columns.length-1;i++){%>
+            <td><%=data[columns[i].ColumnCode]%></td>
+        <%}%>
+    <%}%>
 </script>
 
 <script id="tempReportPager" type="text/template">
@@ -112,6 +90,15 @@
             <li><a href="#nextPage"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
         </ul>
     </center>
+</script>
+
+<script id="tempReportResultDetailView" type="text/template" >
+    <td>
+        <%=result.rowNO%>
+    </td>
+    <% for(var i=0;i<=columns.length-1;i++){%>
+        <td><%=result[columns[i].ColumnCode]%></td>
+    <%}%>
 </script>
 
 <script type="text/javascript">
@@ -217,6 +204,7 @@
                     }
                     this.$el.append("&nbsp;&nbsp;&nbsp;")
                 }
+                this.$el.append("<hr/>");
             },
             toggleShow: function () {
                 this.$el.toggleClass("hide");
@@ -299,20 +287,110 @@
             }
         });
     }
+
+    if (window.Report.ReportDetailView == undefined) {
+        window.Report.ReportDetailView = Backbone.View.extend({
+            tagName: "tr",
+            template: _.template($("#tempReportResultDetailView").html()),
+            initialize:function(data){
+                this.model = data;
+            },
+            render: function () {
+                this.$el.html(this.template({
+                    columns: report.get("Columns"),
+                    result:this.model
+                }));
+                return this.el;
+            }
+        });
+    }
     
+    if (window.Report.ReportFooterView == undefined) {
+        
+        window.Report.ReportFooterView = Backbone.View.extend({
+            tagName: "tr",
+            template: _.template($("#tempReportFooter").html()),
+            initialize: function (data,mode) {
+                this.model = data;
+                this.mode = mode;//0-页 1-总
+            },
+            render: function () {
+                this.$el.html(this.template({
+                    data: this.model,
+                    mode:this.mode,
+                    columns:report.get("Columns")
+                }));
+                switch (this.mode) {
+                    case 0:
+                        this.$el.addClass("warning")
+                        break;
+                    case 1:
+                        this.$el.addClass("success");
+                        break;
+                }
+                return this.el;
+            }
+        });
+    }
+
     if (window.Report.ReportView == undefined) {
         window.Report.ReportView = Backbone.View.extend({
             template_header: _.template($("#tempReportHeader").html()),
-            template_body: _.template($("#tempReportBody").html()),
             template_footer:_.template($("#tempReportFooter").html()),
             render: function () {
                 this.$el(".reportHeader").html(this.template({ data: report.get("Columns") }));
             },
             showQuery: function () {
-                console.info(reportResult);
+                this.clear();
+                this.$el.find(".reportHeader").html(this.template_header({
+                    data: report.get("Columns")
+                }));
+                var result = $.parseJSON(reportResult);
+                var sum = 2;
+                if (report.AllSumabled) {
+                    sum--;
+                }
+                if (report.PageSumabled) {
+                    sum--;
+                }
+                for (var i = 0; i < result.length-sum; i++) {
+                    result[i].rowNO = report.get("PageSize")*(request.get("Page")-1)+i+1;
+                    this.$el.find(".reportBody").append(new window.Report.ReportDetailView(result[i]).render());
+                }
+                
+                var pageSum, allSum;
+                if (report.get("PageSumabled")==1) {
+                    if (report.get("AllSumabled")==1) {
+                        pageSum = result[result.length - 2];
+                    }
+                    else {
+                        pageSum = result[result.length - 1];
+                    }
+                }
+                else {
+                    pageSum = null;
+                }
+                if (report.get("AllSumabled")==1) {
+                    allSum = result[result.length - 1];
+                }
+                else {
+                    allSum = null;
+                }
+                if (report.get("PageSumabled")==1 && pageSum!=null ) {
+                    
+                    this.$el.find(".reportFooter").append(new window.Report.ReportFooterView(pageSum,0).render());
+                }
+                if (report.get("AllSumabled") == 1 && allSum!=null) {
+                    this.$el.find(".reportFooter").append(new window.Report.ReportFooterView(allSum, 1).render());
+                }
+            },
+            clear: function () {
+                this.$el.find(".reportBody").html("");
+                this.$el.find(".reportFooter").html("");
             }
         });
     }
+
 
 </script>
 
@@ -330,7 +408,7 @@
             el: "#paramContainerView",
         });
         reportView = new window.Report.ReportView({
-            el: "#queryHeader"
+            el: "#reportView"
         });
         toolbar = new window.Report.ToolbarView({
             el:"#toolbar"
@@ -340,18 +418,18 @@
 </script>
 
 <div class="container">
-    <h2 class="text-info" id="queryTitle"></h2><a  class="btn btn-default btn-xs pull-right" href="#ToggleParamsContainer"><span id="toggleParamsIcon" class="glyphicon glyphicon-eye-open">&nbsp;</span></a>
+    <h2 class="text-info" id="queryTitle"></h2><a  class="btn btn-default pull-right" href="#ToggleParamsContainer"><span id="toggleParamsIcon" class="glyphicon glyphicon-eye-open"></span></a>
     <hr />
     <div class="row">
         <form class="form-inline" role="form" id="paramContainerView" />
     </div>
     <div class="row" style="overflow-x:auto" id="reportView">
-        <table class="table table-striped table-hover table-bordered">
+        <table class="table table-striped table-hover table-bordered" id="reportView">
             <thead>
                 <tr class="reportHeader" style="position:relative" />
             </thead>
             <tbody class="reportBody" />
-            <tfoot class="reportSum" />
+            <tfoot class="reportFooter" />
         </table>
     </div>
     <div class="row" id="reportPagerView">

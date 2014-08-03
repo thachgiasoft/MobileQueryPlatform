@@ -13,7 +13,7 @@ namespace DAL.Helper
         { 
             typeof(string),//字符型
             typeof(bool),//布尔型
-            typeof(DateTime)//日期型
+            typeof(DateTime)//日期型,
         };
         /// <summary>
         /// Dataset转换为Json
@@ -55,10 +55,18 @@ namespace DAL.Helper
                 jsonBuilder.Append("{");
                 foreach (DataColumn col in dt.Columns)
                 {
-                    jsonBuilder.AppendFormat("\"{0}\":{1}{2}{1}",
-                        col.ColumnName,
-                        NeedQuoteTypeList.Contains(col.DataType) ? "\"" : string.Empty,
-                        row[col].ToString());
+                    if (Convert.IsDBNull(row[col]))
+                    {
+                        jsonBuilder.AppendFormat("\"{0}\":\"\"",
+                        col.ColumnName);
+                    }
+                    else
+                    {
+                        jsonBuilder.AppendFormat("\"{0}\":{1}{2}{1}",
+                            col.ColumnName,
+                            NeedQuoteTypeList.Contains(col.DataType) ? "\"" : string.Empty,
+                            row[col].ToString().TrimEnd());
+                    }
                     if (dt.Columns.IndexOf(col) < dt.Columns.Count - 1)
                     {
                         jsonBuilder.Append(",");
