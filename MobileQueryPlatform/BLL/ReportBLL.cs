@@ -631,11 +631,17 @@ namespace BLL
         /// <param name="id">报表ID</param>
         /// <param name="request">请求信息</param>
         /// <returns></returns>
-        public static int QueryReport(ReportRequest request,out string result,out string msg)
+        public static int QueryReport(ReportRequest request,out ReportResult result,out string msg)
         {
             try
             {
                 Report rpt=GetReport(request.ReportID);//获取报表
+                result = new ReportResult()
+                {
+                    TotalCount = 0,
+                    CurPage = request.Page,
+                    PageSize=rpt.PageSize
+                };
                 string connectionString;
                 short dbType;
                 int i = -1;
@@ -706,9 +712,7 @@ namespace BLL
                         }
                         if (dbp == null)
                         {
-                            msg = "参数错误";
-                            result = null;
-                            return -1;
+                            throw new Exception("参数错误");
                         }
                         pList.Add(dbp);
 
@@ -747,37 +751,20 @@ namespace BLL
                             //总合计请求
                             foreach (ReportColumn c in rpt.Columns)
                             {
-                                if (c == rpt.Columns.Last())
+                                if (c.Sumabled)
                                 {
-                                    if (c.Sumabled)
-                                    {
-                                        sql.AppendFormat(" Sum({0}) AS{0} ",
-                                            c.ColumnCode
-                                            );
-                                    }
-                                    else
-                                    {
-                                        sql.AppendFormat(" null AS {0}",
-                                            c.ColumnCode
-                                            );
-                                    }
+                                    sql.AppendFormat(" Sum({0}) AS {0}, ",
+                                        c.ColumnCode
+                                        );
                                 }
                                 else
                                 {
-                                    if (c.Sumabled)
-                                    {
-                                        sql.AppendFormat(" Sum({0}) AS {0}, ",
-                                            c.ColumnCode
-                                            );
-                                    }
-                                    else
-                                    {
-                                        sql.AppendFormat(" null AS {0},",
-                                            c.ColumnCode
-                                            );
-                                    }
+                                    sql.AppendFormat(" null AS {0},",
+                                        c.ColumnCode
+                                        );
                                 }
                             }
+                            sql.Append("Count(*) AS TotalCount");
                             sql.AppendFormat(" From {0}", Regex.Match(finalSql, ALLSUM_FROM_REGEX, RegexOptions.IgnoreCase).Value);
 
                             dal.OpenReader(sql.ToString(), pList.ToArray());
@@ -793,6 +780,7 @@ namespace BLL
                                     newrow[c.ColumnCode] = dal.DataReader[c.ColumnCode];
                                 }
                                 rstTable.Rows.Add(newrow);
+                                result.TotalCount = Convert.ToInt32(dal.DataReader["TotalCount"]);
                             }
                         }
                     }
@@ -801,7 +789,7 @@ namespace BLL
 
                
 
-                result = JsonHelper.DatatableToJson(rstTable);
+                result.ReportData = JsonHelper.DatatableToJson(rstTable);
                 return 1;
             }
             catch (System.Exception ex)

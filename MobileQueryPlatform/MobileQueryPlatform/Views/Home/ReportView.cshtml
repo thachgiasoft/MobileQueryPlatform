@@ -85,9 +85,13 @@
 <script id="tempReportPager" type="text/template">
     <center>
         <ul class="pagination">
-            <li><a href="#prePage"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
-            <li><a href="#goHome"><span class="glyphicon glyphicon-home"></span></a></li>
-            <li><a href="#nextPage"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+            <li><a href="#">&laquo;</a></li>
+            <li><a href="#">1</a></li>
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+            <li><a href="#">4</a></li>
+            <li><a href="#">5</a></li>
+            <li><a href="#">&raquo;</a></li>
         </ul>
     </center>
 </script>
@@ -345,7 +349,7 @@
                 this.$el.find(".reportHeader").html(this.template_header({
                     data: report.get("Columns")
                 }));
-                var result = $.parseJSON(reportResult);
+                var result = $.parseJSON(reportResult.ReportData);
                 var sum = 2;
                 if (report.AllSumabled) {
                     sum--;

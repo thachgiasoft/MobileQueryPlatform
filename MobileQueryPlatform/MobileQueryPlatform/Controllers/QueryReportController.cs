@@ -12,9 +12,9 @@ namespace MobileQueryPlatform.Controllers
     public class QueryReportController : ApiController
     {
         // POST api/queryreport
-        public ResultModel<string> Post(ReportRequest request)
+        public ResultModel<ReportResult> Post(ReportRequest request)
         {
-            ResultModel<string> rst = new ResultModel<string>();
+            ResultModel<ReportResult> rst = new ResultModel<ReportResult>();
             rst.ResultStatus = ReportBLL.QueryReport(request, out rst.ResultObj, out rst.ResultMessage);
             return rst;
         }
