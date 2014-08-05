@@ -728,74 +728,66 @@ namespace BLL
                         rstTable = dal.Select(finalSql, out i, pList.ToArray());
                     }
 
-                    if (rpt.Columns.Where(c => c.Sumabled).Count() > 0)
+                    if (rpt.PageSumabled)
                     {
-                        if (rpt.PageSumabled)
+                        //页合计请求
+                        DataRow row = rstTable.NewRow();
+                        foreach (ReportColumn c in rpt.Columns)
                         {
-                            //页合计请求
-                            DataRow row = rstTable.NewRow();
-                            foreach (ReportColumn c in rpt.Columns)
+                            if (!c.Sumabled)
                             {
-                                if (!c.Sumabled)
-                                {
-                                    continue;
-                                }
-                                row[c.ColumnCode] = rstTable.Compute("sum(" + c.ColumnCode + ")", "");
+                                continue;
                             }
-                            rstTable.Rows.InsertAt(row, rstTable.Rows.Count);
+                            row[c.ColumnCode] = rstTable.Compute("sum(" + c.ColumnCode + ")", "");
                         }
-
-                        if (rpt.AllSumabled)
+                        rstTable.Rows.InsertAt(row, rstTable.Rows.Count);
+                    }
+                    sql.Clear();
+                    sql.Append("Select ");
+                    if (rpt.AllSumabled)
+                    {
+                        //总合计请求
+                        foreach (ReportColumn c in rpt.Columns)
                         {
-                            sql.Clear();
-                            sql.Append("Select ");
-                            //总合计请求
-                            foreach (ReportColumn c in rpt.Columns)
+                            if (c.Sumabled)
                             {
-                                if (c.Sumabled)
-                                {
-                                    sql.AppendFormat(" Sum({0}) AS {0}, ",
-                                        c.ColumnCode
-                                        );
-                                }
-                                else
-                                {
-                                    sql.AppendFormat(" null AS {0},",
-                                        c.ColumnCode
-                                        );
-                                }
+                                sql.AppendFormat(" Sum({0}) AS {0}, ",
+                                    c.ColumnCode
+                                    );
                             }
-                            sql.Append("Count(*) AS TotalCount");
-                            sql.AppendFormat(" From {0}", Regex.Match(finalSql, ALLSUM_FROM_REGEX, RegexOptions.IgnoreCase).Value);
-
-                            IDbDataParameter[] pList2=new IDbDataParameter[pList.Count];
-                            for (int j = 0; j < pList.Count;j++ )
+                            else
                             {
-                                pList2[j] = dal.CloneParameter(pList[j]);
-                            }
-
-                            dal.OpenReader(sql.ToString(), pList2);
-                            if (dal.DataReader.Read())
-                            {
-                                DataRow newrow = rstTable.NewRow();
-                                foreach (ReportColumn c in rpt.Columns)
-                                {
-                                    if (!c.Sumabled)
-                                    {
-                                        continue;
-                                    }
-                                    newrow[c.ColumnCode] = dal.DataReader[c.ColumnCode];
-                                }
-                                rstTable.Rows.Add(newrow);
-                                result.TotalCount = Convert.ToInt32(dal.DataReader["TotalCount"]);
+                                sql.AppendFormat(" null AS {0},",
+                                    c.ColumnCode
+                                    );
                             }
                         }
                     }
+                    sql.Append("Count(*) AS TotalCount");
+                    sql.AppendFormat(" From {0}", Regex.Match(finalSql, ALLSUM_FROM_REGEX, RegexOptions.IgnoreCase).Value);
 
+                    IDbDataParameter[] pList2 = new IDbDataParameter[pList.Count];
+                    for (int j = 0; j < pList.Count; j++)
+                    {
+                        pList2[j] = dal.CloneParameter(pList[j]);
+                    }
+
+                    dal.OpenReader(sql.ToString(), pList2);
+                    if (dal.DataReader.Read())
+                    {
+                        DataRow newrow = rstTable.NewRow();
+                        foreach (ReportColumn c in rpt.Columns)
+                        {
+                            if (!c.Sumabled)
+                            {
+                                continue;
+                            }
+                            newrow[c.ColumnCode] = dal.DataReader[c.ColumnCode];
+                        }
+                        rstTable.Rows.Add(newrow);
+                        result.TotalCount = Convert.ToInt32(dal.DataReader["TotalCount"]);
+                    }
                 }
-
-               
-
                 result.ReportData = JsonHelper.DatatableToJson(rstTable);
                 return 1;
             }

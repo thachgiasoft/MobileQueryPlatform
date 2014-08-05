@@ -19,7 +19,7 @@ namespace Model
         public int TotalPage
         {
             get {
-                int temp = TotalCount / PageSize;
+                int temp = TotalCount / PageSize;//计算总页数
                 if (TotalCount % PageSize != 0)
                 {
                     temp++;

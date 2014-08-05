@@ -34,38 +34,8 @@
     </div>
 </script>
 
-<script type="text/template" id="tempReportHeader">
-    <th>
-        N.O
-    </th>
-    <% for(var i=0 ;i<=data.length-1;i++) {%>
-    <%if(data[i].Sortabled){%>
-    <th data-index="<%=i%>" style="cursor:pointer">
-        <% if(data[i].SortValue==0){%>
-        <span class="glyphicon glyphicon-sort"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
-        <%} else if(data[i].SortValue==1){%>
-        <% if(data[i].ColumnType==0) {%>
-        <span class="glyphicon glyphicon-sort-by-alphabet"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
-        <%} else if(data[i].ColumnType==1){%>
-        <span class="glyphicon glyphicon-sort-by-order"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
-        <%} else if(data[i].ColumnType==2){%>
-        <span class="glyphicon glyphicon-sort-by-attributes"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
-        <%}%>
-
-        <%} else if(data[i].SortValue==2){%>
-        <% if(data[i].ColumnType==0) {%>
-        <span class="glyphicon glyphicon-sort-by-alphabet-alt"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
-        <%} else if(data[i].ColumnType==1){%>
-        <span class="glyphicon glyphicon-sort-by-order-alt"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
-        <%} else if(data[i].ColumnType==2){%>
-        <span class="glyphicon glyphicon-sort-by-attributes-alt"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></span>
-        <%}%>
-        <%}%>
-    </th>
-    <%} else {%>
-    <th data-index="<%=i%>" style="cursor:pointer"><span class="text-primary"><%=data[i].ColumnName==""?data[i].ColumnCode:data[i].ColumnName%></span></th>
-    <% }%>
-    <%}%>
+<script type="text/template" id="tempReportHeaderColumn">
+    <span class="text-primary"><%=ColumnName==""?ColumnCode:ColumnName%></span>
 </script>
 
 <script type="text/template" id="tempReportFooter">
@@ -84,14 +54,10 @@
 
 <script id="tempReportPager" type="text/template">
     <center>
-        <ul class="pagination">
-            <li><a href="#">&laquo;</a></li>
-            <li><a href="#">1</a></li>
-            <li><a href="#">2</a></li>
-            <li><a href="#">3</a></li>
-            <li><a href="#">4</a></li>
-            <li><a href="#">5</a></li>
-            <li><a href="#">&raquo;</a></li>
+        <ul class="pager">
+            <li class="prevPage <%=CurPage==1?'disabled':''%>"><a href="#do">上一页</a></li>
+            <li><span><%=CurPage%>/<%=TotalPage%>页</span></li>
+            <li class="nextPage <%=CurPage==TotalPage?'disabled':''%>"><a href="#do">下一页</a></li>
         </ul>
     </center>
 </script>
@@ -146,17 +112,7 @@
             btnClick: function (e) {
                 switch ($(e.currentTarget).attr("data-action")) {
                     case "query":
-                        console.info(request.toJSON());
-                        $.post("/api/QueryReport",
-                            request.toJSON(),
-                            function (rst) {
-                                if (rst.ResultStatus != 1) {
-                                    alert(rst.ResultMessage);
-                                    return;
-                                }
-                                reportResult = rst.ResultObj;
-                                reportView.showQuery();
-                            });
+                        reportView.query();
                     break;
                 }
             }
@@ -293,6 +249,37 @@
         });
     }
 
+    if (window.Report.ReportHeaderColumn == undefined) {
+        window.Report.ReportHeaderColumn = Backbone.View.extend({
+            tagName:"th",
+            template: _.template($("#tempReportHeaderColumn").html()),
+            initialize:function(column){
+                this.model = column;
+            },
+            render: function () {
+                this.$el.html(this.template(this.model));
+                return this.el;
+            }
+        });
+    }
+
+    if (window.Report.ReportHeader == undefined) {
+        window.Report.ReportHeader = Backbone.View.extend({
+            tagName: "tr",
+            className:"success",
+            initialize:function(columns){
+                this.columns = columns;
+            },
+            render: function () {
+                this.$el.append("<th>序号</th>");
+                for (var i = 0; i < this.columns.length; i++) {
+                    this.$el.append(new window.Report.ReportHeaderColumn(this.columns[i]).render());
+                }
+                return this.el;
+            }
+        });
+    }
+
     if (window.Report.ReportDetailView == undefined) {
         window.Report.ReportDetailView = Backbone.View.extend({
             tagName: "tr",
@@ -310,8 +297,7 @@
         });
     }
     
-    if (window.Report.ReportFooterView == undefined) {
-        
+    if (window.Report.ReportFooterView == undefined) {    
         window.Report.ReportFooterView = Backbone.View.extend({
             tagName: "tr",
             template: _.template($("#tempReportFooter").html()),
@@ -330,7 +316,7 @@
                         this.$el.addClass("warning")
                         break;
                     case 1:
-                        this.$el.addClass("success");
+                        this.$el.addClass("danger");
                         break;
                 }
                 return this.el;
@@ -340,16 +326,33 @@
 
     if (window.Report.ReportView == undefined) {
         window.Report.ReportView = Backbone.View.extend({
-            template_header: _.template($("#tempReportHeader").html()),
-            template_footer:_.template($("#tempReportFooter").html()),
-            render: function () {
-                this.$el(".reportHeader").html(this.template({ data: report.get("Columns") }));
+            template_footer: _.template($("#tempReportFooter").html()),
+            query:function(){
+                $.ajax({
+                    type: "POST",
+                    url: "/api/QueryReport",
+                    data: request.toJSON(),
+                    success: function (rst) {
+                        if (rst.ResultStatus != 1) {
+                            var pageHis = request.get("PageHis");
+                            request.set({ "Page": pageHis });
+                            alert(rst.ResultMessage);
+                            return;
+                        }
+                        reportResult = rst.ResultObj;
+                        reportView.showQuery();
+                    },
+                    error: function () {
+                        var pageHis = request.get("PageHis");
+                        request.set({ "Page": pageHis });
+                        alert("查询失败");
+                    }
+                }
+            );
             },
             showQuery: function () {
                 this.clear();
-                this.$el.find(".reportHeader").html(this.template_header({
-                    data: report.get("Columns")
-                }));
+                this.$el.find(".reportHeader").html(new window.Report.ReportHeader(report.get("Columns")).render());
                 var result = $.parseJSON(reportResult.ReportData);
                 var sum = 2;
                 if (report.AllSumabled) {
@@ -388,15 +391,51 @@
                 if (report.get("AllSumabled") == 1 && allSum!=null) {
                     this.$el.find(".reportFooter").append(new window.Report.ReportFooterView(allSum, 1).render());
                 }
+                if (report.get("Pagingabled") == 1) {
+                    this.$el.find(".reportPager").append(new window.Report.ReportPagerView().render());
+                }
             },
             clear: function () {
                 this.$el.find(".reportBody").html("");
                 this.$el.find(".reportFooter").html("");
+                this.$el.find(".reportPager")
             }
         });
     }
 
-
+    if (window.Report.ReportPagerView == undefined) {
+        window.Report.ReportPagerView = Backbone.View.extend({
+            template: _.template($("#tempReportPager").html()),
+            render: function () {
+                this.$el.html(this.template(reportResult));
+                return this.el;
+            },
+            events: {
+                "click .prevPage": "prevPage",
+                "click .nextPage": "nextPage"
+            },
+            prevPage: function (e) {
+                if ($(e.currentTarget).hasClass("disabled")) {
+                    return;
+                }
+                console.info("prev");
+                var page=request.get("Page");
+                request.set({ "PageHis":  page});
+                request.set({ Page: page-- });
+                reportView.query();
+            },
+            nextPage: function (e) {
+                if ($(e.currentTarget).hasClass("disabled")) {
+                    return;
+                }
+                console.info("next");
+                var page = request.get("Page");
+                request.set({ "PageHis": page });
+                request.set({ Page: page++ });
+                reportView.query();
+            }
+        });
+    }
 </script>
 
 <script type="text/javascript">
@@ -430,12 +469,11 @@
     </div>
     <div class="row" style="overflow-x:auto" id="reportView">
         <table class="table table-striped table-hover table-bordered" id="reportView">
-            <thead>
-                <tr class="reportHeader" style="position:relative" />
-            </thead>
+            <thead class="reportHeader"/>
             <tbody class="reportBody" />
             <tfoot class="reportFooter" />
         </table>
+        <center class="reportPager"></center>
     </div>
     <div class="row" id="reportPagerView">
 

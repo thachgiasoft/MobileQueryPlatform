@@ -6,7 +6,14 @@
     if (window.UserSignin.SigninView == undefined) {
         window.UserSignin.SigninView = Backbone.View.extend({
             events: {
-                "click a":"clickSignin"
+                "click a": "clickSignin",
+                "change #rmbpwd": "rembPwd"
+            },
+            rembPwd: function (e) {
+                if (!$(e.currentTarget).is(":checked")) {
+                    window.localStorage.removeItem("userId");
+                    window.localStorage.removeItem("pwd");
+                }
             },
             clickSignin: function (e) {
                 $("#btnSignin").button("loading");
@@ -17,6 +24,12 @@
                     },
                     function (data) {
                         if (data.ResultStatus == "1") {
+                            @*登陆成功，如果勾选了记住密码，则在本地记住*@
+                            if ($("#rmbpwd").is(":checked")) {
+                                window.localStorage.setItem("userId", $("#UserCode").val());
+                                window.localStorage.setItem("pwd", $("#UPassword").val());
+                                console.info("rmb ok");
+                            }
                             location.href="@ViewBag.Success";
                         }
                         else {
@@ -32,7 +45,18 @@
 <script type="text/javascript">
     var signinView
     $(function () {
-        var siginView = new window.UserSignin.SigninView({
+        var inputPwd = document.getElementById("rmbpwd");
+        if (inputPwd != undefined) {
+            var userId, pwd;
+            userId = window.localStorage.getItem("userId");
+            psw = window.localStorage.getItem("pwd");
+            if (userId != null) {@*如果本地存储中已有用户名，则自动填入，并勾选记住密码*@
+                $("#UserCode").val(userId);
+                $("#UPassword").val(psw);
+                $("#rmbpwd").attr("checked", "checked");
+            }
+        }       
+        siginView = new window.UserSignin.SigninView({
             el: "#signinView"
         });
     });
@@ -45,7 +69,7 @@
         @if (ViewBag.Action != "doAdminSignin")
         {
             <label class="checkbox">
-                <input type="checkbox" value="remember-me">记住密码
+                <input id="rmbpwd" type="checkbox">记住密码
             </label>
         }
 
