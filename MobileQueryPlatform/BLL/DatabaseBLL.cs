@@ -13,7 +13,7 @@ namespace BLL
 {
     public class DatabaseBLL
     {
-        const string ORACLE_CONNECTIONSTRING = "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = @DataSource)(PORT = 1521)))(CONNECT_DATA = (SERVICE_NAME = @DbName)));Persist Security Info=True;User ID=@USERID;Password=@Password";
+        const string ORACLE_CONNECTIONSTRING = "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = @DataSource)(PORT = 1521)))(CONNECT_DATA = (SERVICE_NAME = @DbName)));Persist Security Info=True;User ID=@UserID;Password=@Password";
         const string MSSQL_CONNECTIONSTRING = "Data Source=@DataSource;Initial Catalog=@DbName;Persist Security Info=True;User ID=@UserID;Password=@Password";
 
         /// <summary>

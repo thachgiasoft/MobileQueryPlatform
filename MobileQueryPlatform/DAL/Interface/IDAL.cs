@@ -84,6 +84,8 @@ namespace DAL.Interface
         IDbDataParameter CreateParameter(string paramName, DbType dbType,int size);
         IDbDataParameter CreateParameter(string paramName, DbType dbType,ParameterDirection direction);
         IDbDataParameter CreateParameter(string paramName, DbType dbType,int size ,ParameterDirection direction);
+
+        IDbDataParameter CloneParameter(IDbDataParameter param);
         #endregion
 
         /// <summary>

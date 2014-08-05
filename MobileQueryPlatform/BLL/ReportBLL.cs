@@ -623,7 +623,7 @@ namespace BLL
             }
         }
 
-        const string PARAMS_REGEX = @"\w*\s*=\s*[@:]\w*";
+        //const string PARAMS_REGEX = @"\w*\s*=\s*[@:]\w*\b";
         const string ALLSUM_FROM_REGEX = @"(?<=from)[^$]*";
         /// <summary>
         /// 执行报表
@@ -675,7 +675,8 @@ namespace BLL
                     {
                         if (request.Params[index].ParamValue == null)
                         {
-                            finalSql=Regex.Replace(finalSql,PARAMS_REGEX.Replace(@"\w*",request.Params[index].ParamCode)," 1=1 ");
+                            string params_regex = @"\w*\s*=\s*[@:]"+request.Params[index].ParamCode+@"*\b";
+                            finalSql=Regex.Replace(finalSql,params_regex," 1=1 ");
                             continue;
                         }
                         IDbDataParameter dbp=null;
@@ -767,7 +768,13 @@ namespace BLL
                             sql.Append("Count(*) AS TotalCount");
                             sql.AppendFormat(" From {0}", Regex.Match(finalSql, ALLSUM_FROM_REGEX, RegexOptions.IgnoreCase).Value);
 
-                            dal.OpenReader(sql.ToString(), pList.ToArray());
+                            IDbDataParameter[] pList2=new IDbDataParameter[pList.Count];
+                            for (int j = 0; j < pList.Count;j++ )
+                            {
+                                pList2[j] = dal.CloneParameter(pList[j]);
+                            }
+
+                            dal.OpenReader(sql.ToString(), pList2);
                             if (dal.DataReader.Read())
                             {
                                 DataRow newrow = rstTable.NewRow();
@@ -801,8 +808,8 @@ namespace BLL
             
         }
 
-        const string REGEX_PARAMS = @"(?<=@)\D\w+";
-        const string REGEX_PARAMS_2=@"@\D\w+";
+        const string REGEX_PARAMS = @"(?<=[@:])\D\w+\b";
+        const string REGEX_PARAMS_2 = @"[@:]\D\w+\b";
         /// <summary>
         /// 重建报表结构
         /// </summary>

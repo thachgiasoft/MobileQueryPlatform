@@ -359,6 +359,22 @@ namespace DAL
             };
         }
 
+        /// <summary>
+        /// 复制参数
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public IDbDataParameter CloneParameter(IDbDataParameter param)
+        {
+            return new SqlParameter()
+            {
+                ParameterName = param.ParameterName,
+                DbType = param.DbType,
+                Direction = param.Direction,
+                Size = param.Size,
+                Value=param.Value
+            };
+        }
         #endregion
 
 

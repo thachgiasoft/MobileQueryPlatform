@@ -504,7 +504,8 @@
             },
             buildReport: function () {
                 var sql=$("#sqlCommand").val();
-                var dbid=$("#DbId").val();
+                var dbid = $("#DbId").val();
+                console.info(dbid);
                 if ( sql=="") {
                     alert("请先输入SQL语句");
                     return;
@@ -520,7 +521,7 @@
                 }
                 rpt.fetch({
                     data: {
-                        DBID:1,//临时赋值1
+                        DBID: dbid,//临时赋值1
                         sql:sql
                     },
                     success: function (model, rst, status) {

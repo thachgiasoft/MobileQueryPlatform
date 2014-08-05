@@ -146,6 +146,7 @@
             btnClick: function (e) {
                 switch ($(e.currentTarget).attr("data-action")) {
                     case "query":
+                        console.info(request.toJSON());
                         $.post("/api/QueryReport",
                             request.toJSON(),
                             function (rst) {
@@ -228,7 +229,7 @@
                 this.$el.html(this.template(this.model));
                 return this.el;
             },
-            event: {
+            events: {
                 "change input":"valueChanged"
             },
             valueChanged: function () {
