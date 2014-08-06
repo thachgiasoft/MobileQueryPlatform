@@ -1,6 +1,6 @@
 ﻿<script type="text/template" id="tempUserListView">
     <%for(var i=0;i<=data.length-1;i++){%>
-    <a class="list-group-item" href="#do" data-index="<%=i%>" <%=data[i].Enabled?'':'disabled'%>> <span class="glyphicon glyphicon-<%=data[i].IsAdmin?'cog':'user'%>"></span> <%=data[i].UserCode%>-<%=data[i].UserName%></a>
+    <a class="list-group-item" href="#do" data-index="<%=i%>"> <span class="glyphicon glyphicon-<%=data[i].IsAdmin?'cog':'user'%>"></span> <%=data[i].UserCode%>-<%=data[i].UserName%></a>
     <%}%>
 </script>
 <script type="text/ng-template" id="tempReportListView">
