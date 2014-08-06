@@ -293,8 +293,12 @@
                     return;
                 }
                 var desc = request.get("Desc");
-                request.set("Desc", !desc);
+                request.set({
+                    "Desc": !desc,
+                    "Page": 1
+                });
                 $(".descTxt").html(request.get("Desc") ? "降序" : "升序");
+                reportView.query();
             },
             columnSelect: function (e) {
                 var index = $(e.currentTarget).attr("data-index");
@@ -308,7 +312,11 @@
                     var column = report.get("Columns")[index]
                     var columnTxt = column.ColumnName == '' ? column.ColumnCode : column.ColumnName;
                     $(".columnTxt").html(columnTxt);
-                    request.set("SortColumn", column.ColumnCode);
+                    request.set({
+                        "SortColumn": column.ColumnCode,
+                        "Page": 1
+                    });
+                    reportView.query();
                 }
             }
 
@@ -359,7 +367,15 @@
                     result:this.model
                 }));
                 return this.el;
+            },
+            events: {
+                "click td":"clickRow"
+            },
+            clickRow: function () {
+                $(".reportBody tr").removeClass();
+                this.$el.addClass("danger");
             }
+
         });
     }
     
@@ -459,11 +475,12 @@
                 if (report.get("Pagingabled") == 1) {
                     this.$el.find(".reportPager").append(new window.Report.ReportPagerView().render());
                 }
+                window.location.hash = "#reportView"
             },
             clear: function () {
                 this.$el.find(".reportBody").html("");
                 this.$el.find(".reportFooter").html("");
-                this.$el.find(".reportPager")
+                this.$el.find(".reportPager").html("");
             }
         });
     }
@@ -483,21 +500,21 @@
                 if ($(e.currentTarget).hasClass("disabled")) {
                     return;
                 }
-                console.info("prev");
                 var page=request.get("Page");
                 request.set({ "PageHis":  page});
-                request.set({ Page: page-- });
+                request.set({ Page: --page });
                 reportView.query();
+                window.location.hash = "#reportView";
             },
             nextPage: function (e) {
                 if ($(e.currentTarget).hasClass("disabled")) {
                     return;
                 }
-                console.info("next");
                 var page = request.get("Page");
                 request.set({ "PageHis": page });
-                request.set({ Page: page++ });
+                request.set({ Page: ++page });
                 reportView.query();
+                window.location.hash = "#reportView";
             }
         });
     }
@@ -526,29 +543,23 @@
     })
 </script>
 
-<div class="container">
-    <h2 class="text-info" id="queryTitle"></h2><a  class="btn btn-default pull-right" href="#ToggleParamsContainer"><span id="toggleParamsIcon" class="glyphicon glyphicon-eye-open"></span></a>
+<div class="container" id="reportView">
+    <h2 class="text-info" id="queryTitle"></h2><a class="btn btn-default pull-right" href="#ToggleParamsContainer"><span id="toggleParamsIcon" class="glyphicon glyphicon-eye-open"></span></a>
     <hr />
     <div class="row">
         <form class="form-inline" role="form" id="paramContainerView" />
     </div>
-    <div class="row" style="overflow-x:auto" id="reportView">
-        <table class="table table-striped table-hover table-bordered" id="reportView">
-            <thead class="reportHeader"/>
+    <div class="row" style="overflow-x:auto">
+        <table class="table table-condensed table-hover table-bordered">
+            <thead class="reportHeader" />
             <tbody class="reportBody" />
             <tfoot class="reportFooter" />
         </table>
-        <center class="reportPager"></center>
     </div>
-    <div class="row" id="reportPagerView">
-
-    </div>
+    <center class="reportPager"></center>
 </div>
 
-<div class="navbar navbar-fixed-bottom">
-    <div class="navbar-header">
-        <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
-            <a class="btn btn-default" data-action="query"><span class="glyphicon glyphicon-search"></span>查询</a>
-        </div>
-    </div>
-</div> 
+<ul id="toolbar" class="nav nav-pills navbar-fixed-bottom nav-justified" role="tablist">
+    <li role="presentation"><a class="btn btn-default btn-sm" data-action="query"><span class="glyphicon glyphicon-search"></span>查询</a></li>
+    <li role="presentation"><a class="btn btn-default btn-sm" href="#queryTitle"><span class="glyphicon glyphicon-home"></span>回到顶部</a></li>
+</ul>
