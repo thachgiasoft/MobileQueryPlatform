@@ -659,8 +659,7 @@ namespace BLL
                 if (!rpt.CommandHasOrderby && !string.IsNullOrEmpty(request.SortColumn))
                 {
                     //排序请求
-                    sql.AppendFormat("{0} Order By {1} {2}",
-                        rpt.SqlCommand,
+                    sql.AppendFormat(" Order By {0} {1}",
                         request.SortColumn,
                         request.Desc?"Desc":string.Empty
                         );
@@ -671,52 +670,55 @@ namespace BLL
                 {
                     //组成parameter
                     List<IDbDataParameter> pList = new List<IDbDataParameter>();
-                    for (int index = 0; index < request.Params.Length;index++ )
+                    if (request.Params != null)
                     {
-                        if (request.Params[index].ParamValue == null)
+                        for (int index = 0; index < request.Params.Length; index++)
                         {
-                            string params_regex = @"\w*\s*=\s*[@:]"+request.Params[index].ParamCode+@"*\b";
-                            finalSql=Regex.Replace(finalSql,params_regex," 1=1 ");
-                            continue;
-                        }
-                        IDbDataParameter dbp=null;
-                        switch (request.Params[index].ParamType)
-                        {
-                            case 0:
-                                dbp = dal.CreateParameter(request.Params[index].ParamCode,DbType.String);
-                                dbp.Value=string.IsNullOrEmpty(request.Params[index].ParamValue) ? string.Empty : request.Params[index].ParamValue;
-                                break;
-                            case 1:
-                                decimal v;
-                                dbp = dal.CreateParameter(request.Params[index].ParamCode, DbType.Decimal);
-                                if (decimal.TryParse(request.Params[index].ParamValue, out v))
-                                {
-                                    dbp.Value=v;
-                                }
-                                else
-                                {
-                                    dbp.Value = null;
-                                }
-                                break;
-                            case 2:
-                                DateTime d;
-                                dbp=dal.CreateParameter(request.Params[index].ParamCode, DbType.DateTime);
-                                if (DateTime.TryParse(request.Params[index].ParamValue, out d))
-                                {
-                                    dbp.Value = d;
-                                }
-                                else
-                                {
-                                    dbp.Value = null;
-                                }
-                                break;
-                        }
-                        if (dbp == null)
-                        {
-                            throw new Exception("参数错误");
-                        }
-                        pList.Add(dbp);
+                            if (request.Params[index].ParamValue == null)
+                            {
+                                string params_regex = @"\w*\s*=\s*[@:]" + request.Params[index].ParamCode + @"*\b";
+                                finalSql = Regex.Replace(finalSql, params_regex, " 1=1 ");
+                                continue;
+                            }
+                            IDbDataParameter dbp = null;
+                            switch (request.Params[index].ParamType)
+                            {
+                                case 0:
+                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, DbType.String);
+                                    dbp.Value = string.IsNullOrEmpty(request.Params[index].ParamValue) ? string.Empty : request.Params[index].ParamValue;
+                                    break;
+                                case 1:
+                                    decimal v;
+                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, DbType.Decimal);
+                                    if (decimal.TryParse(request.Params[index].ParamValue, out v))
+                                    {
+                                        dbp.Value = v;
+                                    }
+                                    else
+                                    {
+                                        dbp.Value = null;
+                                    }
+                                    break;
+                                case 2:
+                                    DateTime d;
+                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, DbType.DateTime);
+                                    if (DateTime.TryParse(request.Params[index].ParamValue, out d))
+                                    {
+                                        dbp.Value = d;
+                                    }
+                                    else
+                                    {
+                                        dbp.Value = null;
+                                    }
+                                    break;
+                            }
+                            if (dbp == null)
+                            {
+                                throw new Exception("参数错误");
+                            }
+                            pList.Add(dbp);
 
+                        }
                     }
                     if (rpt.Pagingabled)
                     {

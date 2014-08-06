@@ -163,7 +163,7 @@
                                     <tr>
                                         <th>字段编码</th>
                                         <th>显示名称</th>
-                                        <th class="hide">排序</th>
+                                        <th>排序</th>
                                         <th>求和</th>
                                     </tr>
                                 </thead>
@@ -172,7 +172,7 @@
                                     <tr>
                                         <td style="vertical-align:middle"><%=report.Columns[i].ColumnCode%></td>
                                         <td><input data-action="columnNameChanged" data-index="<%=i%>" type="text" class="form-control" value="<%=report.Columns[i].ColumnName%>" placeholder="<%=report.Columns[i].ColumnCode%>" /></td>
-                                        <td class="hide">
+                                        <td>
                                             <input data-action="columnSortabledChecked" data-index="<%=i%>" <%=report.CommandHasOrderby?'disabled':''%> type="checkbox"<%=report.Columns[i].Sortabled==true?'checked':''%> >
                                         </td>
                                         <td>

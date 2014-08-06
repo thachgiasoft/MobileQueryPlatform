@@ -34,6 +34,24 @@
     </div>
 </script>
 
+<script id="tempReportSortView" type="text/template">
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary DescSelect"><span class="columnTxt"><%=Request.SortColumn==''?'默认':Request.SortColumn%></span>-<span class="descTxt"><%=Request.Desc?"降序":"升序"%></span></button>
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+            <span class="sr-only">Sort</span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li><a href="#do">默认</a></li>
+            <% for (var i=0; i<=Columns.length-1;i++){%>
+                <%if(Columns[i].Sortabled){%>
+                <li data-index="<%=i%>"><a href="#do"><%=Columns[i].ColumnName==''?Columns[i].ColumnCode:Columns[i].ColumnName%></a></li>
+                <%}%>
+            <%}%>
+        </ul>
+    </div>
+</script>
+
 <script type="text/template" id="tempReportHeaderColumn">
     <span class="text-primary"><%=ColumnName==""?ColumnCode:ColumnName%></span>
 </script>
@@ -85,7 +103,8 @@
                 "PageSumabled": false,
                 "AllSumabled": false,
                 "Pagingabled": false,
-                "PageSize": 10
+                "PageSize": 10,
+                "Sortabled":false
             },
             idAttribute: "ID",
             urlRoot: "/api/Report"
@@ -164,6 +183,10 @@
                             break;
                     }
                     this.$el.append("&nbsp;&nbsp;&nbsp;")
+                }
+                @*排序*@
+                if (report.get("Sortabled")) {
+                    this.$el.append(new window.Report.ReportSortView().render());
                 }
                 this.$el.append("<hr/>");
             },
@@ -249,6 +272,49 @@
         });
     }
 
+    if (window.Report.ReportSortView == undefined) {
+        window.Report.ReportSortView = Backbone.View.extend({
+            tagName: "div",
+            className:"form-group",
+            template: _.template($("#tempReportSortView").html()),
+            render: function () {
+                this.$el.html(this.template({
+                    "Request": request.toJSON(),
+                    "Columns":report.get("Columns")
+                }));
+                return this.el;
+            },
+            events: {
+                "click .DescSelect": "descSelect",
+                "click li":"columnSelect"
+            },
+            descSelect: function () {
+                if (request.get("SortColumn") == '') {
+                    return;
+                }
+                var desc = request.get("Desc");
+                request.set("Desc", !desc);
+                $(".descTxt").html(request.get("Desc") ? "降序" : "升序");
+            },
+            columnSelect: function (e) {
+                var index = $(e.currentTarget).attr("data-index");
+                if (index == undefined) {
+                    $(".columnTxt").html("默认");
+                    $(".descTxt").html("升序");
+                    request.set("Desc", false);
+                    request.set("SortColumn", "");
+                }
+                else {
+                    var column = report.get("Columns")[index]
+                    var columnTxt = column.ColumnName == '' ? column.ColumnCode : column.ColumnName;
+                    $(".columnTxt").html(columnTxt);
+                    request.set("SortColumn", column.ColumnCode);
+                }
+            }
+
+        });
+    }
+
     if (window.Report.ReportHeaderColumn == undefined) {
         window.Report.ReportHeaderColumn = Backbone.View.extend({
             tagName:"th",
@@ -326,7 +392,6 @@
 
     if (window.Report.ReportView == undefined) {
         window.Report.ReportView = Backbone.View.extend({
-            template_footer: _.template($("#tempReportFooter").html()),
             query:function(){
                 $.ajax({
                     type: "POST",

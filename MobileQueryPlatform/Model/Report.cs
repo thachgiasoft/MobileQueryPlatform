@@ -102,9 +102,25 @@ namespace Model
         {
             get
             {
-                return SqlCommand==null?false:Regex.IsMatch(SqlCommand, ORDERBY_REGEX);
+                return string.IsNullOrEmpty(SqlCommand)?false:Regex.IsMatch(SqlCommand, ORDERBY_REGEX);
             }
         }
+
+        /// <summary>
+        /// 可排序
+        /// </summary>
+        public bool Sortabled
+        {
+            get
+            {
+                if (Columns == null)
+                {
+                    return false;
+                }
+                return !CommandHasOrderby && Columns.Where(c => c.Sortabled).Count() > 0 ;
+            }
+        }
+
         /// <summary>
         /// 是否启用页合计
         /// </summary>

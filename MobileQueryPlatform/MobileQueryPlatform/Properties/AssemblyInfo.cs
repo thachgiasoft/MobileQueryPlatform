@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MobileQueryPlatform")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hisense")]
+[assembly: AssemblyCompany("XHB")]
 [assembly: AssemblyProduct("MobileQueryPlatform")]
-[assembly: AssemblyCopyright("版权所有(C) Hisense 2014")]
+[assembly: AssemblyCopyright("版权所有(C) XHB 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -6,14 +6,16 @@
             window.Admin.Router = Backbone.Router.extend({
                 routes: {
                     "":"Index",
-                    "Goto/:id": "Goto"
+                    "Goto/:id": "Goto",
+                    "About":"About"
                 },
                 Index:function(){
                     $("#mainPanel").load("/admin/Menu");
                 },
                 Goto: function (id) {
                     $("#mainPanel").load("/admin/" + id);
-                }
+                },
+
             });
         }
     </script>
@@ -45,7 +47,7 @@
                         <a href="#Goto/ChangePassword"><span class="glyphicon glyphicon-lock"></span>&nbsp;&nbsp;修改密码</a>
                     </li>
                     <li>
-                        <a href="#"><span class="glyphicon glyphicon-info-sign"></span>&nbsp;&nbsp;关于</a>
+                        <a href="#About"><span class="glyphicon glyphicon-info-sign"></span>&nbsp;&nbsp;关于</a>
                     </li>
                     <li>
                         <a href="/Sign/Signoff"><span class="glyphicon glyphicon-off"></span>&nbsp;&nbsp;退出</a>
