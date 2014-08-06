@@ -60,7 +60,7 @@ namespace BLL
         /// </summary>
         /// <param name="db"></param>
         /// <returns></returns>
-        public static int InsertDatabase(Database db,out string msg)
+        public static int InsertDatabase(ref Database db,out string msg)
         {
             try
             {
@@ -83,6 +83,12 @@ namespace BLL
                         );
                     if (i == 1)
                     {
+                        sql.Clear();
+                        sql.Append("SELECT @@IDENTITY ");
+                        dal.OpenReader(sql.ToString());
+                        dal.DataReader.Read();
+                        db.ID = Convert.ToInt32(dal.DataReader[0]);
+                        dal.DataReader.Close();
                         dal.CommitTran();
                         msg = "success";
                         return 1;

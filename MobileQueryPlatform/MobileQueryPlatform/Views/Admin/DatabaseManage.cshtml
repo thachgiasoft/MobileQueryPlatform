@@ -1,15 +1,11 @@
-﻿<script id="tempDbListView" type="text/template">
-    <%for ( var i=0;i<=data.length-1;i++ ){%>
-        <tr>
-            <td><%=data[i].DbCode%></td>
-            <td><%=data[i].DbType==0?"MsSql":"Oracle"%></td>
-            <td><%=data[i].Remark%></td>
-            <td>
-                <a class="btn btn-default" data-action="del" data-id="<%=i%>"><span class="glyphicon glyphicon-trash"></span></a>
-                <a class="btn btn-default" data-action="edit" data-id="<%=i%>"><span class="glyphicon glyphicon-pencil"></span></a>
-            </td>
-        </tr>
-    <%}%>
+﻿<script id="tempDbListItemView" type="text/template">
+    <td><%=DbCode%></td>
+    <td><%=DbType==0?"MsSql":"Oracle"%></td>
+    <td><%=Remark%></td>
+    <td>
+        <a class="btn btn-default" data-action="remove" ><span class="glyphicon glyphicon-trash"></span></a>
+        <a class="btn btn-default" data-action="edit"><span class="glyphicon glyphicon-pencil"></span></a>
+    </td>
 </script>
 
 <script id="tempDbEditView" type="text/template">
@@ -23,57 +19,46 @@
                 <form role="form" id="db_form">
                     <div class="form-group">
                         <label for="dbCode">编码</label>
-                        <input id="dbCode" type="text" class="form-control"  <%=data.DbCode!=null?'disabled':''%> name="DbCode" value="<%=data.DbCode%>" placeholder="输入编码" autofocus="autofocus" required="required" />
+                        <input id="dbCode" type="text" class="form-control"  <%=DbCode!=null?'disabled':''%> name="DbCode" value="<%=DbCode%>" placeholder="输入编码" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
                         <label>数据库类型</label>
                         <br />
-                        <%if(data.DbType==0){%>
                         <div class="btn-group" data-toggle="buttons">
 
-                            <label class="btn btn-info active">
-                                <input name="DbType" type="radio" value="0" checked>&nbsp;&nbsp;MsSql&nbsp;&nbsp;
+                            <label class="btn btn-info <%=DbType==0?'active':''%> ">
+                                <input class="dbType" type="radio" value="0" <%=DbType==0?'checked':''%> >&nbsp;&nbsp;MsSql&nbsp;&nbsp;
                             </label>
-                            <label class="btn btn-info">
-                                <input name="DbType" type="radio" value="1">&nbsp;&nbsp;Oracle&nbsp;&nbsp;
-                            </label>
-                        </div>
-                        <%} else {%>
-                        <div class="btn-group" data-toggle="buttons">
-                            <label class="btn btn-info">
-                                <input name="DbType" type="radio" value="0">&nbsp;&nbsp;MsSql&nbsp;&nbsp;
-                            </label>
-                            <label class="btn btn-info active">
-                                <input name="DbType" type="radio" value="1" checked>&nbsp;&nbsp;Oracle&nbsp;&nbsp;
+                            <label class="btn btn-info <%=DbType==1?'active':''%>">
+                                <input class="dbType" type="radio" value="1" <%=DbType==1?'checked':''%> >&nbsp;&nbsp;Oracle&nbsp;&nbsp;
                             </label>
                         </div>
-                        <%}%>
                     </div>
                     <div class="form-group">
                         <label for="dataSource">服务器地址</label>
-                        <input id="dataSource" type="text" class="form-control" name="DataSource" value="<%=data.DataSource%>" placeholder="输入服务器地址，如:172.16.0.1" autofocus="autofocus" required="required" />
+                        <input id="dataSource" type="text" class="form-control" name="DataSource" value="<%=DataSource%>" placeholder="输入服务器地址，如:172.16.0.1" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
                         <label for="dbName">数据库名称</label>
-                        <input id="dbName" type="text" class="form-control" name="DbName" value="<%=data.DbName%>" placeholder="MsSql填写数据库名，Oracle填写服务名" autofocus="autofocus" required="required" />
+                        <input id="dbName" type="text" class="form-control" name="DbName" value="<%=DbName%>" placeholder="MsSql填写数据库名，Oracle填写服务名" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
                         <label for="userID">登录ID</label>
-                        <input id="userID" type="text" class="form-control" name="UserID" value="<%=data.UserID%>" placeholder="输入登录用户id,如：sa" autofocus="autofocus" required="required" />
+                        <input id="userID" type="text" class="form-control" name="UserID" value="<%=UserID%>" placeholder="输入登录用户id,如：sa" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
                         <label for="password">登录密码</label>
-                        <input id="password" type="password" class="form-control" name="Password" value="<%=data.Password%>" placeholder="输入登录密码" autofocus="autofocus" required="required" />
+                        <input id="password" type="password" class="form-control" name="Password" value="<%=Password%>" placeholder="输入登录密码" autofocus="autofocus" required="required" />
                     </div>
                     <div class="form-group">
                         <label for="remark">说明</label>
-                        <input id="remark" type="text" class="form-control" name="Remark" value="<%=data.Remark%>" placeholder="输入说明" autofocus="autofocus" required="required" />
+                        <input id="remark" type="text" class="form-control" name="Remark" value="<%=Remark%>" placeholder="输入说明" autofocus="autofocus" required="required" />
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <a class="btn btn-default" data-dismiss="modal">关闭</a>
-                <a class="btn btn-primary" id="btn_save">保存</a>
+                <a class="btn btn-primary" id="save">保存</a>
             </div>
         </div>
     </div>
@@ -83,6 +68,7 @@
     if (window.Database == undefined) {
         Tools.Namespace.register("window.Database");
     }
+
     if (window.Database.Toolbar == undefined) {
         window.Database.Toolbar = Backbone.View.extend({
             events: {
@@ -94,72 +80,103 @@
                         dbListView.refresh();
                         break;
                     case "add":
-                        dbEditView.edit(null);
+                        dbEditView.show(null);
                         break;
                 }
             }
         });
     }
-    if (window.Database.DbListView == undefined) {
-        window.Database.DbListView = Backbone.View.extend({
-            template: _.template($("#tempDbListView").html()),
-            render: function (data) {
-                this.$el.html(this.template(data));
+
+    if (window.Database.DbListItemView == undefined) {
+        window.Database.DbListItemView = Backbone.View.extend({
+            tagName: "tr",
+            template: _.template($("#tempDbListItemView").html()),
+            initialize:function(db){
+                this.model = db;
+                this.listenTo(this.model, "change", this.render);
+                this.listenTo(this.model, "destroy", this.remove);
             },
-            refresh: function () {
-                dbList.fetch({
-                    success: function (model,response,options) {
-                        dbListView.render({ data: response });
-                    },
-                    error: function (e) {
-                        alert(e.responseJSON.Message);
-                    }
-                });
+            render: function () {
+                this.$el.html(this.template(this.model.toJSON()));
+                return this.el;
             },
             events: {
-                "click a": function (e) {
-                    switch ($(e.currentTarget).attr("data-action")) {
-                        case "edit":
-                            var db = dbList.at($(e.currentTarget).attr("data-id"));
-                            db.fetch({
-                                success: function () {
-                                    dbEditView.edit(db);
-                                },
-                                error: function () {
-                                    alert("数据源明细获取失败");
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "remove":
+                        if (!confirm("确认删除该数据源？")) {
+                            return;
+                        }
+                        this.model.destroy({
+                            success: function (model, rst) {
+                            },
+                            error: function (model,rst) {
+                                switch (rst.status) {
+                                    case 404:
+                                        alert("删除失败");
+                                        break;
+                                    case 400:
+                                        alert("删除失败，系统异常，请联系管理员");
+                                        break;
+                                    case 403:
+                                        alert("登录失效，请重新登陆");
+                                        window.location.href = "/Sign/UserSignin";
+                                        break;
                                 }
-                            });
-                            break;
-                        case "del":
-                            if (!confirm("确认删除该数据源？")) {
-                                return;
+                            },
+                            wait:true
+                        });
+                        break;
+                    case "edit":
+                        this.model.fetch({
+                            success: function (model,rst) {
+                                dbEditView.show(model);
+                            },
+                            error: function () {
+                                alert("数据源明细获取失败");
                             }
-                            var curDb = dbList.at($(e.currentTarget).attr("data-id"));
-                            curDb.destroy({
-                                success: function (model,rst) {
-                                    if (rst.ResultStatus == 1) {
-                                        alert("删除成功");
-                                        dbListView.refresh();
-                                    } else {
-                                        alert(rst.ResultMessage);
-                                    }
-                                },
-                                error: function () {
-                                    alert("连接失败");
-                                }
-                            });
-                            break;
-                    }
+                        });
+                        break;
                 }
             }
         });
     }
+
+    if (window.Database.DbListView == undefined) {
+        window.Database.DbListView = Backbone.View.extend({
+            render: function () {
+                this.clear();
+                for (var i = 0; i < dbList.length; i++) {
+                    this.addOne(dbList.at(i));
+                }
+            },
+            addOne:function(db){
+                this.$el.append(new window.Database.DbListItemView(db).render());
+            },
+            clear:function(){
+                this.$el.html("");
+            },
+            refresh: function () {
+                dbList.fetch({
+                    success: function (model, response, options) {
+                        dbListView.render();
+                    },
+                    error: function (e) {
+                        alert("获取数据源列表失败");
+                    }
+                });
+            }
+        });
+    }
+
     if (window.Database.DbModel == undefined) {
         window.Database.DbModel = Backbone.Model.extend({
             defaults: {
                 "ID": null,
                 "DbCode": null,
-                "DbType": null,
+                "DbType": 0,
                 "DataSource": null,
                 "DbName": null,
                 "UserID": null,
@@ -170,6 +187,7 @@
             urlRoot:"/api/Database"
         });
     }
+
     if (window.Database.DbList == undefined) {
         window.Database.DbList = Backbone.Collection.extend({
             model: window.Database.DbModel,
@@ -179,48 +197,59 @@
 
     if (window.Database.DbEditView == undefined) {
         window.Database.DbEditView = Backbone.View.extend({
-            curDb:null,
             template: _.template($("#tempDbEditView").html()),
             render: function () {
-                if (this.curDb == null) {
-                    this.curDb = new window.Database.DbModel();
+                this.$el.html(this.template(this.model.toJSON()));
+            },
+            close: function () {
+                this.$el.hide();
+            },
+
+            show: function (db) {
+                this.model = db;
+                if (this.model == null) {
+                    this.model = new window.Database.DbModel();
                 }
-                this.$el.html(this.template({
-                    "data": this.curDb.toJSON(this.curDb)
-                }))
-            },
-            hide: function () {
-                this.$el.modal("hide");
-            },
-            edit: function (data) {
-                this.curDb = data;
                 this.render();
                 this.$el.modal({
                     show:true,
                     keyboard: false,
                     backdrop: false
                 });
+                this.$el.show()
             },
-            events: {
-                "click #btn_save": "save",
-                "change [name='DbType']": "dbTypeChange"
-            },
-            save: function () {
-                this.curDb.set(Tools.serializeObject($("#db_form")));
-                this.curDb.save(null, {
-                    success: function (model, rst) {
-                        if (rst.ResultStatus == 1) {
-                            dbEditView.hide();
-                            dbListView.refresh();
 
-                        } else {
-                            alert(rst.ResultMessage);
+            events: {
+                "click #save": "saveDb",
+                "change .dbType": "dbTypeChange"
+            },
+
+            saveDb: function () {
+                this.model.save(Tools.serializeObject($("#db_form")), {
+                    success: function (model, rst) {
+                        dbListView.refresh();
+                        dbEditView.close();
+                    },
+                    error: function (model,rst) {
+                        switch (rst.status) {
+                            case 404:
+                                alert("保存失败");
+                                break;
+                            case 400:
+                                alert("保存失败，系统异常，请联系管理员");
+                                break;
+                            case 403:
+                                alert("登录失效，请重新登陆");
+                                window.location.href = "/Sign/UserSignin";
+                                break;
                         }
                     },
-                    error: function (e) {
-                        alert("连接失败");
-                    }
+                    wait:true
                 })
+            },
+
+            dbTypeChange: function (e) {
+                this.model.set("DbType", $(e.currentTarget).val());
             }
         });
     }

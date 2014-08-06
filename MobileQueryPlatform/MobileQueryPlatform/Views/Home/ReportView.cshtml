@@ -372,8 +372,9 @@
                 "click td":"clickRow"
             },
             clickRow: function () {
+                var selected = this.$el.hasClass("danger");
                 $(".reportBody tr").removeClass();
-                this.$el.addClass("danger");
+                this.$el.toggleClass("danger",!selected);
             }
 
         });

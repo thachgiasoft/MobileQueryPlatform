@@ -75,22 +75,10 @@
     if (window.UserManage.UserEditView == undefined) {
         window.UserManage.UserEditView = Backbone.View.extend({
             template: _.template($("#tempUserView").html()),
+
             render: function () {
                 this.$el.html(this.template(this.model.toJSON()));
                 return this;
-            },
-            add: function () {
-                this.curUser = null;
-                $("#edit_userCode").removeAttr("disabled");
-                $("#edit_userCode").val("");
-                $("#edit_userName").val("");
-                $("#isAdmin_f").addClass("active");
-                $("#isAdmin_t").removeClass("active");
-                this.$el.modal({
-                    show: true,
-                    keyboard: false,
-                    backdrop: false
-                });
             },
 
             show: function (user) {
@@ -123,8 +111,8 @@
             saveUser: function () {
                 this.model.save(Tools.serializeObject($("#form")), {
                     success: function (model,rst) {
-                        userEditView.close();
                         userListView.refresh();
+                        userEditView.close();
                     },
                     error: function (model,rst) {
                         switch (rst.status) {
