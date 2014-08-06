@@ -177,7 +177,7 @@ namespace BLL
         /// 增加用户
         /// </summary>
         /// <returns></returns>
-        public static int AddUser(User user,out string msg)
+        public static int AddUser(ref User user,out string msg)
         {
             try
             {
@@ -199,6 +199,12 @@ namespace BLL
                         );
                     if (i ==1)
                     {
+                        sql.Clear();
+                        sql.Append("SELECT @@IDENTITY ");
+                        dal.OpenReader(sql.ToString());
+                        dal.DataReader.Read();
+                        user.ID = Convert.ToInt32(dal.DataReader[0]);
+                        dal.DataReader.Close();
                         dal.CommitTran();
                         msg = "success";
                         return i;

@@ -1,20 +1,12 @@
-﻿<script type="text/template" id="tempUserList">
-    <%for(var i=0;i<=data.length-1;i++){ %>
-    <tr>
-        <td><%=data[i].UserCode%></td>
-        <td><%=data[i].UserName%></td>
-        <td><%=data[i].IsAdmin==true?"是":"否"%></td>
-        <td>
-            <a class="btn btn-default" data-action="del" data-id="<%=i%>"><span class="glyphicon glyphicon-trash"></span></a>
-            <a class="btn btn-default" data-action="edit" data-id="<%=i%>"><span class="glyphicon glyphicon-pencil"></span></a>
-            <a class="btn btn-default" data-action="enabled" data-id="<%=i%>"><span class="glyphicon <%=data[i].Enabled?'glyphicon-eye-open':'glyphicon-eye-close'%>"></span></a>
-        </td>
-    </tr>
-    <%}%>
-</script>
-
-<script id="tempUserListItemView" type="text/template">
-
+﻿<script id="tempUserListItemView" type="text/template">
+    <td><%=UserCode%></td>
+    <td><%=UserName%></td>
+    <td><%=IsAdmin==true?"是":"否"%></td>
+    <td>
+        <a class="btn btn-default" data-action="del"><span class="glyphicon glyphicon-trash"></span></a>
+        <a class="btn btn-default" data-action="edit"><span class="glyphicon glyphicon-pencil"></span></a>
+        <a class="btn btn-default" data-action="enabled"><span class="glyphicon <%=Enabled?'glyphicon-eye-open':'glyphicon-eye-close'%>"></span></a>
+    </td>
 </script>
 
 <script id="tempUserView" type="text/template">
@@ -22,43 +14,36 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title"><%=title%></h4>
+                <h4 class="modal-title">用户信息</h4>
             </div>
             <div class="modal-body">
-                <form role="form" id="<%=action%>_form">
+                <form role="form" id="form">
                     <div class="form-group">
-                        <label for="<%=action%>_userCode">用户编码</label>
-                        <input id="<%=action%>_userCode" type="text" class="form-control" name="UserCode" placeholder="输入用户编码" autofocus="autofocus" required="required" />
+                        <label for="userCode">用户编码</label>
+                        <input id="userCode" type="text" class="form-control" name="UserCode" placeholder="输入用户编码" autofocus="autofocus" required="required" value="<%=UserCode%>" />
                     </div>
                     <div class="form-group">
-                        <label for="<%=action%>_userName">用户名称</label>
-                        <input id="<%=action%>_userName" type="text" class="form-control" name="UserName" placeholder="输入用户名称" autofocus="autofocus" required="required" />
+                        <label for="userName">用户名称</label>
+                        <input id="userName" type="text" class="form-control" name="UserName" placeholder="输入用户名称" autofocus="autofocus" required="required" value="<%=UserName%>" />
                     </div>
                     <div class="form-group">
                         <label>管理员</label>
                     </div>
                     <div class="btn-group" data-toggle="buttons">
-                        <%if(action=="edit"){%>
-                        <label id="isAdmin_t" class="btn btn-info">
-                            <input name="IsAdmin" type="radio" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
-                        </label>
-                        <label id="isAdmin_f"class="btn btn-info">
-                            <input name="IsAdmin" type="radio" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
-                        </label>
-                        <%} else {%>
-                        <label class="btn btn-info">
-                            <input name="IsAdmin" type="checkbox" value="true">&nbsp;&nbsp;是&nbsp;&nbsp;
-                        </label>
-                        <label class="btn btn-info">
-                            <input name="IsAdmin" type="checkbox" value="false">&nbsp;&nbsp;否&nbsp;&nbsp;
-                        </label>
-                        <%}%>
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-primary <%=IsAdmin?'active':''%>">
+                                <input class="IsAdmin" value="true" type="radio" autocomplete="off" <%=IsAdmin?"checked":""%> />&nbsp;&nbsp; 是&nbsp;&nbsp;
+                            </label>
+                            <label class="btn btn-primary <%=!IsAdmin?'active':''%>">
+                                <input class="IsAdmin" value="false" type="radio" autocomplete="off" <%=!IsAdmin?"checked":""%> /> &nbsp;&nbsp;否&nbsp;&nbsp;
+                            </label>
+                        </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <a class="btn btn-default" data-dismiss="modal">关闭</a>
-                <a class="btn btn-primary" id="<%=action%>_save"><%=saveText%></a>
+                <a class="btn btn-primary" id="save">保存</a>
             </div>
         </div>
     </div>
@@ -77,7 +62,7 @@
             clickBtn: function (e) {
                 switch ($(e.currentTarget).attr("data-action")) {
                     case "add":
-                        userEditView.add();
+                        userEditView.show(null);
                         break;
                     case "refresh":
                         userListView.refresh();
@@ -91,14 +76,8 @@
         window.UserManage.UserEditView = Backbone.View.extend({
             template: _.template($("#tempUserView").html()),
             render: function () {
-                this.$el.html(this.template({
-                    "action": "edit",
-                    "title": "用户信息",
-                    "saveText": "保存"
-                }))
-            },
-            initialize:function(){
-                this.render();
+                this.$el.html(this.template(this.model.toJSON()));
+                return this;
             },
             add: function () {
                 this.curUser = null;
@@ -113,74 +92,72 @@
                     backdrop: false
                 });
             },
-            curUser:null,
-            edit: function (i) {
-                $("#edit_userCode").attr("disabled", "");
-                this.curUser = userList.at(i);
-                $("#edit_userCode").val(this.curUser.get("UserCode"));
-                $("#edit_userName").val(this.curUser.get("UserName"));
-                if (this.curUser.get("IsAdmin")) {
-                    $("#isAdmin_t").addClass("active");
-                    $("#isAdmin_f").removeClass("active");
+
+            show: function (user) {
+                this.model = user;
+                if (user == null) {
+                    this.model =new  window.UserManage.UserModel();
                 }
-                else {
-                    $("#isAdmin_t").removeClass("active");
-                    $("#isAdmin_f").addClass("active");
-                }
+                this.render();
                 this.$el.modal({
                     show: true,
                     keyboard: false,
                     backdrop: false
                 });
+                this.$el.show();
             },
-            hide: function () {
-                this.$el.modal("hide");
+
+            close: function () {
+                this.$el.hide();
             },
+            
             events: {
-                "click #edit_save":"saveUser"
+                "click #save": "saveUser",
+                "change .IsAdmin":"checkIsAdmin"
             },
+
+            checkIsAdmin: function (e) {
+                this.model.set("IsAdmin", $(e.currentTarget).val());  
+            },
+
             saveUser: function () {
-                if (this.curUser == null) {
-                    this.curUser = new window.UserManage.UserModel(
-                        Tools.serializeObject($("#edit_form"))
-                        );
-                }
-                else {
-                    this.curUser.set(Tools.serializeObject($("#edit_form")));
-                }
-                this.curUser.save(null, {
+                this.model.save(Tools.serializeObject($("#form")), {
                     success: function (model,rst) {
-                        if (rst.ResultStatus == 1) {
-                            userEditView.hide();
-                            userListView.refresh();
-                            
-                        } else {
-                            alert(rst.ResultMessage);
+                        userEditView.close();
+                        userListView.refresh();
+                    },
+                    error: function (model,rst) {
+                        switch (rst.status) {
+                            case 404:
+                                alert("保存失败");
+                                break;
+                            case 400:
+                                alert("保存失败，系统异常，请联系管理员");
+                                break;
+                            case 403:
+                                alert("登录失效，请重新登陆");
+                                window.location.href = "/Sign/UserSignin";
+                                break;
                         }
                     },
-                    error: function (e) {
-                        alert("连接失败");
-                    }
+                    wait:true
                 });
             }
         });
     }
 
-    if (window.UserManage.UserListView == undefined) {
-        window.UserManage.UserListView = Backbone.View.extend({
-            template: _.template($("#tempUserList").html()),
-            render: function (data) {
-                this.$el.html(this.template(data));
+    if (window.UserManage.UserListItemView == undefined) {
+        window.UserManage.UserListItemView = Backbone.View.extend({
+            tagName:"tr",
+            template: _.template($("#tempUserListItemView").html()),
+            initialize:function(user){
+                this.model = user;
+                this.listenTo(this.model, "change", this.render);
+                this.listenTo(this.model, "destroy", this.remove);
             },
-            refresh: function () {
-                userList.fetch({
-                    success: function (collection, response, options) {
-                        userListView.render({ data: response });
-                    },
-                    error: function (e) {
-                        alert(e.responseJSON.Message);
-                    }
-                });
+            render: function () {
+                this.$el.html(this.template(this.model.toJSON()));
+                return this.el;
             },
             events: {
                 "click a":"clickBtn"
@@ -188,49 +165,81 @@
             clickBtn: function (e) {
                 switch ($(e.currentTarget).attr("data-action")) {
                     case "edit":
-                        userEditView.edit($(e.currentTarget).attr("data-id"));
+                        userEditView.show(this.model);
                         break;
                     case "del":
                         if (!confirm("确认删除该用户？")) {
                             return;
                         }
-                        var curUser = userList.at($(e.currentTarget).attr("data-id"));
-                        curUser.destroy({
-                            success: function (model,rst) {
-                                if (rst.ResultStatus == 1) {
-                                    alert("删除成功");
-                                    userListView.refresh();
-                                } else {
-                                    alert(rst.ResultMessage);
+                        this.model.destroy({
+                            success: function (model, rst) {
+                            },
+                            error: function (model,rst) {
+                                switch (rst.status) {
+                                    case 404:
+                                        alert("删除失败");
+                                        break;
+                                    case 400:
+                                        alert("删除失败，系统异常，请联系管理员");
+                                        break;
+                                    case 403:
+                                        alert("登录失效，请重新登陆");
+                                        window.location.href = "/Sign/UserSignin";
+                                        break;
                                 }
                             },
-                            error: function (e) {
-                                alert("连接失败");
-                            }
+                            wait:true
                         })
                         break;
                     case "enabled":
-                        var curUser = userList.at($(e.currentTarget).attr("data-id"));
-                        curUser.set({
-                            Enabled:!curUser.get("Enabled")
-                        });
-                        curUser.save(null,
+                        this.model.save(
+                            { Enabled: !this.model.get("Enabled") },
                             {
                                 success: function (model, rst) {
-                                    if (rst.ResultStatus != 1) {
-                                        alert(rst.ResultMessage);
-                                        return;
-                                    }
-                                    else {
-                                        userListView.refresh();
-                                    }
                                 },
-                                error: function () {
-                                    alert("设置失败");
-                                }
+                                error: function (model, rst, status) {
+                                    switch (rst.status) {
+                                        case 404:
+                                            alert("设置失败");
+                                            break;
+                                        case 400:
+                                            alert("设置失败，系统异常，请联系管理员");
+                                            break;
+                                        case 403:
+                                            alert("登录失效，请重新登陆");
+                                            window.location.href = "/Sign/UserSignin";
+                                            break;
+                                    }
+                                    
+                                },
+                                wait:true
                             });
                         break;
                 }
+            }
+        });
+    }
+
+    if (window.UserManage.UserListView == undefined) {
+        window.UserManage.UserListView = Backbone.View.extend({
+            render: function () {
+                this.$el.html("");
+                for (var i = 0; i < userList.length; i++) {
+                    this.addOne(userList.at(i));
+                }
+            },
+            refresh: function () {
+                userList.fetch({
+                    success: function (collection, response, options) {
+                        userListView.render();
+                    },
+                    error: function () {
+                        alert("获取用户列表失败");
+                    }
+                });
+            },
+            addOne: function (model) {
+                this.$el.append(new window.UserManage.UserListItemView(model).render());
             }
         });
     }
@@ -259,10 +268,11 @@
 </script>
 
 <script type="text/javascript">
+    var userList;
     var toolbar;
     var userEditView;
     var userListView;
-    var userList;
+    
     $(function () {
         toolbar == new window.UserManage.Toolbar({
             el: "#toolbar"
@@ -292,7 +302,6 @@
     </table> 
 </div>
   
-
 <div class="modal fade" id="userEditView"/>
 
 <div class="navbar navbar-fixed-bottom">
