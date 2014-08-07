@@ -84,11 +84,19 @@ namespace BLL
                     if (i == 1)
                     {
                         sql.Clear();
-                        sql.Append("SELECT @@IDENTITY ");
+                        sql.Append("SELECT IDENT_CURRENT('tDatabase') ");
                         dal.OpenReader(sql.ToString());
-                        dal.DataReader.Read();
-                        db.ID = Convert.ToInt32(dal.DataReader[0]);
-                        dal.DataReader.Close();
+                        if (dal.DataReader.Read())
+                        {
+                            db.ID = Convert.ToDecimal(dal.DataReader[0]);
+                            dal.DataReader.Close();
+                        }
+                        else
+                        {
+                            dal.DataReader.Close();
+                            dal.RollBackTran();
+                            throw new Exception("获取报表ID失败");
+                        }
                         dal.CommitTran();
                         msg = "success";
                         return 1;

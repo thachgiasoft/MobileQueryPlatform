@@ -41,45 +41,64 @@ namespace MobileQueryPlatform.Controllers
         }
 
         // POST api/report
-        public ResultModel<object> Post(Report value)
+        public Report Post(Report value)
         {
-            ResultModel<object> rst = new ResultModel<object>();
-            if (HttpContext.Current.Session["SigninedUser"] == null)
+            User user = HttpContext.Current.Session["SigninedUser"] as User;
+            if (user == null || !user.IsAdmin)
             {
-                rst.ResultMessage = "用户登录失效";
-                rst.ResultStatus = -1;
-                return rst;
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
             }
-            rst.ResultStatus = ReportBLL.InsertReport(value, out rst.ResultMessage);
-            return rst;
+            string ResultMessage;
+            int ResultStatus = ReportBLL.InsertReport(ref value, out ResultMessage);
+            if (ResultStatus == 0)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.NotFound));
+            }
+            else if (ResultStatus == -1)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest));
+            }
+            return value;
         }
 
         // PUT api/report/5
-        public ResultModel<object> Put(decimal id, Report value)
+        public void Put(decimal id, Report value)
         {
-            ResultModel<object> rst = new ResultModel<object>();
-            if (HttpContext.Current.Session["SigninedUser"] == null)
+            User user = HttpContext.Current.Session["SigninedUser"] as User;
+            if (user == null || !user.IsAdmin)
             {
-                rst.ResultMessage = "用户登录失效";
-                rst.ResultStatus = -1;
-                return rst;
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
             }
-            rst.ResultStatus = ReportBLL.UpdateReport(id, value, out rst.ResultMessage);
-            return rst;
+            string ResultMessage;
+            int ResultStatus = ReportBLL.UpdateReport(id, value, out ResultMessage);
+            if (ResultStatus == 0)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.NotFound));
+            }
+            else if (ResultStatus == -1)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest));
+            }
         }
 
         // DELETE api/report/5
-        public ResultModel<object> Delete(decimal id)
+        public void Delete(decimal id)
         {
-            ResultModel<object> rst = new ResultModel<object>();
-            if (HttpContext.Current.Session["SigninedUser"] == null)
+            User user = HttpContext.Current.Session["SigninedUser"] as User;
+            if (user == null || !user.IsAdmin)
             {
-                rst.ResultMessage = "用户登录失效";
-                rst.ResultStatus = -1;
-                return rst;
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
             }
-            rst.ResultStatus = ReportBLL.DeleteReport(id, out rst.ResultMessage);
-            return rst;
+            string ResultMessage;
+            int ResultStatus = ReportBLL.DeleteReport(id, out ResultMessage);
+            if (ResultStatus == 0)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.NotFound));
+            }
+            else if (ResultStatus == -1)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest));
+            }
         }
     }
 }

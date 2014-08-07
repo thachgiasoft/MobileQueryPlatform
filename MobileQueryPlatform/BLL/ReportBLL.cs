@@ -48,7 +48,7 @@ namespace BLL
                             AllSumabled=Convert.ToBoolean(dal.DataReader["AllSumabled"]),
                             PageSumabled = Convert.ToBoolean(dal.DataReader["PageSumabled"]),
                             Pagingabled = Convert.ToBoolean(dal.DataReader["Pagingabled"]),
-                            PageSize = Convert.ToInt16(dal.DataReader["PageSize"])
+                            PageSize = Convert.ToInt16(dal.DataReader["PageSize"]),
                         };
                         dal.DataReader.Close();
                     }
@@ -312,7 +312,7 @@ namespace BLL
         /// <param name="report"></param>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public static int InsertReport(Report report, out string msg)
+        public static int InsertReport(ref Report report, out string msg)
         {
             try
             {
@@ -344,19 +344,19 @@ namespace BLL
                     }
                     else{
                         sql.Clear();
-                        sql.Append("SELECT IDENT_CURRENT('tReport') AS ID ");
+                        sql.Append("SELECT IDENT_CURRENT('tReport')");
                         dal.OpenReader(sql.ToString());
                         if (dal.DataReader.Read())
                         {
-                            report.ID = Convert.ToDecimal(dal.DataReader["ID"]);//读取最新ReportID
+                            report.ID = Convert.ToDecimal(dal.DataReader[0]);//读取最新ReportID
+                            dal.DataReader.Close();
                         }
                         else
                         {
+                            dal.DataReader.Close();
                             dal.RollBackTran();
                             throw new Exception("获取报表ID失败");
                         }
-                        
-                        dal.DataReader.Close();
                     }
                     //保存字段
                     foreach (ReportColumn c in report.Columns)
@@ -887,6 +887,7 @@ namespace BLL
                     //获取到数据库report
                     report.ID = id;
                     reportdb = GetReport(id);
+                    report.Enabled = reportdb.Enabled;
                     //两个report进行比较
                     //比较params
                     foreach (ReportParam rp in report.Params)

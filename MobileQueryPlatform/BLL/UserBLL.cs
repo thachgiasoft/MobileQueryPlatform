@@ -200,11 +200,19 @@ namespace BLL
                     if (i ==1)
                     {
                         sql.Clear();
-                        sql.Append("SELECT @@IDENTITY ");
+                        sql.Append("SELECT IDENT_CURRENT('tUser') ");
                         dal.OpenReader(sql.ToString());
-                        dal.DataReader.Read();
-                        user.ID = Convert.ToInt32(dal.DataReader[0]);
-                        dal.DataReader.Close();
+                        if (dal.DataReader.Read())
+                        {
+                            user.ID = Convert.ToInt32(dal.DataReader[0]);
+                            dal.DataReader.Close();
+                        }
+                        else
+                        {
+                            dal.DataReader.Close();
+                            dal.RollBackTran();
+                            throw new Exception("获取ID失败");
+                        }
                         dal.CommitTran();
                         msg = "success";
                         return i;

@@ -1,16 +1,13 @@
-﻿<script type="text/template" id="tempReportList">
-    <%for(var i=0;i<=data.length-1;i++){ %>
-        <tr>
-            <td><%=data[i].ReportName%></td>
-            <td><%=data[i].DBCode%></td>
-            <td><%=data[i].Remark%></td>
-            <td>
-                <a class="btn btn-default" data-action="del" data-id="<%=i%>"><span class="glyphicon glyphicon-trash"></span></a>
-                <a class="btn btn-default" data-action="edit" data-id="<%=i%>"><span class="glyphicon glyphicon-pencil"></span></a>
-                <a class="btn btn-default" data-action="enabled" data-id="<%=i%>"><span class="glyphicon <%=data[i].Enabled?'glyphicon-eye-open':'glyphicon-eye-close'%>"></span></a>
-            </td>
-        </tr>
-    <%}%>
+﻿<script type="text/template" id="tempReportListItemView">
+    <td><%=ReportName%></td>
+    <td><%=DBCode%></td>
+    <td><%=Remark%></td>
+    <td><%=Enabled?"启用":"禁用"%></td>
+    <td>
+        <a class="btn btn-default" data-action="del" ><span class="glyphicon glyphicon-trash"></span></a>
+        <a class="btn btn-default" data-action="edit"><span class="glyphicon glyphicon-pencil"></span></a>
+        <a class="btn btn-default" data-action="enabled"><span class="glyphicon <%=!Enabled?'glyphicon-ok-circle text-success':'glyphicon-ban-circle text-danger'%>"></span></a>
+    </td>
 </script>
 
 <script id="tempReportView" type="text/template">
@@ -24,7 +21,6 @@
                 <form role="form" id="formReport">
                     <div class="form-group">
                         <label for="reportName">报表名称</label>
-                        <input id="reportID" name="ID" type="hidden" value="<%=report.ID%>"/>
                         <input id="reportName" type="text" class="form-control" name="ReportName" value="<%=report.ReportName%>" placeholder="输入报表名称" autofocus="autofocus" required="required" />
                     </div>
                     <hr />
@@ -251,96 +247,124 @@
         });
     }
     
-    if (window.ReportManage.ReportListView == undefined) {
-        window.ReportManage.ReportListView = Backbone.View.extend({
-            template: _.template($("#tempReportList").html()),
-            render: function (data) {
-                this.$el.html(this.template(data));
+    if (window.ReportManage.ReportListItemView == undefined) {
+        window.ReportManage.ReportListItemView = Backbone.View.extend({
+            tagName:"tr",
+            template: _.template($("#tempReportListItemView").html()),
+            initialize:function(rpt){
+                this.model = rpt;
+                this.listenTo(this.model, "change", this.render);
+                this.listenTo(this.model, "destroy", this.remove);
             },
-            refresh: function () {
-                reportList.fetch({
-                    success: function (collection, response, options) {
-                        
-                        reportListView.render({ data: response });
-                    },
-                    error: function (e) {
-                        alert(e.responseJSON.Message);
-                    }
-                });
+            render: function () {
+                this.$el.html(this.template(this.model.toJSON()));
+                return this.el;
             },
             events: {
-                "click a": function (e) {
-                    switch ($(e.currentTarget).attr("data-action")) {
-                        case "del":
-                            if(confirm("确定删除该报表？")==false){
-                                return;
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "del":
+                        if (confirm("确定删除该报表？") == false) {
+                            return;
+                        }
+                        this.model.destroy({
+                            success: function (model, rst) {
+                            },
+                            error: function (model,rst) {
+                                switch (rst.status) {
+                                    case 404:
+                                        alert("删除失败");
+                                        break;
+                                    case 400:
+                                        alert("删除失败，系统异常，请联系管理员");
+                                        break;
+                                    case 403:
+                                        alert("登录失效，请重新登陆");
+                                        window.location.href = "/Sign/adminSignin";
+                                        break;
+                                }
+                            },
+                            wait:true
+                        });
+                        break;
+                    case "edit":
+                        this.model.fetch({
+                            success: function (model,rst) {
+                                reportView.show(model);
+                            },
+                            error: function () {
+                                alert("报表明细读取失败");
                             }
-                            var rpt = reportList.at($(e.currentTarget).attr("data-id"));
-                            rpt.destroy({
-                                success: function (model,rst) {
-                                    if (rst.ResultStatus != 1) {
-                                        alert(rst.ResultMessage);
-                                        return;
-                                    }
-                                    else {
-                                        reportListView.refresh();
-                                    }
-                                },
-                                error: function () {
-                                    alert("删除失败");
-                                }
-                            });
-                            break;
-                        case "edit":
-                            var rpt = reportList.at($(e.currentTarget).attr("data-id"));
-                            rpt.fetch({
-                                success: function () {
-                                    reportView.show(rpt);
-                                },
-                                error: function () {
-                                    alert("报表明细读取失败");
-                                }
-                            });
-                            
-                            break;
-                        case "enabled":
-                            var rpt = reportList.at($(e.currentTarget).attr("data-id"));
-                            rpt.set({
-                                Enabled:!rpt.get("Enabled")
-                            });
-                            rpt.save(null,{
+                        });
+
+                        break;
+                    case "enabled":
+                        this.model.save({
+                                Enabled: !this.model.get("Enabled")
+                            },
+                            {
                                 success: function (model, rst) {
-                                    if (rst.ResultStatus != 1) {
-                                        alert(rst.ResultMessage);
-                                        return;
-                                    }
-                                    else {
-                                        reportListView.refresh();
+                                },
+                                error: function (model,rst) {
+                                    switch (rst.status) {
+                                        case 404:
+                                            alert("设置失败");
+                                            break;
+                                        case 400:
+                                            alert("设置失败，系统异常，请联系管理员");
+                                            break;
+                                        case 403:
+                                            alert("登录失效，请重新登陆");
+                                            window.location.href = "/Sign/adminSignin";
+                                            break;
                                     }
                                 },
-                                error: function () {
-                                    alert("设置失败");
-                                }
-                            })
-                            break;
-                    }
+                                wait: true
+                            });
+                        break;
                 }
             }
         });
     }
+
+    if (window.ReportManage.ReportListView == undefined) {
+        window.ReportManage.ReportListView = Backbone.View.extend({
+            render: function () {
+                this.$el.empty();
+                for (var i = 0; i < reportList.length; i++) {
+                    this.$el.append(new window.ReportManage.ReportListItemView(reportList.at(i)).render());
+                }
+            },
+            refresh: function () {
+                reportList.fetch({
+                    success: function (collection, response, options) {
+                        reportListView.render();
+                    },
+                    error: function (e) {
+                        alert("获取报表失败");
+                    }
+                });
+            }
+        });
+    }
+
     if (window.ReportManage.ReportView == undefined) {
         window.ReportManage.ReportView = Backbone.View.extend({
-            curReport:null,
             template: _.template($("#tempReportView").html()),
             render: function () {
                 this.$el.html(this.template({
-                    "report": this.curReport.toJSON(this.curReport),
-                    "dbList": dbList.toJSON(dbList)//此处添加数据源变量
+                    "report": this.model.toJSON(),
+                    "dbList": dbList.toJSON()//此处添加数据源变量
                 }));
             },
             //传入的data是window.ReportManage.Report的实例
-            show: function (data) {
-                this.curReport = data==null?new window.ReportManage.Report():data;
+            show: function (rpt) {
+                this.model = rpt;
+                if (this.model == null) {
+                    this.model=new window.ReportManage.Report();
+                }
                 this.render();
                 this.$el.modal({
                     show:true,
@@ -349,8 +373,8 @@
                 });
                 this.$el.show();
             },
-            hide: function () {
-                this.$el.modal("hide");
+            close: function () {
+                this.$el.hide();
             },
             events: {
                 "click #btnRebuild": "buildReport",
@@ -367,29 +391,29 @@
                     case "paramNameChanged":
                         @*参数名改变*@
                         var index = $(e.currentTarget).attr("data-index");
-                        var param = this.curReport.get("Params")[index];
+                        var param = this.model.get("Params")[index];
                         param.ParamName = $(e.currentTarget).val();
                         break;
                     case "paramItemsStringChanged":
                         @*参数列表值改变*@
                         var index = $(e.currentTarget).attr("data-index");
-                        var param = this.curReport.get("Params")[index];
+                        var param = this.model.get("Params")[index];
                         param.ParamItemString = $(e.currentTarget).val();
                         break;
                     case "columnSortabledChecked":
                         @*字段排序改变*@
                         var index = $(e.currentTarget).attr("data-index");
-                        this.curReport.get("Columns")[index].Sortabled = $(e.currentTarget).is(":checked");
+                        this.model.get("Columns")[index].Sortabled = $(e.currentTarget).is(":checked");
                         break;
                     case "columnSumabledChecked":
                         @*字段求和发生改变*@
                         var index = $(e.currentTarget).attr("data-index");
-                        this.curReport.get("Columns")[index].Sumabled = $(e.currentTarget).is(":checked");
+                        this.model.get("Columns")[index].Sumabled = $(e.currentTarget).is(":checked");
                         break;
                     case "columnNameChanged":
                         @*字段名称改变*@
                         var index = $(e.currentTarget).attr("data-index");
-                        this.curReport.get("Columns")[index].ColumnName = $(e.currentTarget).val();
+                        this.model.get("Columns")[index].ColumnName = $(e.currentTarget).val();
                         break;
                 }
                 
@@ -426,14 +450,14 @@
                             $("#paramInputTypeList_" + index + " li").removeClass("active")
                             $("#paramInputTypeList_" + index + " li:eq(0)").addClass("active")
                             $("#btn_InputType_" + index).addClass("disabled");
-                            var params = this.curReport.get("Params");
+                            var params = this.model.get("Params");
                             params[index].ParamInputType = 0;
                             params[index].ParamInputTypeName = "手动输入";
                         }
                         else {
                             $("#btn_InputType_" + index).removeClass("disabled");
                         }
-                        var params = this.curReport.get("Params");
+                        var params = this.model.get("Params");
                         params[index].ParamType = value;
                         params[index].ParamTypeName = text;
                         $("#paramTypeText_" + index).html(text);
@@ -459,7 +483,7 @@
                         else {
                             $("#paramItemsString_" + index).removeAttr("readonly");
                         }
-                        var params = this.curReport.get("Params");
+                        var params = this.model.get("Params");
                         params[index].ParamInputType = value;
                         params[index].ParamInputTypeName = text;
                         $("#paramInputTypeText_" + index).html(text);
@@ -487,19 +511,26 @@
                     return;
                 }
                 var rpt = Tools.serializeObject($("#formReport"));
-                this.curReport.set(rpt);
-                if (this.curReport.get("ID") == "") {
-                    this.curReport.set({ ID: null });
-                }
-
-                this.curReport.save(null, {
+                this.model.save(rpt, {
                     success: function () {
-                        reportView.hide();
                         reportListView.refresh();
+                        reportView.close();
                     },
-                    error: function () {
-                        alert("保存失败");
-                    }
+                    error: function (model,rst) {
+                        switch (rst.status) {
+                            case 404:
+                                alert("保存失败");
+                                break;
+                            case 400:
+                                alert("保存失败，系统异常，请联系管理员");
+                                break;
+                            case 403:
+                                alert("登录失效，请重新登陆");
+                                window.location.href = "/Sign/adminSignin";
+                                break;
+                        }
+                    },
+                    wait:true
                 });
             },
             buildReport: function () {
@@ -513,7 +544,7 @@
                     alert("请选择数据库");
                     return;
                 }
-                var rpt = this.curReport.clone();
+                var rpt = this.model.clone();
                 if (rpt.get("ID") == null) {
                     @*将id设为0*@
                     rpt.set({ "ID": 0 });
@@ -539,7 +570,7 @@
                         rst.PageSumabled = $("#PageSumabled_t").hasClass("active");
                         rst.PageSize = $("#pageSize").val();
                         rst.Pagingabled = $("#pagingabled_t").hasClass("active");
-                        reportView.curReport.set(rst);
+                        reportView.model.set(rst);
                         reportView.render();
                         needRebuild = false;
                     },
@@ -578,7 +609,7 @@
     var reportListView;
     var reportView;
     var dbList;
-    var needRebuild=false;
+    var needRebuild = false;
     $(function () {
         
         toolbar = new window.ReportManage.Toolbar({
@@ -609,6 +640,7 @@
                 <th>报表名</th>
                 <th>数据源</th>
                 <th>说明</th>
+                <th>状态</th>
                 <th>操作</th>
             </tr>
         </thead>
