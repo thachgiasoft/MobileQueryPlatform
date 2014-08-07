@@ -60,7 +60,7 @@ namespace BLL
                     
                     //读取字段集合
                     sql.Clear();
-                    sql.Append("SELECT * FROM tReportColumn WHERE ReportID=@ReportID");
+                    sql.Append("SELECT * FROM tReportColumn WHERE ReportID=@ReportID ORDER BY OrderIndex");
                     dal.OpenReader(sql.ToString(),
                         dal.CreateParameter("@ReportID", rpt.ID)
                         );
@@ -143,7 +143,7 @@ namespace BLL
 
                     //读取字段集合
                     sql.Clear();
-                    sql.Append("SELECT * FROM tReportColumn WHERE ReportID=@ReportID");
+                    sql.Append("SELECT * FROM tReportColumn WHERE ReportID=@ReportID ORDER BY OrderIndex");
                     dal.OpenReader(sql.ToString(),
                         dal.CreateParameter("@ReportID", rpt.ID)
                         );
@@ -362,9 +362,9 @@ namespace BLL
                     foreach (ReportColumn c in report.Columns)
                     {
                         sql.Clear();
-                        sql.Append("INSERT INTO tReportColumn( ReportID , ColumnCode , ColumnName ,ColumnType,Sumabled  ,Sortabled) ");
+                        sql.Append("INSERT INTO tReportColumn( ReportID , ColumnCode , ColumnName ,ColumnType,Sumabled  ,Sortabled,OrderIndex) ");
                         sql.Append("VALUES( ");
-                        sql.Append(" @ReportID ,@ColumnCode ,@ColumnName ,@ColumnType,@Sumabled ,@Sortabled ");
+                        sql.Append(" @ReportID ,@ColumnCode ,@ColumnName ,@ColumnType,@Sumabled ,@Sortabled ,@OrderIndex");
                         sql.Append(" ) ");
 
                         dal.Execute(sql.ToString(), out i,
@@ -373,7 +373,8 @@ namespace BLL
                             dal.CreateParameter("@ColumnName", c.ColumnName==null?"":c.ColumnName),
                             dal.CreateParameter("@ColumnType",c.ColumnType),
                             dal.CreateParameter("@Sumabled", c.Sumabled),
-                            dal.CreateParameter("@Sortabled", c.Sortabled)
+                            dal.CreateParameter("@Sortabled", c.Sortabled),
+                            dal.CreateParameter("@OrderIndex",c.OrderIndex)
                             );
                         if (i != 1)
                         {
@@ -498,9 +499,9 @@ namespace BLL
                     foreach (ReportColumn c in report.Columns)
                     {
                         sql.Clear();
-                        sql.Append("INSERT INTO tReportColumn( ReportID , ColumnCode , ColumnName ,ColumnType,Sumabled  ,Sortabled) ");
+                        sql.Append("INSERT INTO tReportColumn( ReportID , ColumnCode , ColumnName ,ColumnType,Sumabled  ,Sortabled,OrderIndex) ");
                         sql.Append("VALUES( ");
-                        sql.Append(" @ReportID ,@ColumnCode ,@ColumnName ,@ColumnType,@Sumabled ,@Sortabled ");
+                        sql.Append(" @ReportID ,@ColumnCode ,@ColumnName ,@ColumnType,@Sumabled ,@Sortabled,@OrderIndex ");
                         sql.Append(" ) ");
 
                         dal.Execute(sql.ToString(), out i,
@@ -508,8 +509,9 @@ namespace BLL
                             dal.CreateParameter("@ColumnCode", c.ColumnCode),
                             dal.CreateParameter("@ColumnName", c.ColumnName==null?"":c.ColumnName),
                             dal.CreateParameter("@ColumnType",c.ColumnType),
-                            dal.CreateParameter("@Sumabled", Convert.ToInt16(c.Sumabled)),
-                            dal.CreateParameter("@Sortabled", Convert.ToInt16(c.Sortabled))
+                            dal.CreateParameter("@Sumabled", c.Sumabled),
+                            dal.CreateParameter("@Sortabled", c.Sortabled),
+                            dal.CreateParameter("@OrderIndex",c.OrderIndex)
                             );
                         if (i != 1)
                         {
@@ -840,14 +842,16 @@ namespace BLL
                     }
                     else
                     {
-
-                        foreach (DataColumn c in ds.Tables[0].Columns)
+                        for (int i = 0; i < ds.Tables[0].Columns.Count; i++)
                         {
-                            ReportColumn column = new ReportColumn() {
+                            ReportColumn column = new ReportColumn()
+                            {
                                 ReportID = id,
-                                ColumnCode = c.ColumnName
+                                ColumnCode = ds.Tables[0].Columns[i].ColumnName,
+                                OrderIndex=i+1
                             };
-                            switch (c.DataType.Name) {
+                            switch (ds.Tables[0].Columns[i].DataType.Name)
+                            {
                                 case "Int16":
                                 case "Int32":
                                 case "Int64":
@@ -909,6 +913,7 @@ namespace BLL
                         IEnumerable<ReportColumn> dbclms = reportdb.Columns.Where(c => c.ColumnCode == rc.ColumnCode);
                         if (dbclms.Count() == 0)
                         {
+                            //数据库中原本不存在
                             continue;
                         }
                         ReportColumn dbclm = dbclms.First();

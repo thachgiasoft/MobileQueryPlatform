@@ -182,6 +182,15 @@ namespace Model
         }
 
         /// <summary>
+        /// 字段排序
+        /// </summary>
+        public int OrderIndex
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// 字符型 = 0,
         /// 数值型 = 1,
         /// 日期型 = 2
