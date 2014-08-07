@@ -777,7 +777,7 @@ namespace BLL
                     }
 
                     dal.OpenReader(sql.ToString(), pList2);
-                    if (dal.DataReader.Read())
+                    if (dal.DataReader.Read()&&rpt.AllSumabled)
                     {
                         DataRow newrow = rstTable.NewRow();
                         foreach (ReportColumn c in rpt.Columns)
@@ -789,8 +789,9 @@ namespace BLL
                             newrow[c.ColumnCode] = dal.DataReader[c.ColumnCode];
                         }
                         rstTable.Rows.Add(newrow);
-                        result.TotalCount = Convert.ToInt32(dal.DataReader["TotalCount"]);
                     }
+                    result.TotalCount = Convert.ToInt32(dal.DataReader["TotalCount"]);
+                    dal.DataReader.Close();
                 }
                 result.ReportData = JsonHelper.DatatableToJson(rstTable);
                 return 1;

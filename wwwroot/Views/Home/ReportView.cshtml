@@ -436,13 +436,14 @@
                 this.clear();
                 this.$el.find(".reportHeader").html(new window.Report.ReportHeader(report.get("Columns")).render());
                 var result = $.parseJSON(reportResult.ReportData);
-                var sum = 2;
-                if (report.AllSumabled) {
-                    sum--;
+                var sum = 0;
+                if (report.get("AllSumabled")) {
+                    sum++;
                 }
-                if (report.PageSumabled) {
-                    sum--;
+                if (report.get("PageSumabled")) {
+                    sum++;
                 }
+                //console.info(sum);
                 for (var i = 0; i < result.length-sum; i++) {
                     result[i].rowNO = report.get("PageSize")*(request.get("Page")-1)+i+1;
                     this.$el.find(".reportBody").append(new window.Report.ReportDetailView(result[i]).render());
