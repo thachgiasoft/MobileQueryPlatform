@@ -15,11 +15,22 @@
                 syscfg.set(Tools.serializeObject($("#sysCfgForm")));
                 syscfg.save(null,{
                     success: function (model, rst) {
-                        alert(rst.ResultMessage);
                         formView.refresh();
                     },
-                    error: function (e) {
-                        alert(e.responseJSON.Message);
+                    error: function (model,rst) {
+                        switch (rst.status) {
+                            case 404:
+                                alert("设置失败");
+                                break;
+                            case 400:
+                                alert("设置失败，系统异常，请联系管理员");
+                                break;
+                            case 403:
+                                alert("登录失效，请重新登陆");
+                                window.location.href = "/Sign/UserSignin";
+                                break;
+                        }
+
                     }
                 });
             }

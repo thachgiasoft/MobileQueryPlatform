@@ -33,17 +33,23 @@ namespace MobileQueryPlatform.Controllers
         }
 
         // POST api/userreport
-        public ResultModel<object> Post(UserReport[] collection)
+        public void Post(UserReport[] collection)
         {
-            ResultModel<object> rst = new ResultModel<object>();
-            if (HttpContext.Current.Session["SigninedUser"] == null)
+            User user = HttpContext.Current.Session["SigninedUser"] as User;
+            if (user == null || !user.IsAdmin)
             {
-                rst.ResultMessage = "用户登录失效";
-                rst.ResultStatus = -1;
-                return rst;
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
             }
-            rst.ResultStatus = ReportBLL.SaveUserReport(collection[0].UserID, collection, out rst.ResultMessage);
-            return rst;
+            string ResultMessage;
+            int ResultStatus = ReportBLL.SaveUserReport(collection[0].UserID, collection, out ResultMessage);
+            if (ResultStatus == 0)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.NotFound));
+            }
+            else if (ResultStatus == -1)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest));
+            }
         }
     }
 }

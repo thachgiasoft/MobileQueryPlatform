@@ -150,13 +150,6 @@
                         $("#queryTitle").html(rst.ReportName);
                         request.set("Params", rst.Params);
                         paramContainerView.render();
-                        $(".form_datetime").datetimepicker({
-                            format: "yyyy-MM-dd hh:ii",
-                            autoclose: true,
-                            todayBtn: true,
-                            todayHighlight: true,
-                            language: "zh-CN"
-                        });
                     },
                     error: function () {
                         alert("获取报表信息失败");
@@ -184,6 +177,13 @@
                     }
                     this.$el.append("&nbsp;&nbsp;&nbsp;")
                 }
+                $(".form_datetime").datetimepicker({
+                    format: "yyyy-MM-dd hh:ii",
+                    autoclose: true,
+                    todayBtn: true,
+                    todayHighlight: true,
+                    language: "zh-CN"
+                });
                 @*排序*@
                 if (report.get("Sortabled")) {
                     this.$el.append(new window.Report.ReportSortView().render());

@@ -31,16 +31,21 @@
                         }
                         reportList.sync("create", reportList, {
                             success: function (rst) {
-                                if (rst.ResultStatus == 1) {
-                                    alert("保存成功");
-                                    needSave = false;
-                                }
-                                else {
-                                    alert(rst.ResultMessage);
-                                }
+                                needSave = false;
                             },
-                            error: function () {
-                                alert("保存失败");
+                            error: function (model,rst) {
+                                switch (rst.status) {
+                                    case 404:
+                                        alert("设置失败");
+                                        break;
+                                    case 400:
+                                        alert("设置失败，系统异常，请联系管理员");
+                                        break;
+                                    case 403:
+                                        alert("登录失效，请重新登陆");
+                                        window.location.href = "/Sign/UserSignin";
+                                        break;
+                                }
                             }
                         })
                         break;

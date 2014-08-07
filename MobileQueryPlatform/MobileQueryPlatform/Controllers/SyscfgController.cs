@@ -19,16 +19,23 @@ namespace MobileQueryPlatform.Controllers
             return SyscfgBLL.LoadCfg(out msg);
         }
         // post api/syscfg/5
-        public ResultModel<object> Post(Syscfg value)
+        public void Post(Syscfg value)
         {
             User user = HttpContext.Current.Session["SigninedUser"] as User;
             if (user == null || !user.IsAdmin)
             {
                 throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
             }
-            ResultModel<object> rst = new ResultModel<object>();
-            rst.ResultStatus = SyscfgBLL.SaveCfg(value, out rst.ResultMessage);
-            return rst;
+            string ResultMessage;
+            int ResultStatus = SyscfgBLL.SaveCfg(value, out ResultMessage);
+            if (ResultStatus == 0)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.NotFound));
+            }
+            else if (ResultStatus == -1)
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.BadRequest));
+            }
         }
     }
 }

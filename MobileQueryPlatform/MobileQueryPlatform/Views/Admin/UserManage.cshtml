@@ -2,10 +2,11 @@
     <td><%=UserCode%></td>
     <td><%=UserName%></td>
     <td><%=IsAdmin==true?"是":"否"%></td>
+    <td><%=Enabled?"启用":"禁用"%></td>
     <td>
         <a class="btn btn-default" data-action="del"><span class="glyphicon glyphicon-trash"></span></a>
         <a class="btn btn-default" data-action="edit"><span class="glyphicon glyphicon-pencil"></span></a>
-        <a class="btn btn-default" data-action="enabled"><span class="glyphicon <%=Enabled?'glyphicon-eye-open':'glyphicon-eye-close'%>"></span></a>
+        <a class="btn btn-default" data-action="enabled"><span class="glyphicon <%=!Enabled?'glyphicon-ok-circle text-success':'glyphicon-ban-circle text-danger'%>"></span></a>
     </td>
 </script>
 
@@ -283,6 +284,7 @@
                 <th>编码</th>
                 <th>名称</th>
                 <th>管理员</th>
+                <th>状态</th>
                 <th>操作</th>
             </tr>
         </thead>
