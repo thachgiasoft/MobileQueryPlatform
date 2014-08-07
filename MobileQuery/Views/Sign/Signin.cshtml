@@ -1,0 +1,78 @@
+﻿@Styles.Render("~/bundles/signincss")
+<script type="text/javascript">
+    if (window.UserSignin == undefined) {
+        Tools.Namespace.register("window.UserSignin");
+    }
+    if (window.UserSignin.SigninView == undefined) {
+        window.UserSignin.SigninView = Backbone.View.extend({
+            events: {
+                "click a": "clickSignin",
+                "change #rmbpwd": "rembPwd"
+            },
+            rembPwd: function (e) {
+                if (!$(e.currentTarget).is(":checked")) {
+                    window.localStorage.removeItem("userId");
+                    window.localStorage.removeItem("pwd");
+                }
+            },
+            clickSignin: function (e) {
+                $("#btnSignin").button("loading");
+                $.post("/Sign/@ViewBag.Action",
+                    {
+                        "UserCode": $("#UserCode").val(),
+                        "UPassword": $("#UPassword").val()
+                    },
+                    function (data) {
+                        if (data.ResultStatus == "1") {
+                            @*登陆成功，如果勾选了记住密码，则在本地记住*@
+                            if ($("#rmbpwd").is(":checked")) {
+                                window.localStorage.setItem("userId", $("#UserCode").val());
+                                window.localStorage.setItem("pwd", $("#UPassword").val());
+                            }
+                            location.href="@ViewBag.Success";
+                        }
+                        else {
+                            $("#btnSignin").button("reset");
+                            alert(data.ResultMessage);
+                        }
+                    });
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var signinView
+    $(function () {
+        var inputPwd = document.getElementById("rmbpwd");
+        if (inputPwd != undefined) {
+            var userId, pwd;
+            userId = window.localStorage.getItem("userId");
+            psw = window.localStorage.getItem("pwd");
+            if (userId != null) {@*如果本地存储中已有用户名，则自动填入，并勾选记住密码*@
+                $("#UserCode").val(userId);
+                $("#UPassword").val(psw);
+                $("#rmbpwd").attr("checked", "checked");
+            }
+        }       
+        siginView = new window.UserSignin.SigninView({
+            el: "#signinView"
+        });
+    });
+</script>
+<div class="container" id="signinView">
+    <form role="form" class="form-signin" action="/Home/doUserSignin">
+        <h2 class="form-signin-heading"><span class="glyphicon glyphicon-user"></span>@ViewBag.Title</h2>
+        <input id="UserCode" class="form-control" type="text" autofocus="autofocus" autocomplete="on" required="required" placeholder="输入用户编码">
+        <input id="UPassword" class="form-control" type="password" autofocus="autofocus" required="required" placeholder="输入密码">
+        @if (ViewBag.Action != "doAdminSignin")
+        {
+            <label class="checkbox">
+                <input id="rmbpwd" type="checkbox">记住密码
+            </label>
+        }
+
+        <a id="btnSignin" class="btn btn-lg btn-primary btn-block">&nbsp;登&nbsp;录&nbsp;</a>
+    </form>
+</div>
+

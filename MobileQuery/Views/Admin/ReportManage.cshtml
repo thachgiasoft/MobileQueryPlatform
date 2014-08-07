@@ -1,0 +1,660 @@
+﻿<script type="text/template" id="tempReportListItemView">
+    <td><%=ReportName%></td>
+    <td><%=DBCode%></td>
+    <td><%=Remark%></td>
+    <td><%=Enabled?"启用":"禁用"%></td>
+    <td>
+        <a class="btn btn-default" data-action="del" ><span class="glyphicon glyphicon-trash"></span></a>
+        <a class="btn btn-default" data-action="edit"><span class="glyphicon glyphicon-pencil"></span></a>
+        <a class="btn btn-default" data-action="enabled"><span class="glyphicon <%=!Enabled?'glyphicon-ok-circle text-success':'glyphicon-ban-circle text-danger'%>"></span></a>
+    </td>
+</script>
+
+<script id="tempReportView" type="text/template">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">报表编辑</h4>
+            </div>
+            <div class="modal-body">
+                <form role="form" id="formReport">
+                    <div class="form-group">
+                        <label for="reportName">报表名称</label>
+                        <input id="reportName" type="text" class="form-control" name="ReportName" value="<%=report.ReportName%>" placeholder="输入报表名称" autofocus="autofocus" required="required" />
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label for="userName">数据源</label>
+                                <br />
+                                <div class="btn-group">
+                                    <input id="DbId" type="hidden" name="DBID" value="<%=report.DBID%>"/>
+                                    <input id="DbCode" type="hidden" name="DBCode" value="<%=report.DBCode%>"/>
+                                    <button type="button" class="btn btn-info dropdown-toggle <%=report.DBID==null?'':'disabled'%>" data-toggle="dropdown">
+                                        <span id="chooseDbText">
+                                            <% if(report.DBID==null){ %>
+                                            选择数据源
+                                            <%} else{%>
+                                            <%=report.DBCode%>
+                                            <%}%>
+                                        </span>
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul id="DBList" class="dropdown-menu" role="menu">
+                                        <% for(var i=0;i<=dbList.length-1;i++){ %>
+                                            <li data-action="chooseDb" data-value="<%=i%>"><a><%=dbList[i].DbCode%></a></li>
+                                        <% };%>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>页合计</label>
+                                <br />
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label id="PageSumabled_t" class="btn btn-info <%=report.PageSumabled==true?'active':''%>">
+                                        <input name="PageSumabled" type="radio" value="true" <%=report.PageSumabled==true?'checked':''%>>&nbsp;&nbsp;是&nbsp;&nbsp;
+                                    </label>
+                                    <label id="PageSumabled_t" class=" btn btn-info <%=report.PageSumabled==false?'active':''%>">
+                                        <input name="PageSumabled" type="radio" value="false"<%=report.PageSumabled==false?'checked':''%>>&nbsp;&nbsp;否&nbsp;&nbsp;
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>总合计</label>
+                                <br />
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label id="AllSumabled_t"class="btn btn-info <%=report.AllSumabled==true?'active':''%>">
+                                        <input name="AllSumabled" type="radio" value="true" <%=report.AllSumabled==true?'checked':''%>>&nbsp;&nbsp;是&nbsp;&nbsp;
+                                    </label>
+                                    <label id="AllSumabled_f" class="btn btn-info  <%=report.AllSumabled==false?'active':''%>">
+                                        <input name="AllSumabled" type="radio" value="false" <%=report.AllSumabled==false?'checked':''%>>&nbsp;&nbsp;否&nbsp;&nbsp;
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="Enabled" value="<%=report.Enabled%>"/>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>分页</label>
+                                <br />
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label id="pagingabled_t" class="btn btn-info <%=report.Pagingabled==true?'active':''%>">
+                                        <input name="Pagingabled" type="radio" value="true" <%=report.Pagingabled==true?'checked':''%>>&nbsp;&nbsp;是&nbsp;&nbsp;
+                                    </label>
+                                    <label id="pagingabled_f" class="btn btn-info  <%=report.Pagingabled==false?'active':''%>">
+                                        <input name="Pagingabled" type="radio" value="false" <%=report.Pagingabled==false?'checked':''%>>&nbsp;&nbsp;否&nbsp;&nbsp;
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label for="pageSize">每页显示条数</label>
+                                <input id="pageSize" type="text" class="form-control" name="PageSize" value="<%=report.PageSize%>" placeholder="输入条数" autofocus="autofocus" required="required" />
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <label>参数</label>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover  table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>参数编码</th>
+                                        <th>显示名称</th>
+                                        <th>参数类型</th>
+                                        <th>输入类型</th>
+                                        <th>列表值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% for(var i=0;i<=report.Params.length-1;i++ ){ %>
+                                    <tr>
+                                        <td style="vertical-align:middle"><%=report.Params[i].ParamCode%></td>
+                                        <td><input type="text" class="form-control" data-index="<%=i%>" data-action="paramNameChanged" value="<%=report.Params[i].ParamName%>" placeholder="<%=report.Params[i].ParamCode%>" /></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                                                    <span id="paramTypeText_<%=i%>"> <%=report.Params[i].ParamTypeName%></span> <span class="caret"></span>
+                                                </button>
+                                                <ul id="paramTypeList_<%=i%>" class="dropdown-menu" role="menu">
+                                                    <li data-action="chooseParamType" data-index="<%=i%>" data-value="0" class="<%=report.Params[i].ParamType=='0'?'active':''%>"><a>字符型</a></li>
+                                                    <li data-action="chooseParamType" data-index="<%=i%>" data-value="1" class="<%=report.Params[i].ParamType=='1'?'active':''%>"><a>数值型</a></li>
+                                                    <li data-action="chooseParamType" data-index="<%=i%>" data-value="2" class="<%=report.Params[i].ParamType=='2'?'active':''%>"><a>日期型</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button id="btn_InputType_<%=i%>" type="button" class="btn btn-info dropdown-toggle  <%=report.Params[i].ParamType==2?'disabled':''%> " data-toggle="dropdown">
+                                                    <span id="paramInputTypeText_<%=i%>"><%=report.Params[i].ParamInputTypeName%></span> <span class="caret"></span>
+                                                </button>
+                                                <ul id="paramInputTypeList_<%=i%>" class="dropdown-menu" role="menu">
+                                                    <li data-action="chooseParamInputType" data-index="<%=i%>" data-value="0" class="<%=report.Params[i].ParamInputType=='0'?'active':''%>"><a>手动输入</a></li>
+                                                    <li data-action="chooseParamInputType" data-index="<%=i%>" data-value="1" class="<%=report.Params[i].ParamInputType=='1'?'active':''%>"><a>列表选择</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                        <td>
+                                        <input id="paramItemsString_<%=i%>" data-action="paramItemsStringChanged" data-index="<%=i%>" value="<%report.Params[i].ParamItemString%>" type="text" class="form-control" placeholder="例：p1=123;p2=abc"  <%=report.Params[i].ParamInputType=='0'?'readonly':''%>/>
+                                        </td>
+                                    </tr>
+                                    <% }; %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>字段</label>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover  table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>字段编码</th>
+                                        <th>显示名称</th>
+                                        <th>排序</th>
+                                        <th>求和</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% for(var i=0;i<=report.Columns.length-1;i++){ %>
+                                    <tr>
+                                        <td style="vertical-align:middle"><%=report.Columns[i].ColumnCode%></td>
+                                        <td><input data-action="columnNameChanged" data-index="<%=i%>" type="text" class="form-control" value="<%=report.Columns[i].ColumnName%>" placeholder="<%=report.Columns[i].ColumnCode%>" /></td>
+                                        <td>
+                                            <input data-action="columnSortabledChecked" data-index="<%=i%>" <%=report.CommandHasOrderby?'disabled':''%> type="checkbox"<%=report.Columns[i].Sortabled==true?'checked':''%> >
+                                        </td>
+                                        <td>
+                                            <input data-action="columnSumabledChecked" data-index="<%=i%>" type="checkbox" <%=report.Columns[i].Sumabled==true?'checked':''%> >
+                                        </td>
+                                    </tr>
+                                    <%}%>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sqlCommand">SQL语句</label><a id="btnRebuild" class="btn btn-sm btn-warning pull-right">重构报表结构 </a>  
+                        <textarea id="sqlCommand" class="form-control" name="SqlCommand" rows="3"><%=report.SqlCommand%></textarea>                     
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-default" data-dismiss="modal">关闭</a>
+                <a class="btn btn-primary" id="btnSave">保存</a>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    if (window.ReportManage == undefined) {
+        Tools.Namespace.register("window.ReportManage");
+    }
+    
+    if (window.ReportManage.Toolbar == undefined) {
+        window.ReportManage.Toolbar = Backbone.View.extend({
+            events: {
+                "click a": "clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "add":
+                        reportView.show(null);
+                        break;
+                    case "refresh":
+                        reportListView.refresh();
+                        break;
+                }
+            }
+
+        });
+    }
+   
+    if (window.ReportManage.Report == undefined) {
+        window.ReportManage.Report = Backbone.Model.extend({
+            defaults: {
+                "ID": null,
+                "DBID": null,
+                "DBCode": "",
+                "ReportName": "",
+                "Enabled": true,
+                "Remark": "",
+                "Columns": [],
+                "Params": [],
+                "SqlCommand": "",
+                "PageSumabled": false,
+                "AllSumabled": false,
+                "Pagingabled": false,
+                "PageSize": 10
+            },
+            idAttribute:"ID",
+            urlRoot:"/api/Report"
+        });
+    }
+
+    if (window.ReportManage.ReportList == undefined) {
+        window.ReportManage.ReportList = Backbone.Collection.extend({
+            model: window.ReportManage.Report,
+            url: "/api/Report"
+        });
+    }
+    
+    if (window.ReportManage.ReportListItemView == undefined) {
+        window.ReportManage.ReportListItemView = Backbone.View.extend({
+            tagName:"tr",
+            template: _.template($("#tempReportListItemView").html()),
+            initialize:function(rpt){
+                this.model = rpt;
+                this.listenTo(this.model, "change", this.render);
+                this.listenTo(this.model, "destroy", this.remove);
+            },
+            render: function () {
+                this.$el.html(this.template(this.model.toJSON()));
+                return this.el;
+            },
+            events: {
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "del":
+                        if (confirm("确定删除该报表？") == false) {
+                            return;
+                        }
+                        this.model.destroy({
+                            success: function (model, rst) {
+                            },
+                            error: function (model,rst) {
+                                switch (rst.status) {
+                                    case 404:
+                                        alert("删除失败");
+                                        break;
+                                    case 400:
+                                        alert("删除失败，系统异常，请联系管理员");
+                                        break;
+                                    case 403:
+                                        alert("登录失效，请重新登陆");
+                                        window.location.href = "/Sign/adminSignin";
+                                        break;
+                                }
+                            },
+                            wait:true
+                        });
+                        break;
+                    case "edit":
+                        this.model.fetch({
+                            success: function (model,rst) {
+                                reportView.show(model);
+                            },
+                            error: function () {
+                                alert("报表明细读取失败");
+                            }
+                        });
+
+                        break;
+                    case "enabled":
+                        this.model.save({
+                                Enabled: !this.model.get("Enabled")
+                            },
+                            {
+                                success: function (model, rst) {
+                                },
+                                error: function (model,rst) {
+                                    switch (rst.status) {
+                                        case 404:
+                                            alert("设置失败");
+                                            break;
+                                        case 400:
+                                            alert("设置失败，系统异常，请联系管理员");
+                                            break;
+                                        case 403:
+                                            alert("登录失效，请重新登陆");
+                                            window.location.href = "/Sign/adminSignin";
+                                            break;
+                                    }
+                                },
+                                wait: true
+                            });
+                        break;
+                }
+            }
+        });
+    }
+
+    if (window.ReportManage.ReportListView == undefined) {
+        window.ReportManage.ReportListView = Backbone.View.extend({
+            render: function () {
+                this.$el.empty();
+                for (var i = 0; i < reportList.length; i++) {
+                    this.$el.append(new window.ReportManage.ReportListItemView(reportList.at(i)).render());
+                }
+            },
+            refresh: function () {
+                reportList.fetch({
+                    success: function (collection, response, options) {
+                        reportListView.render();
+                    },
+                    error: function (e) {
+                        alert("获取报表失败");
+                    }
+                });
+            }
+        });
+    }
+
+    if (window.ReportManage.ReportView == undefined) {
+        window.ReportManage.ReportView = Backbone.View.extend({
+            template: _.template($("#tempReportView").html()),
+            render: function () {
+                this.$el.html(this.template({
+                    "report": this.model.toJSON(),
+                    "dbList": dbList.toJSON()//此处添加数据源变量
+                }));
+            },
+            //传入的data是window.ReportManage.Report的实例
+            show: function (rpt) {
+                this.model = rpt;
+                if (this.model == null) {
+                    this.model=new window.ReportManage.Report();
+                }
+                this.render();
+                this.$el.modal({
+                    show:true,
+                    keyboard: false,
+                    backdrop: false
+                });
+                this.$el.show();
+            },
+            close: function () {
+                this.$el.hide();
+            },
+            events: {
+                "click #btnRebuild": "buildReport",
+                "click #btnSave": "saveReport",
+                "click li": "choose",
+                "change input": "valueChanged",
+                "change #sqlCommand":"sqlChanged"
+            },
+            sqlChanged:function(){
+                needRebuild = true;
+            },
+            valueChanged: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "paramNameChanged":
+                        @*参数名改变*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        var param = this.model.get("Params")[index];
+                        param.ParamName = $(e.currentTarget).val();
+                        break;
+                    case "paramItemsStringChanged":
+                        @*参数列表值改变*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        var param = this.model.get("Params")[index];
+                        param.ParamItemString = $(e.currentTarget).val();
+                        break;
+                    case "columnSortabledChecked":
+                        @*字段排序改变*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        this.model.get("Columns")[index].Sortabled = $(e.currentTarget).is(":checked");
+                        break;
+                    case "columnSumabledChecked":
+                        @*字段求和发生改变*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        this.model.get("Columns")[index].Sumabled = $(e.currentTarget).is(":checked");
+                        break;
+                    case "columnNameChanged":
+                        @*字段名称改变*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        this.model.get("Columns")[index].ColumnName = $(e.currentTarget).val();
+                        break;
+                }
+                
+            },
+            choose: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "chooseDb":
+                        @*选择数据源*@
+                        var db = dbList.at( $(e.currentTarget).attr("data-value"));
+                        $("#DbId").val(db.get("ID"));
+                        $("#DbCode").val(db.get("DbCode"));
+                        $("#chooseDbText").html(db.get("DbCode"));
+                        $("#DBList li").removeClass("active");
+                        $(e.currentTarget).addClass("active");
+                        break;
+                    case "chooseParamType":
+                        @*选择参数类型*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        var value = $(e.currentTarget).attr("data-value");
+                        var text;
+                        switch (value) {
+                            case "0":
+                                text = "字符型";
+                                break;
+                            case "1":
+                                text = "数值型";
+                                break;
+                            case "2":
+                                text = "日期型";
+                                break;
+                        }
+                        if (value == "2") {
+                            $("#paramInputTypeText_" + index).html("手动输入");
+                            $("#paramInputTypeList_" + index + " li").removeClass("active")
+                            $("#paramInputTypeList_" + index + " li:eq(0)").addClass("active")
+                            $("#btn_InputType_" + index).addClass("disabled");
+                            var params = this.model.get("Params");
+                            params[index].ParamInputType = 0;
+                            params[index].ParamInputTypeName = "手动输入";
+                        }
+                        else {
+                            $("#btn_InputType_" + index).removeClass("disabled");
+                        }
+                        var params = this.model.get("Params");
+                        params[index].ParamType = value;
+                        params[index].ParamTypeName = text;
+                        $("#paramTypeText_" + index).html(text);
+                        $("#paramTypeList_" + index +" li").removeClass("active");
+                        $(e.currentTarget).addClass("active");
+                        break;
+                    case "chooseParamInputType":
+                        @*选择参数输入类型*@
+                        var index = $(e.currentTarget).attr("data-index");
+                        var value = $(e.currentTarget).attr("data-value");
+                        var text;
+                        switch (value) {
+                            case "0":
+                                text = "手动输入";
+                                break;
+                            case "1":
+                                text = "列表选择";
+                                break;
+                        }
+                        if (value == "0") {
+                            $("#paramItemsString_" + index).attr("readonly", "readonly");
+                        }
+                        else {
+                            $("#paramItemsString_" + index).removeAttr("readonly");
+                        }
+                        var params = this.model.get("Params");
+                        params[index].ParamInputType = value;
+                        params[index].ParamInputTypeName = text;
+                        $("#paramInputTypeText_" + index).html(text);
+                        $("#paramInputTypeList_" + index + " li").removeClass("active");
+                        $(e.currentTarget).addClass("active");
+                        break;
+
+                }
+            },
+            saveReport: function () {
+                if ($.trim($("#reportName").val()) == "") {
+                    alert("请填写报表名称");
+                    return;
+                }
+                if ($("#DbId").val() == "") {
+                    alert("请选择数据源");
+                    return;
+                }
+                if ($.trim($("#sqlCommand").val()) == "") {
+                    alert("请填写SQL语句");
+                    return;
+                }
+                if (needRebuild == true) {
+                    alert("sql语句有改动，请先重构表结构");
+                    return;
+                }
+                var rpt = Tools.serializeObject($("#formReport"));
+                this.model.save(rpt, {
+                    success: function () {
+                        reportListView.refresh();
+                        reportView.close();
+                    },
+                    error: function (model,rst) {
+                        switch (rst.status) {
+                            case 404:
+                                alert("保存失败");
+                                break;
+                            case 400:
+                                alert("保存失败，系统异常，请联系管理员");
+                                break;
+                            case 403:
+                                alert("登录失效，请重新登陆");
+                                window.location.href = "/Sign/adminSignin";
+                                break;
+                        }
+                    },
+                    wait:true
+                });
+            },
+            buildReport: function () {
+                var sql=$("#sqlCommand").val();
+                var dbid = $("#DbId").val();
+                if ( sql=="") {
+                    alert("请先输入SQL语句");
+                    return;
+                }
+                if(dbid==""){
+                    alert("请选择数据库");
+                    return;
+                }
+                var rpt = this.model.clone();
+                if (rpt.get("ID") == null) {
+                    @*将id设为0*@
+                    rpt.set({ "ID": 0 });
+                }
+                rpt.fetch({
+                    data: {
+                        DBID: dbid,//临时赋值1
+                        sql:sql
+                    },
+                    success: function (model, rst, status) {
+                        if (rst==null) {
+                            @*重构失败*@
+                            alert("重构失败，请检查SQL语句");
+                            return;
+                        }
+                        if (rst.ID == 0) {
+                            rst.ID = null;
+                        }
+                        rst.DBID = $("#DbId").val();
+                        rst.DBCode = $("#DbCode").val();
+                        rst.ReportName = $("#reportName").val();
+                        rst.AllSumabled = $("#AllSumabled_t").hasClass("active");
+                        rst.PageSumabled = $("#PageSumabled_t").hasClass("active");
+                        rst.PageSize = $("#pageSize").val();
+                        rst.Pagingabled = $("#pagingabled_t").hasClass("active");
+                        reportView.model.set(rst);
+                        reportView.render();
+                        needRebuild = false;
+                    },
+                    error: function () {
+                        alert("重构失败");
+                    }
+                });
+                
+            }
+        });
+    }
+
+    //Database
+    if (window.ReportManage.DbModel == undefined) {
+        window.ReportManage.DbModel = Backbone.Model.extend({
+            defaults: {
+                "ID": null,
+                "DbCode": null,
+                "DbName": null
+            },
+            idAttribute: "ID",
+            urlRoot: "/api/Database"
+        });
+    }
+    if (window.ReportManage.DbList == undefined) {
+        window.ReportManage.DbList = Backbone.Collection.extend({
+            model: window.ReportManage.DbModel,
+            url: "/api/Database"
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var toolbar;
+    var reportList;
+    var reportListView;
+    var reportView;
+    var dbList;
+    var needRebuild = false;
+    $(function () {
+        
+        toolbar = new window.ReportManage.Toolbar({
+            el: "#toolbar"
+        });
+        reportList = new window.ReportManage.ReportList();
+        reportListView = new window.ReportManage.ReportListView({
+            el: "#reportList"
+        });
+        reportView = new window.ReportManage.ReportView({
+            el: "#reportView"
+        });
+
+        dbList = new window.ReportManage.DbList();
+        dbList.fetch({
+            error: function () {
+                alert("获取数据库列表失败");
+            }
+        });
+        reportListView.refresh();
+    })
+</script>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>报表名</th>
+                <th>数据源</th>
+                <th>说明</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="reportList"></tbody>
+    </table> 
+</div>
+
+<div class="modal fade" aria-hidden="true" id="reportView"/>
+
+<div class="navbar navbar-fixed-bottom">
+    <div class="navbar-header">
+        <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
+            <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a>
+            <a class="btn btn-default" data-action="add"><span class="glyphicon glyphicon-plus"></span>新建</a>
+        </div>
+    </div>
+</div> 

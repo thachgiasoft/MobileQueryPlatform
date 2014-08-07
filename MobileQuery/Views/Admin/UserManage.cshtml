@@ -1,0 +1,304 @@
+﻿<script id="tempUserListItemView" type="text/template">
+    <td><%=UserCode%></td>
+    <td><%=UserName%></td>
+    <td><%=IsAdmin==true?"是":"否"%></td>
+    <td><%=Enabled?"启用":"禁用"%></td>
+    <td>
+        <a class="btn btn-default" data-action="del"><span class="glyphicon glyphicon-trash"></span></a>
+        <a class="btn btn-default" data-action="edit"><span class="glyphicon glyphicon-pencil"></span></a>
+        <a class="btn btn-default" data-action="enabled"><span class="glyphicon <%=!Enabled?'glyphicon-ok-circle text-success':'glyphicon-ban-circle text-danger'%>"></span></a>
+    </td>
+</script>
+
+<script id="tempUserView" type="text/template">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">用户信息</h4>
+            </div>
+            <div class="modal-body">
+                <form role="form" id="form">
+                    <div class="form-group">
+                        <label for="userCode">用户编码</label>
+                        <input id="userCode" type="text" class="form-control" name="UserCode" placeholder="输入用户编码" autofocus="autofocus" required="required" value="<%=UserCode%>" />
+                    </div>
+                    <div class="form-group">
+                        <label for="userName">用户名称</label>
+                        <input id="userName" type="text" class="form-control" name="UserName" placeholder="输入用户名称" autofocus="autofocus" required="required" value="<%=UserName%>" />
+                    </div>
+                    <div class="form-group">
+                        <label>管理员</label>
+                    </div>
+                    <div class="btn-group" data-toggle="buttons">
+                        <div class="btn-group" data-toggle="buttons">
+                            <label class="btn btn-primary <%=IsAdmin?'active':''%>">
+                                <input class="IsAdmin" value="true" type="radio" autocomplete="off" <%=IsAdmin?"checked":""%> />&nbsp;&nbsp; 是&nbsp;&nbsp;
+                            </label>
+                            <label class="btn btn-primary <%=!IsAdmin?'active':''%>">
+                                <input class="IsAdmin" value="false" type="radio" autocomplete="off" <%=!IsAdmin?"checked":""%> /> &nbsp;&nbsp;否&nbsp;&nbsp;
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-default" data-dismiss="modal">关闭</a>
+                <a class="btn btn-primary" id="save">保存</a>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    if (window.UserManage == undefined) {
+        Tools.Namespace.register("window.UserManage");
+    }
+
+    if (window.UserManage.Toolbar == undefined) {
+        window.UserManage.Toolbar = Backbone.View.extend({
+            events: {
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "add":
+                        userEditView.show(null);
+                        break;
+                    case "refresh":
+                        userListView.refresh();
+                        break;
+                }
+            }
+        });
+    }
+
+    if (window.UserManage.UserEditView == undefined) {
+        window.UserManage.UserEditView = Backbone.View.extend({
+            template: _.template($("#tempUserView").html()),
+
+            render: function () {
+                this.$el.html(this.template(this.model.toJSON()));
+                return this;
+            },
+
+            show: function (user) {
+                this.model = user;
+                if (user == null) {
+                    this.model =new  window.UserManage.UserModel();
+                }
+                this.render();
+                this.$el.modal({
+                    show: true,
+                    keyboard: false,
+                    backdrop: false
+                });
+                this.$el.show();
+            },
+
+            close: function () {
+                this.$el.hide();
+            },
+            
+            events: {
+                "click #save": "saveUser",
+                "change .IsAdmin":"checkIsAdmin"
+            },
+
+            checkIsAdmin: function (e) {
+                this.model.set("IsAdmin", $(e.currentTarget).val());  
+            },
+
+            saveUser: function () {
+                this.model.save(Tools.serializeObject($("#form")), {
+                    success: function (model,rst) {
+                        userListView.refresh();
+                        userEditView.close();
+                    },
+                    error: function (model,rst) {
+                        switch (rst.status) {
+                            case 404:
+                                alert("保存失败");
+                                break;
+                            case 400:
+                                alert("保存失败，系统异常，请联系管理员");
+                                break;
+                            case 403:
+                                alert("登录失效，请重新登陆");
+                                window.location.href = "/Sign/adminSignin";
+                                break;
+                        }
+                    },
+                    wait:true
+                });
+            }
+        });
+    }
+
+    if (window.UserManage.UserListItemView == undefined) {
+        window.UserManage.UserListItemView = Backbone.View.extend({
+            tagName:"tr",
+            template: _.template($("#tempUserListItemView").html()),
+            initialize:function(user){
+                this.model = user;
+                this.listenTo(this.model, "change", this.render);
+                this.listenTo(this.model, "destroy", this.remove);
+            },
+            render: function () {
+                this.$el.html(this.template(this.model.toJSON()));
+                return this.el;
+            },
+            events: {
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "edit":
+                        userEditView.show(this.model);
+                        break;
+                    case "del":
+                        if (!confirm("确认删除该用户？")) {
+                            return;
+                        }
+                        this.model.destroy({
+                            success: function (model, rst) {
+                            },
+                            error: function (model,rst) {
+                                switch (rst.status) {
+                                    case 404:
+                                        alert("删除失败");
+                                        break;
+                                    case 400:
+                                        alert("删除失败，系统异常，请联系管理员");
+                                        break;
+                                    case 403:
+                                        alert("登录失效，请重新登陆");
+                                        window.location.href = "/Sign/adminSignin";
+                                        break;
+                                }
+                            },
+                            wait:true
+                        })
+                        break;
+                    case "enabled":
+                        this.model.save(
+                            { Enabled: !this.model.get("Enabled") },
+                            {
+                                success: function (model, rst) {
+                                },
+                                error: function (model, rst, status) {
+                                    switch (rst.status) {
+                                        case 404:
+                                            alert("设置失败");
+                                            break;
+                                        case 400:
+                                            alert("设置失败，系统异常，请联系管理员");
+                                            break;
+                                        case 403:
+                                            alert("登录失效，请重新登陆");
+                                            window.location.href = "/Sign/adminSignin";
+                                            break;
+                                    }
+                                    
+                                },
+                                wait:true
+                            });
+                        break;
+                }
+            }
+        });
+    }
+
+    if (window.UserManage.UserListView == undefined) {
+        window.UserManage.UserListView = Backbone.View.extend({
+            render: function () {
+                this.$el.empty();
+                for (var i = 0; i < userList.length; i++) {
+                    this.addOne(userList.at(i));
+                }
+            },
+            refresh: function () {
+                userList.fetch({
+                    success: function (collection, response, options) {
+                        userListView.render();
+                    },
+                    error: function () {
+                        alert("获取用户列表失败");
+                    }
+                });
+            },
+            addOne: function (model) {
+                this.$el.append(new window.UserManage.UserListItemView(model).render());
+            }
+        });
+    }
+
+    if (window.UserManage.UserModel == undefined) {
+        window.UserManage.UserModel = Backbone.Model.extend({
+            defaults: {
+                "ID":null,
+                "UserCode": "",
+                "UserName": "",
+                "UPassword": "",
+                "IsAdmin": false,
+                "Enabled":true
+            },
+            idAttribute: "ID",
+            urlRoot:"/api/User"
+        });
+    }
+    
+    if (window.UserManage.UserList == undefined) {
+        window.UserManage.UserList = Backbone.Collection.extend({
+            model: window.UserManage.UserModel,
+            url:"/api/User"
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var userList;
+    var toolbar;
+    var userEditView;
+    var userListView;
+    
+    $(function () {
+        toolbar == new window.UserManage.Toolbar({
+            el: "#toolbar"
+        });
+        userEditView = new window.UserManage.UserEditView({
+            el: "#userEditView"
+        });
+        userListView = new window.UserManage.UserListView({
+            el: "#userList"
+        });
+        userList = new window.UserManage.UserList();
+        userListView.refresh();
+    })
+</script>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>编码</th>
+                <th>名称</th>
+                <th>管理员</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="userList"></tbody>
+    </table> 
+</div>
+  
+<div class="modal fade" id="userEditView"/>
+
+<div class="navbar navbar-fixed-bottom">
+    <div class="navbar-header">
+        <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">
+            <a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a>
+            <a class="btn btn-default" data-action="add"><span class="glyphicon glyphicon-plus"></span>新建</a>
+        </div>
+    </div>
+</div> 

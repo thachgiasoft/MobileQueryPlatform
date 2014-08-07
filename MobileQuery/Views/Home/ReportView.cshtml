@@ -1,0 +1,566 @@
+﻿@Scripts.Render("~/bundles/datetimepickerJs")
+@Styles.Render("~/bundles/datetimepickerCss")
+@Styles.Render("~/bundles/less")
+
+<script id="tempParamInputView" type="text/template">
+    <label class="sr-only"><%=ParamName==''?ParamCode:ParamName%></label>
+    <input class="form-control" type="text" placeholder="输入<%=ParamName==''? ParamCode:ParamName%>" />
+</script>
+
+<script id="tempParamListView" type="text/template">
+    <label class="sr-only"><%=ParamName=""?ParamCode:ParamName%></label>
+    <div class="input-group">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <span class="showTxtBtn"><%=ParamName==""?ParamCode:ParamName%></span> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li class="clearBtn"><a href="#do">无条件</a></li>
+                <% for(var j=0;j<=ParamItems.length-1;j++) {%>
+                <li  class="selectBtn" data-index="<%=j%>"><a href="#do"><%=ParamItems[j].OptionName%></a></li>
+                <%}%>
+            </ul>
+        </div>
+    </div>
+</script>
+
+<script id="tempParamDatetimeView" type="text/template">
+    <label for="<%=ParamCode%>" class="sr-only "><%=ParamName==''?ParamCode:ParamName%></label>
+    <input type="hidden" id="<%=ParamCode%>" class="datetimeValue" value="" />
+    <div class="input-group date form_datetime" data-link-field="<%=ParamCode%>">
+        <input class="form-control datetimeLabel" size="18" placeholder="输入<%=ParamName==''?ParamCode:ParamName%>" type="text" value="" readonly>
+        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+    </div>
+</script>
+
+<script id="tempReportSortView" type="text/template">
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary DescSelect"><span class="columnTxt"><%=Request.SortColumn==''?'默认':Request.SortColumn%></span>-<span class="descTxt"><%=Request.Desc?"降序":"升序"%></span></button>
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+            <span class="sr-only">Sort</span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li><a href="#do">默认</a></li>
+            <% for (var i=0; i<=Columns.length-1;i++){%>
+                <%if(Columns[i].Sortabled){%>
+                <li data-index="<%=i%>"><a href="#do"><%=Columns[i].ColumnName==''?Columns[i].ColumnCode:Columns[i].ColumnName%></a></li>
+                <%}%>
+            <%}%>
+        </ul>
+    </div>
+</script>
+
+<script type="text/template" id="tempReportHeaderColumn">
+    <span class="text-primary"><%=ColumnName==""?ColumnCode:ColumnName%></span>
+</script>
+
+<script type="text/template" id="tempReportFooter">
+    <%if(mode==0){%>
+        <td>页合计</td>
+        <%for(var i=0;i<=columns.length-1;i++){%>
+        <td><%=data[columns[i].ColumnCode]%></td>
+        <%}%>
+    <%} else if(mode==1){%>
+        <td>总合计</td>
+        <%for(var i=0;i<=columns.length-1;i++){%>
+            <td><%=data[columns[i].ColumnCode]%></td>
+        <%}%>
+    <%}%>
+</script>
+
+<script id="tempReportPager" type="text/template">
+    <center>
+        <ul class="pager">
+            <li class="prevPage <%=CurPage==1?'disabled':''%>"><a href="#do">上一页</a></li>
+            <li><span><%=CurPage%>/<%=TotalPage%>页</span></li>
+            <li class="nextPage <%=CurPage==TotalPage?'disabled':''%>"><a href="#do">下一页</a></li>
+        </ul>
+    </center>
+</script>
+
+<script id="tempReportResultDetailView" type="text/template" >
+    <td>
+        <%=result.rowNO%>
+    </td>
+    <% for(var i=0;i<=columns.length-1;i++){%>
+        <td><%=result[columns[i].ColumnCode]%></td>
+    <%}%>
+</script>
+
+<script type="text/javascript">
+    
+    if (window.Report.Report == undefined) {
+        window.Report.Report = Backbone.Model.extend({
+            defaults: {
+                "ID": null,
+                "DBID": null,
+                "ReportName": "",
+                "Remark": "",
+                "Columns": [],
+                "Params": [],
+                "PageSumabled": false,
+                "AllSumabled": false,
+                "Pagingabled": false,
+                "PageSize": 10,
+                "Sortabled":false
+            },
+            idAttribute: "ID",
+            urlRoot: "/api/Report"
+        });
+    }
+
+    if (window.Report.Request == undefined) {
+        window.Report.Request = Backbone.Model.extend({
+            defaults: {
+                ReportID: "@ViewBag.ReportID",
+                Page: 1,
+                Params: [],
+                SortColumn: "",
+                Desc:false
+            }
+        });
+    }
+    
+    if (window.Report.ToolbarView == undefined) {
+        window.Report.ToolbarView = Backbone.View.extend({
+            events: {
+                "click a":"btnClick"
+            },
+            btnClick: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "query":
+                        reportView.query();
+                    break;
+                }
+            }
+        });
+    }
+
+    if (window.Report.ParamContainerView == undefined) {
+        window.Report.ParamContainerView = Backbone.View.extend({
+            initialize: function () {
+                report.fetch({
+                    data: {
+                        id: "@ViewBag.ReportID",
+                        forQuery: true
+                    },
+                    success: function (model, rst) {
+                        $("#queryTitle").html(rst.ReportName);
+                        request.set("Params", rst.Params);
+                        paramContainerView.render();
+                    },
+                    error: function () {
+                        alert("获取报表信息失败");
+                    }
+                });
+            },
+            render: function () {
+                var params = request.get("Params");
+                for (var i = 0; i < params.length; i++) {
+                    switch (params[i].ParamType) {
+                        case 0:
+                        case 1:
+                            switch (params[i].ParamInputType) {
+                                case 0:
+                                    this.$el.append(new window.Report.ParamInputView(params[i]).render());
+                                    break;
+                                case 1:
+                                    this.$el.append(new window.Report.ParamListView(params[i]).render());
+                                    break;
+                            }
+                            break;
+                        case 2:
+                            this.$el.append(new window.Report.ParamDatetimeView(params[i]).render());
+                            break;
+                    }
+                    this.$el.append("&nbsp;&nbsp;&nbsp;")
+                }
+                $(".form_datetime").datetimepicker({
+                    format: "yyyy-MM-dd hh:ii",
+                    autoclose: true,
+                    todayBtn: true,
+                    todayHighlight: true,
+                    language: "zh-CN"
+                });
+                @*排序*@
+                if (report.get("Sortabled")) {
+                    this.$el.append(new window.Report.ReportSortView().render());
+                }
+                this.$el.append("<hr/>");
+            },
+            toggleShow: function () {
+                this.$el.toggleClass("hide");
+            }
+        });
+    }
+
+    if (window.Report.ParamInputView == undefined) {
+        window.Report.ParamInputView = Backbone.View.extend({
+            tagName:"div",
+            className:"form-group",
+            template: _.template($("#tempParamInputView").html()),
+            initialize:function(param){
+                this.model=param;
+            },
+            render: function () {
+                this.$el.html(this.template(this.model));
+                return this.el;
+            },
+            events: {
+                "change input":"valueChanged"
+            },
+            valueChanged: function () {
+                this.model.ParamValue = this.$el.find("input").val();
+            }
+        });
+    }
+    
+    if (window.Report.ParamListView == undefined) {
+        window.Report.ParamListView = Backbone.View.extend({
+            tagName: "div",
+            className: "form-group",
+            template: _.template($("#tempParamListView").html()),
+            initialize:function(param){
+                this.model = param;
+            },
+            render: function () {
+                this.$el.html(this.template(this.model));
+                return this.el;
+            },
+            showText: function (txt) {
+                this.$el.find(".showTxtBtn").html(txt);
+            },
+            events: {
+                "click .selectBtn": "selectValue",
+                "click .clearBtn":"clearParam"
+            },
+            selectValue: function (e) {
+                var index = $(e.currentTarget).attr("data-index");
+                this.model.ParamValue = this.model.ParamItems[index].OptionValue;
+                this.$el.find("li").removeClass("active");
+                $(e.currentTarget).addClass("active");
+                this.showText((this.model.ParamName == "" ? this.model.ParamCode : this.model.ParamName) + "--" + (this.model.ParamItems[index].OptionName));
+            },
+            clearParam: function () {
+                this.model.ParamValue = null;
+                this.$el.find("li").removeClass("active");
+                this.showText(this.model.ParamName == "" ? this.model.ParamCode : this.model.ParamName);
+            }
+        });
+    }
+    
+    if (window.Report.ParamDatetimeView == undefined) {
+        window.Report.ParamDatetimeView = Backbone.View.extend({
+            tagName: "div",
+            className: "form-group",
+            template: _.template($("#tempParamDatetimeView").html()),
+            initialize:function(param){
+                this.model = param;
+            },
+            render: function () {
+                this.$el.html(this.template(this.model));
+                return this.el;
+            },
+            events: {
+                "change .datetimeLabel": "selectDatetime"
+            },
+            selectDatetime: function () {
+                this.model.ParamValue = this.$el.find(".datetimeValue").val();
+            }
+        });
+    }
+
+    if (window.Report.ReportSortView == undefined) {
+        window.Report.ReportSortView = Backbone.View.extend({
+            tagName: "div",
+            className:"form-group",
+            template: _.template($("#tempReportSortView").html()),
+            render: function () {
+                this.$el.html(this.template({
+                    "Request": request.toJSON(),
+                    "Columns":report.get("Columns")
+                }));
+                return this.el;
+            },
+            events: {
+                "click .DescSelect": "descSelect",
+                "click li":"columnSelect"
+            },
+            descSelect: function () {
+                if (request.get("SortColumn") == '') {
+                    return;
+                }
+                var desc = request.get("Desc");
+                request.set({
+                    "Desc": !desc,
+                    "Page": 1
+                });
+                $(".descTxt").html(request.get("Desc") ? "降序" : "升序");
+                reportView.query();
+            },
+            columnSelect: function (e) {
+                var index = $(e.currentTarget).attr("data-index");
+                if (index == undefined) {
+                    $(".columnTxt").html("默认");
+                    $(".descTxt").html("升序");
+                    request.set("Desc", false);
+                    request.set("SortColumn", "");
+                }
+                else {
+                    var column = report.get("Columns")[index]
+                    var columnTxt = column.ColumnName == '' ? column.ColumnCode : column.ColumnName;
+                    $(".columnTxt").html(columnTxt);
+                    request.set({
+                        "SortColumn": column.ColumnCode,
+                        "Page": 1
+                    });
+                    reportView.query();
+                }
+            }
+
+        });
+    }
+
+    if (window.Report.ReportHeaderColumn == undefined) {
+        window.Report.ReportHeaderColumn = Backbone.View.extend({
+            tagName:"th",
+            template: _.template($("#tempReportHeaderColumn").html()),
+            initialize:function(column){
+                this.model = column;
+            },
+            render: function () {
+                this.$el.html(this.template(this.model));
+                return this.el;
+            }
+        });
+    }
+
+    if (window.Report.ReportHeader == undefined) {
+        window.Report.ReportHeader = Backbone.View.extend({
+            tagName: "tr",
+            className:"success",
+            initialize:function(columns){
+                this.columns = columns;
+            },
+            render: function () {
+                this.$el.append("<th>序号</th>");
+                for (var i = 0; i < this.columns.length; i++) {
+                    this.$el.append(new window.Report.ReportHeaderColumn(this.columns[i]).render());
+                }
+                return this.el;
+            }
+        });
+    }
+
+    if (window.Report.ReportDetailView == undefined) {
+        window.Report.ReportDetailView = Backbone.View.extend({
+            tagName: "tr",
+            template: _.template($("#tempReportResultDetailView").html()),
+            initialize:function(data){
+                this.model = data;
+            },
+            render: function () {
+                this.$el.html(this.template({
+                    columns: report.get("Columns"),
+                    result:this.model
+                }));
+                return this.el;
+            },
+            events: {
+                "click td":"clickRow"
+            },
+            clickRow: function () {
+                var selected = this.$el.hasClass("danger");
+                $(".reportBody tr").removeClass();
+                this.$el.toggleClass("danger",!selected);
+            }
+
+        });
+    }
+    
+    if (window.Report.ReportFooterView == undefined) {    
+        window.Report.ReportFooterView = Backbone.View.extend({
+            tagName: "tr",
+            template: _.template($("#tempReportFooter").html()),
+            initialize: function (data,mode) {
+                this.model = data;
+                this.mode = mode;//0-页 1-总
+            },
+            render: function () {
+                this.$el.html(this.template({
+                    data: this.model,
+                    mode:this.mode,
+                    columns:report.get("Columns")
+                }));
+                switch (this.mode) {
+                    case 0:
+                        this.$el.addClass("warning")
+                        break;
+                    case 1:
+                        this.$el.addClass("danger");
+                        break;
+                }
+                return this.el;
+            }
+        });
+    }
+
+    if (window.Report.ReportView == undefined) {
+        window.Report.ReportView = Backbone.View.extend({
+            query:function(){
+                $.ajax({
+                    type: "POST",
+                    url: "/api/QueryReport",
+                    data: request.toJSON(),
+                    success: function (rst) {
+                        if (rst.ResultStatus != 1) {
+                            var pageHis = request.get("PageHis");
+                            request.set({ "Page": pageHis });
+                            alert(rst.ResultMessage);
+                            return;
+                        }
+                        reportResult = rst.ResultObj;
+                        reportView.showQuery();
+                    },
+                    error: function () {
+                        var pageHis = request.get("PageHis");
+                        request.set({ "Page": pageHis });
+                        alert("查询失败");
+                    }
+                }
+            );
+            },
+            showQuery: function () {
+                this.clear();
+                this.$el.find(".reportHeader").html(new window.Report.ReportHeader(report.get("Columns")).render());
+                var result = $.parseJSON(reportResult.ReportData);
+                var sum = 2;
+                if (report.AllSumabled) {
+                    sum--;
+                }
+                if (report.PageSumabled) {
+                    sum--;
+                }
+                for (var i = 0; i < result.length-sum; i++) {
+                    result[i].rowNO = report.get("PageSize")*(request.get("Page")-1)+i+1;
+                    this.$el.find(".reportBody").append(new window.Report.ReportDetailView(result[i]).render());
+                }
+                
+                var pageSum, allSum;
+                if (report.get("PageSumabled")==1) {
+                    if (report.get("AllSumabled")==1) {
+                        pageSum = result[result.length - 2];
+                    }
+                    else {
+                        pageSum = result[result.length - 1];
+                    }
+                }
+                else {
+                    pageSum = null;
+                }
+                if (report.get("AllSumabled")==1) {
+                    allSum = result[result.length - 1];
+                }
+                else {
+                    allSum = null;
+                }
+                if (report.get("PageSumabled")==1 && pageSum!=null ) {
+                    
+                    this.$el.find(".reportFooter").append(new window.Report.ReportFooterView(pageSum,0).render());
+                }
+                if (report.get("AllSumabled") == 1 && allSum!=null) {
+                    this.$el.find(".reportFooter").append(new window.Report.ReportFooterView(allSum, 1).render());
+                }
+                if (report.get("Pagingabled") == 1) {
+                    this.$el.find(".reportPager").append(new window.Report.ReportPagerView().render());
+                }
+                window.location.hash = "#reportView"
+            },
+            clear: function () {
+                this.$el.find(".reportBody").empty();
+                this.$el.find(".reportFooter").empty();
+                this.$el.find(".reportPager").empty();
+            }
+        });
+    }
+
+    if (window.Report.ReportPagerView == undefined) {
+        window.Report.ReportPagerView = Backbone.View.extend({
+            template: _.template($("#tempReportPager").html()),
+            render: function () {
+                this.$el.html(this.template(reportResult));
+                return this.el;
+            },
+            events: {
+                "click .prevPage": "prevPage",
+                "click .nextPage": "nextPage"
+            },
+            prevPage: function (e) {
+                if ($(e.currentTarget).hasClass("disabled")) {
+                    return;
+                }
+                var page=request.get("Page");
+                request.set({ "PageHis":  page});
+                request.set({ Page: --page });
+                reportView.query();
+                window.location.hash = "#reportView";
+            },
+            nextPage: function (e) {
+                if ($(e.currentTarget).hasClass("disabled")) {
+                    return;
+                }
+                var page = request.get("Page");
+                request.set({ "PageHis": page });
+                request.set({ Page: ++page });
+                reportView.query();
+                window.location.hash = "#reportView";
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var report;
+    var paramContainerView;
+    var reportView;
+    var reportResult;
+    var toolbar;
+    var request;
+    $(function () {
+        report = new window.Report.Report();
+        request = new window.Report.Request();
+        paramContainerView = new window.Report.ParamContainerView({
+            el: "#paramContainerView",
+        });
+        reportView = new window.Report.ReportView({
+            el: "#reportView"
+        });
+        toolbar = new window.Report.ToolbarView({
+            el:"#toolbar"
+        });
+       
+    })
+</script>
+
+<div class="container" id="reportView">
+    <h2 class="text-info" id="queryTitle"></h2><a class="btn btn-default pull-right" href="#ToggleParamsContainer"><span id="toggleParamsIcon" class="glyphicon glyphicon-eye-open"></span></a>
+    <hr />
+    <div class="row">
+        <form class="form-inline" role="form" id="paramContainerView" />
+    </div>
+    <div class="row" style="overflow-x:auto">
+        <table class="table table-condensed table-hover table-bordered">
+            <thead class="reportHeader" />
+            <tbody class="reportBody" />
+            <tfoot class="reportFooter" />
+        </table>
+    </div>
+    <center class="reportPager"></center>
+</div>
+
+<ul id="toolbar" class="nav nav-pills navbar-fixed-bottom nav-justified" role="tablist">
+    <li role="presentation"><a class="btn btn-default btn-sm" data-action="query"><span class="glyphicon glyphicon-search"></span>查询</a></li>
+    <li role="presentation"><a class="btn btn-default btn-sm" href="#queryTitle"><span class="glyphicon glyphicon-home"></span>回到顶部</a></li>
+</ul>
