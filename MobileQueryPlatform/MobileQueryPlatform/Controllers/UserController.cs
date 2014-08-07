@@ -20,7 +20,8 @@ namespace MobileQueryPlatform.Controllers
         // POST api/user
         public User Post(User value)
         {
-            if (HttpContext.Current.Session["SigninedUser"] == null)
+            User user = HttpContext.Current.Session["SigninedUser"] as User;
+            if (user == null || !user.IsAdmin)
             {
                 throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
             }
@@ -40,7 +41,8 @@ namespace MobileQueryPlatform.Controllers
         // PUT api/user/5
         public void Put(decimal id, User value)
         {
-            if (HttpContext.Current.Session["SigninedUser"] == null)
+            User user = HttpContext.Current.Session["SigninedUser"] as User;
+            if (user == null || !user.IsAdmin)
             {
                 throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
             }
@@ -59,7 +61,8 @@ namespace MobileQueryPlatform.Controllers
         // DELETE api/user/5
         public void Delete(decimal id)
         {
-            if (HttpContext.Current.Session["SigninedUser"] == null)
+            User user = HttpContext.Current.Session["SigninedUser"] as User;
+            if (user == null || !user.IsAdmin)
             {
                 throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
             }

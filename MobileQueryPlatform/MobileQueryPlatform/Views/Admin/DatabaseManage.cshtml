@@ -156,7 +156,7 @@
                 this.$el.append(new window.Database.DbListItemView(db).render());
             },
             clear:function(){
-                this.$el.html("");
+                this.$el.empty();
             },
             refresh: function () {
                 dbList.fetch({

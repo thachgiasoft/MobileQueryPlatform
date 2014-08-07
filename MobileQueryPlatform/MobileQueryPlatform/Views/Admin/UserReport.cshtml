@@ -1,17 +1,16 @@
-﻿<script type="text/template" id="tempUserListView">
-    <%for(var i=0;i<=data.length-1;i++){%>
-    <a class="list-group-item" href="#do" data-index="<%=i%>"> <span class="glyphicon glyphicon-<%=data[i].IsAdmin?'cog':'user'%>"></span> <%=data[i].UserCode%>-<%=data[i].UserName%></a>
-    <%}%>
+﻿<script type="text/template" id="tempUserListItemView">
+    <span class="rptItem glyphicon glyphicon-<%=IsAdmin?'cog':'user'%>"></span> <%=UserCode%>-<%=UserName%> <span class="pull-right text-danger <%=Enabled?'':'glyphicon glyphicon-ban-circle'%>"></span>
 </script>
-<script type="text/ng-template" id="tempReportListView">
-    <%for(var i=0;i<=data.length-1;i++){%>
-    <a class="list-group-item" href="#do" data-index="<%=i%>"><%=data[i].ReportName%><span class="glyphicon glyphicon-eye-<%=data[i].Enabled?'open':'close'%> pull-right"></span></a>
-    <%}%>
+
+<script type="text/ng-template" id="tempReportListItemView">
+    <%=ReportName%><span class="glyphicon glyphicon-eye-<%=Enabled?'open':'close'%> pull-right"></span>
 </script>
+
 <script>
     if (window.UserReport == undefined) {
         Tools.Namespace.register("window.UserReport");
     }
+
     if (window.UserReport.Toolbar == undefined) {
         window.UserReport.Toolbar = Backbone.View.extend({
             events: {
@@ -55,37 +54,41 @@
             url: "/api/User"
         });
     }
+
     if (window.UserReport.ReportList == undefined) {
         window.UserReport.ReportList = Backbone.Collection.extend({
             url:"/api/UserReport"
         });
     }
-    if (window.UserReport.UserListView == undefined) {
-        window.UserReport.UserListView = Backbone.View.extend({
-            template: _.template($("#tempUserListView").html()),
+
+    if (window.UserReport.UserListItemView == undefined) {
+        window.UserReport.UserListItemView = Backbone.View.extend({
+            tagName: "a",
+            className: "list-group-item",
+            template: _.template($("#tempUserListItemView").html()),
+            initialize: function (user) {
+                this.model = user;
+            },
             render: function () {
-                this.$el.html(this.template(
-                    {
-                        "data": userList.toJSON(userList)
-                    }
-                    ));
+                this.$el.html(this.template(this.model.toJSON()));
+                this.$el.attr("href", "#do");
+                return this.el;
             },
             events: {
-                "click a":"clickUser"
+                "click":"clickUser"
             },
-            clickUser: function (e) {
+            clickUser: function () {
                 if (needSave && !confirm("还没有保存设定，是否放弃当前修改？")) {
                     return;
                 }
                 needSave = false;
-                this.$el.children("a").removeClass("active");
-                $(e.currentTarget).addClass("active");
-                var index = $(e.currentTarget).attr("data-index");
+                userListView.allUnSelect();
+                this.$el.addClass("active");
                 reportList.fetch(
                     {
                         data: {
-                            userID: userList.at(index).get("ID"),
-                            model:1
+                            userID: this.model.get("ID"),
+                            model: 1
                         },
                         success: function (collection, rst) {
                             reportListView.render();
@@ -94,13 +97,23 @@
                             alert("获取报表信息失败");
                         }
                     })
+            }
+        });
+    }
+
+    if (window.UserReport.UserListView == undefined) {
+        window.UserReport.UserListView = Backbone.View.extend({
+            render: function () {
+                this.$el.empty();
+                for (var i = 0; i < userList.length; i++) {
+                    this.$el.append(new window.UserReport.UserListItemView(userList.at(i)).render());
+                }
             },
             refresh: function () {
                 userList.fetch(
                     {
                         success: function () {
                             userListView.render();
-                            reportListView.clear();
                         },
                         error: function () {
                             alert("刷新失败");
@@ -108,37 +121,51 @@
                     }
                     );
 
+            },
+            allUnSelect: function () {
+                this.$el.children("a").removeClass("active");
             }
         });
     }
-    if (window.UserReport.ReportListView == undefined) {
-        window.UserReport.ReportListView = Backbone.View.extend({
-            template: _.template($("#tempReportListView").html()),
+
+    if (window.UserReport.ReportListItemView == undefined) {
+        window.UserReport.ReportListItemView = Backbone.View.extend({
+            tagName: "a",
+            className:"list-group-item",
+            template: _.template($("#tempReportListItemView").html()),
+            initialize:function(rpt){
+                this.model = rpt;
+            },
             render: function () {
-                this.$el.html(this.template(
-                    {
-                        data:reportList.toJSON(reportList)
-                    }
-                    ))
+                this.$el.html(this.template(this.model.toJSON()));
+                this.$el.attr("href", "#do");
+                return this.el;
             },
             events: {
-                "click a":"clickReport"
+                "click":"clickRpt"
             },
-            clickReport: function (e) {
+            clickRpt: function () {
                 needSave = true;
-                var index = $(e.currentTarget).attr("data-index");
-                var oldValue=reportList.at(index).get("Enabled");
-                reportList.at(index).set({ "Enabled": !oldValue });
-                $(e.currentTarget).children("span").removeClass();
-                $(e.currentTarget).children("span").addClass("glyphicon glyphicon-eye-" + (oldValue ? "close" : "open") + " pull-right");
-            },
-            clear: function () {
-                reportList.reset();
-                this.render();
+                var oldValue=this.model.get("Enabled");
+                this.model.set({ "Enabled": !oldValue});
+                this.$el.find("span").removeClass();
+                this.$el.find("span").addClass("glyphicon glyphicon-eye-" + (oldValue ? "close" : "open") + " pull-right");
+            }
+        });
+    }
+
+    if (window.UserReport.ReportListView == undefined) {
+        window.UserReport.ReportListView = Backbone.View.extend({
+            render: function () {
+                this.$el.empty();
+                for (var i = 0; i < reportList.length; i++) {
+                    this.$el.append(new window.UserReport.ReportListItemView(reportList.at(i)).render());
+                }
             }
         });
     }
 </script>
+
 <script>
     var userList ;
     var userListView;
@@ -158,16 +185,10 @@
         toolbar = new window.UserReport.Toolbar({
             el: "#toolbar"
         });
-        userList.fetch({
-            success: function (collection, rst) {
-                userListView.render();
-            },
-            error: function () {
-                alert("获取用户列表失败");
-            }
-        });
+        userListView.refresh();
     })
 </script>
+
 <div class="row">
     <div class="col-sm-4">
         <div class="panel panel-default" >
@@ -188,6 +209,7 @@
         </div>
     </div>
 </div>
+
 <div class="navbar navbar-fixed-bottom">
     <div class="navbar-header">
         <div class="btn-group btn-group-lg btn-group-justified" id="toolbar">

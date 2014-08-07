@@ -211,7 +211,7 @@
     if (window.UserManage.UserListView == undefined) {
         window.UserManage.UserListView = Backbone.View.extend({
             render: function () {
-                this.$el.html("");
+                this.$el.empty();
                 for (var i = 0; i < userList.length; i++) {
                     this.addOne(userList.at(i));
                 }

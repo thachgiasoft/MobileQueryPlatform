@@ -479,9 +479,9 @@
                 window.location.hash = "#reportView"
             },
             clear: function () {
-                this.$el.find(".reportBody").html("");
-                this.$el.find(".reportFooter").html("");
-                this.$el.find(".reportPager").html("");
+                this.$el.find(".reportBody").empty();
+                this.$el.find(".reportFooter").empty();
+                this.$el.find(".reportPager").empty();
             }
         });
     }

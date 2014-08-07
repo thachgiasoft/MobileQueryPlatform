@@ -21,13 +21,12 @@ namespace MobileQueryPlatform.Controllers
         // post api/syscfg/5
         public ResultModel<object> Post(Syscfg value)
         {
-            ResultModel<object> rst = new ResultModel<object>();
-            if (HttpContext.Current.Session["SigninedUser"] == null)
+            User user = HttpContext.Current.Session["SigninedUser"] as User;
+            if (user == null || !user.IsAdmin)
             {
-                rst.ResultMessage = "用户登录失效";
-                rst.ResultStatus = -1;
-                return rst;
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
             }
+            ResultModel<object> rst = new ResultModel<object>();
             rst.ResultStatus = SyscfgBLL.SaveCfg(value, out rst.ResultMessage);
             return rst;
         }
