@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-/* Created on:     2014-07-22 16:24:16                          */
+/* Created on:     2014-08-07 17:26:42                          */
 /*==============================================================*/
 
 
@@ -143,10 +143,6 @@ if exists (select 1
 go
 
 alter table dbo.tUserReport
-   drop constraint PK_TUSERREPORT
-go
-
-alter table dbo.tUserReport
    drop constraint AK_KEY_2_TUSERREP
 go
 
@@ -205,8 +201,10 @@ create table tReportColumn (
    ColumnType           numeric(1)           not null,
    Sumabled             numeric(1)           not null default 0,
    Sortabled            numeric(1)           not null default 0,
+   OrderIndex           numeric(1)           not null,
    constraint PK_TREPORTCOLUMN primary key (ReportID, ColumnCode),
-   constraint AK_KEY_2_TREPORTC unique (ColumnCode, ReportID)
+   constraint AK_KEY_2_TREPORTC unique (ColumnCode, ReportID),
+   constraint AK_KEY_4_TREPORTC unique (ReportID, OrderIndex)
 )
 go
 
