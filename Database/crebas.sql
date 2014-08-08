@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2000                    */
-/* Created on:     2014-08-07 17:26:42                          */
+/* Created on:     2014-08-08 13:55:40                          */
 /*==============================================================*/
 
 
@@ -84,6 +84,10 @@ alter table dbo.tReportColumn
 go
 
 alter table dbo.tReportColumn
+   drop constraint AK_KEY_4_TREPORTC
+go
+
+alter table dbo.tReportColumn
    drop constraint AK_KEY_2_TREPORTC
 go
 
@@ -153,9 +157,6 @@ if exists (select 1
    drop table dbo.tUserReport
 go
 
---execute sp_revokedbaccess dbo
-go
-
 /*==============================================================*/
 /* Table: tDatabase                                             */
 /*==============================================================*/
@@ -201,7 +202,7 @@ create table tReportColumn (
    ColumnType           numeric(1)           not null,
    Sumabled             numeric(1)           not null default 0,
    Sortabled            numeric(1)           not null default 0,
-   OrderIndex           numeric(1)           not null,
+   OrderIndex           numeric(2)           not null,
    constraint PK_TREPORTCOLUMN primary key (ReportID, ColumnCode),
    constraint AK_KEY_2_TREPORTC unique (ColumnCode, ReportID),
    constraint AK_KEY_4_TREPORTC unique (ReportID, OrderIndex)

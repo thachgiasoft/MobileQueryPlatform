@@ -58,6 +58,7 @@
             </div>
             <div class="modal-footer">
                 <a class="btn btn-default" data-dismiss="modal">关闭</a>
+                <a class="btn btn-warning" id="test">测试 </a>
                 <a class="btn btn-primary" id="save">保存</a>
             </div>
         </div>
@@ -221,9 +222,21 @@
 
             events: {
                 "click #save": "saveDb",
+                "click #test":"testDb",
                 "change .dbType": "dbTypeChange"
             },
-
+            testDb: function () {
+                var value = this.model.clone();
+                value.set(Tools.serializeObject($("#db_form")));
+                $.post("/Admin/TestDatabase", value.toJSON(), function (rst) {
+                    if (rst.ResultStatus == 1) {
+                        alert(rst.ResultMessage);
+                    }
+                    else {
+                        alert("测试失败：" + rst.ResultMessage);
+                    }
+                })
+            },
             saveDb: function () {
                 this.model.save(Tools.serializeObject($("#db_form")), {
                     success: function (model, rst) {

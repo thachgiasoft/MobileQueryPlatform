@@ -266,5 +266,24 @@ namespace BLL
             }
         }
 
+        public static int TestDatabase(Database db, out string msg)
+        {
+            string connectionString;
+            connectionString = db.DbType == 0 ? MSSQL_CONNECTIONSTRING : ORACLE_CONNECTIONSTRING;
+            connectionString = connectionString.Replace("@DataSource", db.DataSource).Replace("@DbName", db.DbName).Replace("@UserID", db.UserID).Replace("@Password", db.Password);
+            try
+            {
+                using (IDAL dal = DALBuilder.CreateDAL(connectionString, db.DbType))
+                {
+                    msg = "连接成功";
+                    return 1;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                msg = ex.Message;
+                return -1;
+            }
+        }
     }
 }

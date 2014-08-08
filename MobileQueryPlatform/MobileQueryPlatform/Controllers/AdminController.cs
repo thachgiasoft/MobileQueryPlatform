@@ -43,6 +43,21 @@ namespace MobileQueryPlatform.Controllers
             return PartialView();
         }
 
+        public JsonResult TestDatabase(string dataSource, string dbName, string userID, string password, short dbType)
+        {
+            Database db = new Database()
+            {
+                DataSource = dataSource,
+                DbName = dbName,
+                UserID = userID,
+                Password = password,
+                DbType = dbType
+            };
+            ResultModel<object> rst = new ResultModel<object>();
+            rst.ResultStatus = DatabaseBLL.TestDatabase(db, out rst.ResultMessage);
+            return Json(rst);
+        }
+
         /// <summary>
         /// 报表管理页面
         /// </summary>

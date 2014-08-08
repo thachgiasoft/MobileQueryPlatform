@@ -51,6 +51,12 @@ namespace BLL
                         {
                             cfg.ExpDate = "永久";
                         }
+                        else
+                        {
+                            StringBuilder temp=new StringBuilder(32);
+                            temp.AppendFormat("{0}-{1}-{2}",cfg.ExpDate.Substring(0,4),cfg.ExpDate.Substring(4,2),cfg.ExpDate.Substring(6,2));
+                            cfg.ExpDate = temp.ToString();
+                        }
                         if (cfg.ReportNumber == "999")
                         {
                             cfg.ReportNumber = "无限";

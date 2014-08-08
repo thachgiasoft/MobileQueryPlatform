@@ -158,6 +158,9 @@
             },
             render: function () {
                 var params = request.get("Params");
+                if (params.length > 0 || report.get("Sortabled")) {
+                    this.$el.append("<hr/>");
+                }
                 for (var i = 0; i < params.length; i++) {
                     switch (params[i].ParamType) {
                         case 0:
@@ -188,7 +191,9 @@
                 if (report.get("Sortabled")) {
                     this.$el.append(new window.Report.ReportSortView().render());
                 }
-                this.$el.append("<hr/>");
+                if (params.length > 0 || report.get("Sortabled")) {
+                    this.$el.append("<hr/>");
+                }
             },
             toggleShow: function () {
                 this.$el.toggleClass("hide");
@@ -477,7 +482,7 @@
                 if (report.get("Pagingabled") == 1) {
                     this.$el.find(".reportPager").append(new window.Report.ReportPagerView().render());
                 }
-                window.location.hash = "#reportView"
+                window.location.hash = "#reportView";
             },
             clear: function () {
                 this.$el.find(".reportBody").empty();
@@ -506,7 +511,6 @@
                 request.set({ "PageHis":  page});
                 request.set({ Page: --page });
                 reportView.query();
-                window.location.hash = "#reportView";
             },
             nextPage: function (e) {
                 if ($(e.currentTarget).hasClass("disabled")) {
@@ -516,7 +520,6 @@
                 request.set({ "PageHis": page });
                 request.set({ Page: ++page });
                 reportView.query();
-                window.location.hash = "#reportView";
             }
         });
     }
@@ -546,8 +549,9 @@
 </script>
 
 <div class="container" id="reportView">
-    <h2 class="text-info" id="queryTitle"></h2><a class="btn btn-default pull-right" href="#ToggleParamsContainer"><span id="toggleParamsIcon" class="glyphicon glyphicon-eye-open"></span></a>
-    <hr />
+    <div class="row">
+        <h2 class="text-info" id="queryTitle"></h2><a class="btn btn-default pull-left" href="#ToggleParamsContainer">选项<span id="toggleParamsIcon" class="glyphicon glyphicon-eye-open"></span></a>
+    </div>
     <div class="row">
         <form class="form-inline" role="form" id="paramContainerView" />
     </div>

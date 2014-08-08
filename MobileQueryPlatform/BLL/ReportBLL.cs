@@ -637,6 +637,32 @@ namespace BLL
         {
             try
             {
+                Syscfg cfg = SyscfgBLL.LoadCfg(out msg);
+                if (cfg == null)
+                {
+                    msg = "系统参数错误，请联系管理员";
+                    result = null;
+                    return -99;
+                }
+                if (cfg.ExpDate=="无效"||(cfg.ExpDate!="永久"&&DateTime.Now.CompareTo(DateTime.Parse(cfg.ExpDate)) > 0))
+                {
+                    //过期
+                    msg = "授权已过期";
+                    result = null;
+                    return -99;
+                }
+                int rptCount;
+                if (cfg.ReportNumber=="无效"||!int.TryParse(cfg.ReportNumber, out rptCount))
+                {
+                    throw new Exception("报表授权数获取失败");
+                }
+                if (rptCount < ReportCount())
+                {
+                    //超过报表数
+                    msg = "报表数已超过授权数量";
+                    result = null;
+                    return -99;
+                }
                 Report rpt=GetReport(request.ReportID);//获取报表
                 result = new ReportResult()
                 {
@@ -803,6 +829,37 @@ namespace BLL
                 return -1;
             }
             
+        }
+
+        /// <summary>
+        /// 获取系统可用报表数量
+        /// </summary>
+        /// <returns></returns>
+        public static int ReportCount()
+        {
+            int rptCount = -1;
+            try
+            {
+                using (IDAL dal = DALBuilder.CreateDAL(ConfigurationManager.ConnectionStrings["SYSDB"].ConnectionString, 0))
+                {
+                    StringBuilder sql = new StringBuilder(128);
+                    sql.Append("SELECT COUNT(1) FROM tReport WHERE Enabled=1");
+                    dal.OpenReader(sql.ToString());
+                    if (dal.DataReader.Read())
+                    {
+                        rptCount = Convert.ToInt32(dal.DataReader[0]);
+                    }
+                    else
+                    {
+                        throw new Exception("报表数获取失败");
+                    }
+                    return rptCount;
+                }
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
         }
 
         const string REGEX_PARAMS = @"(?<=[@:])\D\w+\b";

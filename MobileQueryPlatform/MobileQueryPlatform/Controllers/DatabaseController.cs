@@ -16,12 +16,12 @@ namespace MobileQueryPlatform.Controllers
         {
             return DatabaseBLL.GetDatabase(ID);
         }
+
         // GET api/database
         public IEnumerable<Database> Get()
         {
             return DatabaseBLL.ListDatabase();
         }
-
         
         // POST api/database
         public Database Post(Database value)
