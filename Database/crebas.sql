@@ -153,7 +153,7 @@ if exists (select 1
    drop table dbo.tUserReport
 go
 
-execute sp_revokedbaccess dbo
+--execute sp_revokedbaccess dbo
 go
 
 /*==============================================================*/
