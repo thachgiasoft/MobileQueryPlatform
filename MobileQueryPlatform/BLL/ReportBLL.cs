@@ -627,6 +627,13 @@ namespace BLL
 
         //const string PARAMS_REGEX = @"\w*\s*=\s*[@:]\w*\b";
         const string ALLSUM_FROM_REGEX = @"(?<=from)[^$]*";
+        const string PARAM_REGEX = @"[@:]参数名\b";//匹配单个参数
+        const string PARAM_SIG_OPERATOR = @"\b\w*\s*[=<>]\s*null\b";//匹配 参数 【单操作符】（= 、> 、<） null 的项
+        const string PARAM_MUL_OPERATOR = @"\b\w*\s*[<>!]=\s*null\b";//匹配 参数 【多操作符】(>=、<=、！=) null 的项
+        const string PARAM_LIKE = @"\b\w*\s+like\s+('[\s\w]*%[\s\w]*'\s*\+\s*){0,1}null(\s*\+\s*'[\s\w]*%[\s\w]*'){0,1}\s*\b";//匹配含有null的like参数
+        const string PARAM_BETWEEN_LEFT_PARAM_NULL = @"\bbetween\s+null\s+and\s+@\w+\b";//匹配between 左侧参数为null
+        const string PARAM_BETWEEN_RIGHT_PARAM_NULL = @"\bbetween\s+@\w+\s+and\s+null\b";//匹配between 右侧参数为null
+        const string PARAM_BETWEEN_BOTH_PARAM_NULL = @"\b\w+\s+between\s+null\s+and\s+null\b";//匹配between 两侧侧参数为null
         /// <summary>
         /// 执行报表
         /// </summary>
@@ -637,6 +644,7 @@ namespace BLL
         {
             try
             {
+                #region 授权检测
                 Syscfg cfg = SyscfgBLL.LoadCfg(out msg);
                 if (cfg == null)
                 {
@@ -644,7 +652,7 @@ namespace BLL
                     result = null;
                     return -99;
                 }
-                if (cfg.ExpDate=="无效"||(cfg.ExpDate!="永久"&&DateTime.Now.CompareTo(DateTime.Parse(cfg.ExpDate)) > 0))
+                if (cfg.ExpDate == "无效" || (cfg.ExpDate != "永久" && DateTime.Now.CompareTo(DateTime.Parse(cfg.ExpDate)) > 0))
                 {
                     //过期
                     msg = "授权已过期";
@@ -652,7 +660,7 @@ namespace BLL
                     return -99;
                 }
                 int rptCount;
-                if (cfg.ReportNumber=="无效"||!int.TryParse(cfg.ReportNumber, out rptCount))
+                if (cfg.ReportNumber == "无效" || !int.TryParse(cfg.ReportNumber, out rptCount))
                 {
                     throw new Exception("报表授权数获取失败");
                 }
@@ -663,6 +671,8 @@ namespace BLL
                     result = null;
                     return -99;
                 }
+                #endregion
+                
                 Report rpt=GetReport(request.ReportID);//获取报表
                 result = new ReportResult()
                 {
@@ -700,25 +710,54 @@ namespace BLL
                     List<IDbDataParameter> pList = new List<IDbDataParameter>();
                     if (request.Params != null)
                     {
+                        //替换所有的
                         for (int index = 0; index < request.Params.Length; index++)
                         {
                             if (request.Params[index].ParamValue == null)
                             {
-                                string params_regex = @"\w*\s*=\s*[@:]" + request.Params[index].ParamCode + @"*\b";
-                                finalSql = Regex.Replace(finalSql, params_regex, " 1=1 ");
-                                continue;
+                                //将所有值为null的参数 替换为null
+                                finalSql = Regex.Replace(finalSql, PARAM_REGEX.Replace("参数名", request.Params[index].ParamCode), " null ");
                             }
+                        }
+                        finalSql = Regex.Replace(finalSql,PARAM_SIG_OPERATOR , " 1=1 ");//将所有 参数【单操作符】null 的项 替换为1=1
+                        finalSql = Regex.Replace(finalSql, PARAM_MUL_OPERATOR, " 1=1 ");//将所有参数【多操作符】null 的项替换为1=1
+                        finalSql = Regex.Replace(finalSql, PARAM_LIKE, " 1=1 ");//将所有like null的项替换为1=1
+                        finalSql = Regex.Replace(finalSql, PARAM_BETWEEN_BOTH_PARAM_NULL, "1=1");//将所有between null and null 的项替换为1=1
+                        MatchCollection mc = Regex.Matches(finalSql, PARAM_BETWEEN_LEFT_PARAM_NULL);//匹配between null and 参数 的项
+                        if (mc.Count > 0)
+                        {
+                            foreach (Match m in mc)
+                            {
+                                string tmp = " <= " + (dbType == 0 ? "@" : ":") + Regex.Match(m.Value, @"(?<=@)\w+\b").Value+" ";
+                                finalSql = finalSql.Replace(m.Value, tmp);
+                            }
+                        }
+                        mc = Regex.Matches(finalSql, PARAM_BETWEEN_RIGHT_PARAM_NULL);//匹配between 参数 and null
+                        if (mc.Count > 0)
+                        {
+                            foreach (Match m in mc)
+                            {
+                                string tmp = " >=" + (dbType == 0 ? "@" : ":") + Regex.Match(m.Value, @"(?<=@)\w+\b").Value + " ";
+                                finalSql = finalSql.Replace(m.Value, tmp);
+                            }
+                        }
+                        foreach ( ReportParam p in request.Params)
+                        {
                             IDbDataParameter dbp = null;
-                            switch (request.Params[index].ParamType)
+                            if (p.ParamValue == null)
+                            {
+                                continue;//值为null的参数不加入参数列表
+                            }
+                            switch (p.ParamType)
                             {
                                 case 0:
-                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, DbType.String);
-                                    dbp.Value = string.IsNullOrEmpty(request.Params[index].ParamValue) ? string.Empty : request.Params[index].ParamValue;
+                                    dbp = dal.CreateParameter(p.ParamCode, DbType.String);
+                                    dbp.Value = string.IsNullOrEmpty(p.ParamValue) ? string.Empty : p.ParamValue;
                                     break;
                                 case 1:
                                     decimal v;
-                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, DbType.Decimal);
-                                    if (decimal.TryParse(request.Params[index].ParamValue, out v))
+                                    dbp = dal.CreateParameter(p.ParamCode, DbType.Decimal);
+                                    if (decimal.TryParse(p.ParamValue, out v))
                                     {
                                         dbp.Value = v;
                                     }
@@ -729,8 +768,8 @@ namespace BLL
                                     break;
                                 case 2:
                                     DateTime d;
-                                    dbp = dal.CreateParameter(request.Params[index].ParamCode, DbType.DateTime);
-                                    if (DateTime.TryParse(request.Params[index].ParamValue, out d))
+                                    dbp = dal.CreateParameter(p.ParamCode, DbType.DateTime);
+                                    if (DateTime.TryParse(p.ParamValue, out d))
                                     {
                                         dbp.Value = d;
                                     }
@@ -745,8 +784,7 @@ namespace BLL
                                 throw new Exception("参数错误");
                             }
                             pList.Add(dbp);
-
-                        }
+                        } 
                     }
                     if (rpt.Pagingabled)
                     {
