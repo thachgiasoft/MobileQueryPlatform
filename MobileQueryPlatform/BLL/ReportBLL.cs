@@ -626,7 +626,7 @@ namespace BLL
         }
 
         //const string PARAMS_REGEX = @"\w*\s*=\s*[@:]\w*\b";
-        const string ALLSUM_FROM_REGEX = @"(?<=from)[^$]*";
+        const string ALLSUM_FROM_REGEX = @"(?<=from\s+).+$";
         const string PARAM_REGEX = @"[@:]参数名\b";//匹配单个参数
         const string PARAM_SIG_OPERATOR = @"\b\w*\s*[=<>]\s*null\b";//匹配 参数 【单操作符】（= 、> 、<） null 的项
         const string PARAM_MUL_OPERATOR = @"\b\w*\s*[<>!]=\s*null\b";//匹配 参数 【多操作符】(>=、<=、！=) null 的项
