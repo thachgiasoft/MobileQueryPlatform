@@ -789,11 +789,11 @@ namespace BLL
                     if (rpt.Pagingabled)
                     {
                         //分页请求
-                        rstTable = dal.Select(finalSql, rpt.PageSize * (request.Page - 1), rpt.PageSize, out i,pList.ToArray());
+                        rstTable = dal.Select(finalSql.Replace('\r',' ').Replace('\n' ,' '), rpt.PageSize * (request.Page - 1), rpt.PageSize, out i,pList.ToArray());
                     }
                     else
                     {
-                        rstTable = dal.Select(finalSql, out i, pList.ToArray());
+                        rstTable = dal.Select(finalSql.Replace('\r', ' ').Replace('\n', ' '), out i, pList.ToArray());
                     }
 
                     if (rpt.PageSumabled)
@@ -811,7 +811,7 @@ namespace BLL
                         rstTable.Rows.InsertAt(row, rstTable.Rows.Count);
                     }
                     sql.Clear();
-                    sql.Append("Select ");
+                    sql.Append(" Select ");
                     if (rpt.AllSumabled)
                     {
                         //总合计请求
@@ -825,14 +825,14 @@ namespace BLL
                             }
                             else
                             {
-                                sql.AppendFormat(" null AS {0},",
+                                sql.AppendFormat(" null AS {0}, ",
                                     c.ColumnCode
                                     );
                             }
                         }
                     }
-                    sql.Append("Count(*) AS TotalCount");
-                    sql.AppendFormat(" From {0}", Regex.Match(finalSql, ALLSUM_FROM_REGEX, RegexOptions.IgnoreCase).Value);
+                    sql.Append(" Count(*) AS TotalCount ");
+                    sql.AppendFormat(" From {0} ", Regex.Match(finalSql.Replace('\r',' ').Replace('\n',' '), ALLSUM_FROM_REGEX, RegexOptions.IgnoreCase).Value);
 
                     IDbDataParameter[] pList2 = new IDbDataParameter[pList.Count];
                     for (int j = 0; j < pList.Count; j++)
@@ -860,7 +860,7 @@ namespace BLL
                 result.ReportData = JsonHelper.DatatableToJson(rstTable);
                 return 1;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 result = null;
                 msg = ex.Message;
@@ -931,7 +931,7 @@ namespace BLL
                 using (IDAL dal = DALBuilder.CreateDAL(tarConn, dbType))
                 {
                     //获取SQL语句中的Column
-                    DataSet ds = dal.Select(tmpSql);
+                    DataSet ds = dal.Select(tmpSql.Replace('\r',' ').Replace('\n',' '));//替换掉回车、换行符
                     if (ds.Tables.Count != 1)
                     {
                         throw new Exception("错误：查询结果必须只有一个结果表");
