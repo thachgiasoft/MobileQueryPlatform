@@ -694,10 +694,11 @@ namespace BLL
                 //开始组装sql
                 StringBuilder sql = new StringBuilder(256);
                 sql.Append(rpt.SqlCommand);
+                var orderBy = new StringBuilder();
                 if (!rpt.CommandHasOrderby && !string.IsNullOrEmpty(request.SortColumn))
                 {
                     //排序请求
-                    sql.AppendFormat(" Order By {0} {1}",
+                    orderBy.AppendFormat(" Order By {0} {1}",
                         request.SortColumn,
                         request.Desc?"Desc":string.Empty
                         );
@@ -789,11 +790,11 @@ namespace BLL
                     if (rpt.Pagingabled)
                     {
                         //分页请求
-                        rstTable = dal.Select(finalSql.Replace('\r',' ').Replace('\n' ,' '), rpt.PageSize * (request.Page - 1), rpt.PageSize, out i,pList.ToArray());
+                        rstTable = dal.Select(finalSql.Replace('\r',' ').Replace('\n' ,' ')+orderBy.ToString(), rpt.PageSize * (request.Page - 1), rpt.PageSize, out i,pList.ToArray());
                     }
                     else
                     {
-                        rstTable = dal.Select(finalSql.Replace('\r', ' ').Replace('\n', ' '), out i, pList.ToArray());
+                        rstTable = dal.Select(finalSql.Replace('\r', ' ').Replace('\n', ' ')+orderBy.ToString(), out i, pList.ToArray());
                     }
 
                     if (rpt.PageSumabled)
