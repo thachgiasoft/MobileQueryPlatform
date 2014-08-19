@@ -13,22 +13,22 @@
       <publishTime>08/08/2014 09:55:27</publishTime>
     </File>
     <File Include="bin/App_global.asax.compiled">
-      <publishTime>08/18/2014 19:05:15</publishTime>
+      <publishTime>08/19/2014 09:04:06</publishTime>
     </File>
     <File Include="bin/App_global.asax.dll">
-      <publishTime>08/18/2014 19:05:15</publishTime>
+      <publishTime>08/19/2014 09:04:06</publishTime>
     </File>
     <File Include="bin/BLL.dll">
-      <publishTime>08/18/2014 19:03:06</publishTime>
+      <publishTime>08/19/2014 09:03:53</publishTime>
     </File>
     <File Include="bin/BLL.pdb">
-      <publishTime>08/18/2014 19:03:06</publishTime>
+      <publishTime>08/19/2014 09:03:53</publishTime>
     </File>
     <File Include="bin/DAL.dll">
-      <publishTime>08/18/2014 19:03:06</publishTime>
+      <publishTime>08/19/2014 09:03:51</publishTime>
     </File>
     <File Include="bin/DAL.pdb">
-      <publishTime>08/18/2014 19:03:06</publishTime>
+      <publishTime>08/19/2014 09:03:51</publishTime>
     </File>
     <File Include="bin/dotless.Core.dll">
       <publishTime>08/08/2014 09:55:27</publishTime>
@@ -43,16 +43,16 @@
       <publishTime>08/08/2014 09:55:25</publishTime>
     </File>
     <File Include="bin/MobileQueryPlatform.dll">
-      <publishTime>08/18/2014 19:03:06</publishTime>
+      <publishTime>08/19/2014 09:03:54</publishTime>
     </File>
     <File Include="bin/MobileQueryPlatform.pdb">
-      <publishTime>08/18/2014 19:03:06</publishTime>
+      <publishTime>08/19/2014 09:03:54</publishTime>
     </File>
     <File Include="bin/Model.dll">
-      <publishTime>08/18/2014 19:03:06</publishTime>
+      <publishTime>08/19/2014 09:03:51</publishTime>
     </File>
     <File Include="bin/Model.pdb">
-      <publishTime>08/18/2014 19:03:06</publishTime>
+      <publishTime>08/19/2014 09:03:51</publishTime>
     </File>
     <File Include="bin/Newtonsoft.Json.dll">
       <publishTime>08/08/2014 09:55:26</publishTime>
@@ -205,7 +205,7 @@
       <publishTime>08/08/2014 09:55:24</publishTime>
     </File>
     <File Include="PrecompiledApp.config">
-      <publishTime>08/18/2014 19:05:13</publishTime>
+      <publishTime>08/19/2014 09:04:04</publishTime>
     </File>
     <File Include="Scripts/Backbone/backbone-min.js">
       <publishTime>08/08/2014 09:55:24</publishTime>
@@ -316,7 +316,7 @@
       <publishTime>08/08/2014 09:55:24</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>08/18/2014 19:03:10</publishTime>
+      <publishTime>08/19/2014 09:04:02</publishTime>
     </File>
   </ItemGroup>
 </Project>
