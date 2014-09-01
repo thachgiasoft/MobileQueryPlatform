@@ -1,0 +1,114 @@
+﻿<script type="text/javascript">
+    if (window.SysCfg == undefined) {
+        Tools.Namespace.register("window.SysCfg");
+    }
+    if (window.SysCfg.Toolbar == undefined) {
+        window.SysCfg.Toolbar = Backbone.View.extend({
+            events: {
+                "click #refresh":"refresh",
+                "click #save":"save"
+            },
+            refresh:function(){
+                formView.refresh();
+            },
+            save: function () {
+                syscfg.set(Tools.serializeObject($("#sysCfgForm")));
+                syscfg.save(null,{
+                    success: function (model, rst) {
+                        formView.refresh();
+                    },
+                    error: function (model,rst) {
+                        switch (rst.status) {
+                            case 404:
+                                alert("设置失败");
+                                break;
+                            case 400:
+                                alert("设置失败，系统异常，请联系管理员");
+                                break;
+                            case 403:
+                                alert("登录失效，请重新登陆");
+                                window.location.href = "/Sign/adminSignin";
+                                break;
+                        }
+
+                    }
+                });
+            }
+        });
+    }
+    if (window.SysCfg.FormView == undefined) {
+        window.SysCfg.FormView = Backbone.View.extend({
+            refresh: function () {
+                syscfg.fetch({
+                    success: function (model) {
+                        $("#SerialNo").val(model.get("SerialNo"));
+                        $("#Company").val(model.get("Company"));
+                        $("#License").val(model.get("License"));
+                        $("#ExpDate").val(model.get("ExpDate"));
+                        $("#ReportNumber").val(model.get("ReportNumber"));
+                    },
+                    error: function (e) {
+                        alert(e.responseJSON.Message);
+                    }
+                });
+            }
+        });
+    }
+    if (window.SysCfg.Model == undefined) {
+        window.SysCfg.Model = Backbone.Model.extend({
+            defaults: {
+                "Company": "",
+                "SerialNo": "",
+                "License": "",
+                "ExpDate": "",
+                "ReportNumber": ""
+            },
+            urlRoot: "/api/Syscfg"
+        });
+    }
+</script>
+
+<script>
+    var toolbar;
+    var syscfg;
+    var formView;
+    $(function () {
+        toolbar = new window.SysCfg.Toolbar({
+            el:"#toolbar"
+        });
+        formView = new window.SysCfg.FormView({
+            el: "#sysCfgForm"
+        });
+        syscfg = new window.SysCfg.Model();
+        formView.refresh();
+    })
+</script>
+<div class="container">
+    <form id="sysCfgForm" role="form">
+        <div class="form-group">
+            <label>序列号</label>
+            <input id="SerialNo" name="SerialNo" class="form-control" type="text" placeholder="loading" value="" readonly="readonly" />
+        </div>
+        <div class="form-group">
+            <label>单位名称</label>
+            <input id="Company" name="Company"class="form-control" type="text" placeholder="输入单位名称" />
+        </div>
+        <div class="form-group">
+            <label>授权码</label>
+            <input id="License" name="License" class="form-control" type="text" placeholder="输入授权码" />
+        </div>
+        <div class="form-group">
+            <label>有效期至</label>
+            <input id="ExpDate" name="ExpDate" class="form-control" type="text" placeholder="loading" disabled />
+        </div>
+        <div class="form-group">
+            <label>授权报表数</label>
+            <input id="ReportNumber" name="ReportNumber" class="form-control" type="text" placeholder="loading" disabled />
+        </div>
+    </form>
+</div>
+
+<ul id="toolbar" class="nav nav-pills navbar-fixed-bottom nav-justified" role="tablist">
+    <li role="presentation"><a class="btn btn-default" id="refresh"><span class="glyphicon glyphicon-refresh">刷新</span></a></li>
+    <li role="presentation"><a class="btn btn-default" id="save"><span class="glyphicon glyphicon-floppy-save">保存</span></a></li>
+</ul>

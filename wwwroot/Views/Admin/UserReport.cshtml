@@ -1,0 +1,221 @@
+﻿<script type="text/template" id="tempUserListItemView">
+    <span class="rptItem glyphicon glyphicon-<%=IsAdmin?'cog':'user'%>"></span> <%=UserCode%>-<%=UserName%> <span class="pull-right text-danger <%=Enabled?'':'glyphicon glyphicon-ban-circle'%>"></span>
+</script>
+
+<script type="text/ng-template" id="tempReportListItemView">
+    <%=ReportName%><span class="glyphicon glyphicon-eye-<%=Enabled?'open':'close'%> pull-right"></span>
+</script>
+
+<script>
+    if (window.UserReport == undefined) {
+        Tools.Namespace.register("window.UserReport");
+    }
+
+    if (window.UserReport.Toolbar == undefined) {
+        window.UserReport.Toolbar = Backbone.View.extend({
+            events: {
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "refresh":
+                        if (needSave && !confirm("还没有保存设定，是否放弃当前修改？")) {
+                            return;
+                        }
+                        
+                        userListView.refresh();
+                        break;
+                    case "save":
+                        if (!needSave) {
+                            return;
+                        }
+                        reportList.sync("create", reportList, {
+                            success: function (rst) {
+                                needSave = false;
+                            },
+                            error: function (model,rst) {
+                                switch (rst.status) {
+                                    case 404:
+                                        alert("设置失败");
+                                        break;
+                                    case 400:
+                                        alert("设置失败，系统异常，请联系管理员");
+                                        break;
+                                    case 403:
+                                        alert("登录失效，请重新登陆");
+                                        window.location.href = "/Sign/adminSignin";
+                                        break;
+                                }
+                            }
+                        })
+                        break;
+                }
+            }
+        });
+    }
+
+    if (window.UserReport.UserList == undefined) {
+        window.UserReport.UserList = Backbone.Collection.extend({
+            url: "/api/User"
+        });
+    }
+
+    if (window.UserReport.ReportList == undefined) {
+        window.UserReport.ReportList = Backbone.Collection.extend({
+            url:"/api/UserReport"
+        });
+    }
+
+    if (window.UserReport.UserListItemView == undefined) {
+        window.UserReport.UserListItemView = Backbone.View.extend({
+            tagName: "a",
+            className: "list-group-item",
+            template: _.template($("#tempUserListItemView").html()),
+            initialize: function (user) {
+                this.model = user;
+            },
+            render: function () {
+                this.$el.html(this.template(this.model.toJSON()));
+                this.$el.attr("href", "#do");
+                return this.el;
+            },
+            events: {
+                "click":"clickUser"
+            },
+            clickUser: function () {
+                if (needSave && !confirm("还没有保存设定，是否放弃当前修改？")) {
+                    return;
+                }
+                needSave = false;
+                userListView.allUnSelect();
+                this.$el.addClass("active");
+                reportList.fetch(
+                    {
+                        data: {
+                            userID: this.model.get("ID"),
+                            model: 1
+                        },
+                        success: function (collection, rst) {
+                            reportListView.render();
+                        },
+                        error: function () {
+                            alert("获取报表信息失败");
+                        }
+                    })
+            }
+        });
+    }
+
+    if (window.UserReport.UserListView == undefined) {
+        window.UserReport.UserListView = Backbone.View.extend({
+            render: function () {
+                this.$el.empty();
+                for (var i = 0; i < userList.length; i++) {
+                    this.$el.append(new window.UserReport.UserListItemView(userList.at(i)).render());
+                }
+            },
+            refresh: function () {
+                userList.fetch(
+                    {
+                        success: function () {
+                            userListView.render();
+                        },
+                        error: function () {
+                            alert("刷新失败");
+                        }
+                    }
+                    );
+
+            },
+            allUnSelect: function () {
+                this.$el.children("a").removeClass("active");
+            }
+        });
+    }
+
+    if (window.UserReport.ReportListItemView == undefined) {
+        window.UserReport.ReportListItemView = Backbone.View.extend({
+            tagName: "a",
+            className:"list-group-item",
+            template: _.template($("#tempReportListItemView").html()),
+            initialize:function(rpt){
+                this.model = rpt;
+            },
+            render: function () {
+                this.$el.html(this.template(this.model.toJSON()));
+                this.$el.attr("href", "#do");
+                return this.el;
+            },
+            events: {
+                "click":"clickRpt"
+            },
+            clickRpt: function () {
+                needSave = true;
+                var oldValue=this.model.get("Enabled");
+                this.model.set({ "Enabled": !oldValue});
+                this.$el.find("span").removeClass();
+                this.$el.find("span").addClass("glyphicon glyphicon-eye-" + (oldValue ? "close" : "open") + " pull-right");
+            }
+        });
+    }
+
+    if (window.UserReport.ReportListView == undefined) {
+        window.UserReport.ReportListView = Backbone.View.extend({
+            render: function () {
+                this.$el.empty();
+                for (var i = 0; i < reportList.length; i++) {
+                    this.$el.append(new window.UserReport.ReportListItemView(reportList.at(i)).render());
+                }
+            }
+        });
+    }
+</script>
+
+<script>
+    var userList ;
+    var userListView;
+    var reportList;
+    var reportListView;
+    var needSave = false;
+    var toolbar;
+    $(function () {
+        userList = new window.UserReport.UserList();
+        reportList = new window.UserReport.ReportList();
+        userListView = new window.UserReport.UserListView({
+            el: "#userListView"
+        });
+        reportListView = new window.UserReport.ReportListView({
+            el: "#reportListView"
+        });
+        toolbar = new window.UserReport.Toolbar({
+            el: "#toolbar"
+        });
+        userListView.refresh();
+    })
+</script>
+
+<div class="row">
+    <div class="col-sm-4">
+        <div class="panel panel-default" >
+            <div class="panel-heading">
+                <span class="panel-title">用户</span>
+            </div>
+            <div id="userListView" class="list-group"/>
+        </div>
+    </div>
+    <div class="col-sm-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <span class="panel-title">
+                    报表
+                </span>
+            </div>
+            <div id="reportListView" class="list-group"/>
+        </div>
+    </div>
+</div>
+
+<ul id="toolbar" class="nav nav-pills navbar-fixed-bottom nav-justified" role="tablist">
+    <li role="presentation"><a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a></li>
+    <li role="presentation"><a class="btn btn-default" data-action="save"><span class="glyphicon glyphicon-floppy-save"></span>保存</a></li>
+</ul>

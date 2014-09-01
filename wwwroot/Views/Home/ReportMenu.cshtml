@@ -1,0 +1,48 @@
+﻿<script type="text/template" id="tempReportMenuView">
+    <% for(var i=0;i<=data.length-1;i++) {%>
+    <a class="list-group-item" href="#Report/<%=data[i].ReportID%>"><span class="glyphicon glyphicon-stats">&nbsp;</span><%=data[i].ReportName%></a>
+    <% } %>
+</script>
+<script>
+    if (window.Report == undefined) {
+        Tools.Namespace.register("window.Report");
+    }
+    if (window.Report.ReportMenuView == undefined) {
+        window.Report.ReportMenuView = Backbone.View.extend({
+            template: _.template($("#tempReportMenuView").html()),
+            render: function () {
+                this.$el.html(this.template({
+                    "data":menuList.toJSON(menuList)
+                }));
+            }
+        });
+    }
+    if (window.Report.ReportMenuList == undefined) {
+        window.Report.ReportMenuList = Backbone.Collection.extend({
+            url: "/api/UserReport"
+        });
+    }
+</script>
+<script type="text/javascript">
+    var menuList;
+    var menuView;
+    $(function () {
+        menuList = new window.Report.ReportMenuList();
+        menuView = new window.Report.ReportMenuView({
+            el: "#reportMenu"
+        });
+        menuList.fetch({
+            data: {
+                userID: "@ViewBag.UserID",
+                model: 0
+            },
+            success: function () {
+                menuView.render();
+            },
+            error: function () {
+                alert("获取用户菜单失败");
+            }
+        })
+    })
+</script>
+<div class="list-group" id="reportMenu"/>

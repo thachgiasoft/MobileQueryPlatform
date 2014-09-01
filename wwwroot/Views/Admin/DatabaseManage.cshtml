@@ -1,0 +1,310 @@
+﻿<script id="tempDbListItemView" type="text/template">
+    <td><%=DbCode%></td>
+    <td><%=DbType==0?"MsSql":"Oracle"%></td>
+    <td><%=Remark%></td>
+    <td>
+        <a class="btn btn-default" data-action="remove" ><span class="glyphicon glyphicon-trash"></span></a>
+        <a class="btn btn-default" data-action="edit"><span class="glyphicon glyphicon-pencil"></span></a>
+    </td>
+</script>
+
+<script id="tempDbEditView" type="text/template">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">数据源编辑</h4>
+            </div>
+            <div class="modal-body">
+                <form role="form" id="db_form">
+                    <div class="form-group">
+                        <label for="dbCode">编码</label>
+                        <input id="dbCode" type="text" class="form-control"  <%=DbCode!=null?'disabled':''%> name="DbCode" value="<%=DbCode%>" placeholder="输入编码" autofocus="autofocus" required="required" />
+                    </div>
+                    <div class="form-group">
+                        <label>数据库类型</label>
+                        <br />
+                        <div class="btn-group" data-toggle="buttons">
+
+                            <label class="btn btn-info <%=DbType==0?'active':''%> ">
+                                <input class="dbType" type="radio" value="0" <%=DbType==0?'checked':''%> >&nbsp;&nbsp;MsSql&nbsp;&nbsp;
+                            </label>
+                            <label class="btn btn-info <%=DbType==1?'active':''%>">
+                                <input class="dbType" type="radio" value="1" <%=DbType==1?'checked':''%> >&nbsp;&nbsp;Oracle&nbsp;&nbsp;
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dataSource">服务器地址</label>
+                        <input id="dataSource" type="text" class="form-control" name="DataSource" value="<%=DataSource%>" placeholder="输入服务器地址，如:172.16.0.1" autofocus="autofocus" required="required" />
+                    </div>
+                    <div class="form-group">
+                        <label for="dbName">数据库名称</label>
+                        <input id="dbName" type="text" class="form-control" name="DbName" value="<%=DbName%>" placeholder="MsSql填写数据库名，Oracle填写服务名" autofocus="autofocus" required="required" />
+                    </div>
+                    <div class="form-group">
+                        <label for="userID">登录ID</label>
+                        <input id="userID" type="text" class="form-control" name="UserID" value="<%=UserID%>" placeholder="输入登录用户id,如：sa" autofocus="autofocus" required="required" />
+                    </div>
+                    <div class="form-group">
+                        <label for="password">登录密码</label>
+                        <input id="password" type="password" class="form-control" name="Password" value="<%=Password%>" placeholder="输入登录密码" autofocus="autofocus" required="required" />
+                    </div>
+                    <div class="form-group">
+                        <label for="remark">说明</label>
+                        <input id="remark" type="text" class="form-control" name="Remark" value="<%=Remark%>" placeholder="输入说明" autofocus="autofocus" required="required" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-default" data-dismiss="modal">关闭</a>
+                <a class="btn btn-warning" id="test">测试 </a>
+                <a class="btn btn-primary" id="save">保存</a>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    if (window.Database == undefined) {
+        Tools.Namespace.register("window.Database");
+    }
+
+    if (window.Database.Toolbar == undefined) {
+        window.Database.Toolbar = Backbone.View.extend({
+            events: {
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "refresh":
+                        dbListView.refresh();
+                        break;
+                    case "add":
+                        dbEditView.show(null);
+                        break;
+                }
+            }
+        });
+    }
+
+    if (window.Database.DbListItemView == undefined) {
+        window.Database.DbListItemView = Backbone.View.extend({
+            tagName: "tr",
+            template: _.template($("#tempDbListItemView").html()),
+            initialize:function(db){
+                this.model = db;
+                this.listenTo(this.model, "change", this.render);
+                this.listenTo(this.model, "destroy", this.remove);
+            },
+            render: function () {
+                this.$el.html(this.template(this.model.toJSON()));
+                return this.el;
+            },
+            events: {
+                "click a":"clickBtn"
+            },
+            clickBtn: function (e) {
+                switch ($(e.currentTarget).attr("data-action")) {
+                    case "remove":
+                        if (!confirm("确认删除该数据源？")) {
+                            return;
+                        }
+                        this.model.destroy({
+                            success: function (model, rst) {
+                            },
+                            error: function (model,rst) {
+                                switch (rst.status) {
+                                    case 404:
+                                        alert("删除失败");
+                                        break;
+                                    case 400:
+                                        alert("删除失败，系统异常，请联系管理员");
+                                        break;
+                                    case 403:
+                                        alert("登录失效，请重新登陆");
+                                        window.location.href = "/Sign/adminSignin";
+                                        break;
+                                }
+                            },
+                            wait:true
+                        });
+                        break;
+                    case "edit":
+                        this.model.fetch({
+                            success: function (model,rst) {
+                                dbEditView.show(model);
+                            },
+                            error: function () {
+                                alert("数据源明细获取失败");
+                            }
+                        });
+                        break;
+                }
+            }
+        });
+    }
+
+    if (window.Database.DbListView == undefined) {
+        window.Database.DbListView = Backbone.View.extend({
+            render: function () {
+                this.clear();
+                for (var i = 0; i < dbList.length; i++) {
+                    this.addOne(dbList.at(i));
+                }
+            },
+            addOne:function(db){
+                this.$el.append(new window.Database.DbListItemView(db).render());
+            },
+            clear:function(){
+                this.$el.empty();
+            },
+            refresh: function () {
+                dbList.fetch({
+                    success: function (model, response, options) {
+                        dbListView.render();
+                    },
+                    error: function (e) {
+                        alert("获取数据源列表失败");
+                    }
+                });
+            }
+        });
+    }
+
+    if (window.Database.DbModel == undefined) {
+        window.Database.DbModel = Backbone.Model.extend({
+            defaults: {
+                "ID": null,
+                "DbCode": null,
+                "DbType": 0,
+                "DataSource": null,
+                "DbName": null,
+                "UserID": null,
+                "Password": null,
+                "Remark":null
+            },
+            idAttribute: "ID",
+            urlRoot:"/api/Database"
+        });
+    }
+
+    if (window.Database.DbList == undefined) {
+        window.Database.DbList = Backbone.Collection.extend({
+            model: window.Database.DbModel,
+            url:"/api/Database"
+        });
+    }
+
+    if (window.Database.DbEditView == undefined) {
+        window.Database.DbEditView = Backbone.View.extend({
+            template: _.template($("#tempDbEditView").html()),
+            render: function () {
+                this.$el.html(this.template(this.model.toJSON()));
+            },
+            close: function () {
+                this.$el.hide();
+            },
+
+            show: function (db) {
+                this.model = db;
+                if (this.model == null) {
+                    this.model = new window.Database.DbModel();
+                }
+                this.render();
+                this.$el.modal({
+                    show:true,
+                    keyboard: false,
+                    backdrop: false
+                });
+                this.$el.show()
+            },
+
+            events: {
+                "click #save": "saveDb",
+                "click #test":"testDb",
+                "change .dbType": "dbTypeChange"
+            },
+            testDb: function () {
+                var value = this.model.clone();
+                value.set(Tools.serializeObject($("#db_form")));
+                $.post("/Admin/TestDatabase", value.toJSON(), function (rst) {
+                    if (rst.ResultStatus == 1) {
+                        alert(rst.ResultMessage);
+                    }
+                    else {
+                        alert("测试失败：" + rst.ResultMessage);
+                    }
+                })
+            },
+            saveDb: function () {
+                this.model.save(Tools.serializeObject($("#db_form")), {
+                    success: function (model, rst) {
+                        dbListView.refresh();
+                        dbEditView.close();
+                    },
+                    error: function (model,rst) {
+                        switch (rst.status) {
+                            case 404:
+                                alert("保存失败");
+                                break;
+                            case 400:
+                                alert("保存失败，系统异常，请联系管理员");
+                                break;
+                            case 403:
+                                alert("登录失效，请重新登陆");
+                                window.location.href = "/Sign/adminSignin";
+                                break;
+                        }
+                    },
+                    wait:true
+                })
+            },
+
+            dbTypeChange: function (e) {
+                this.model.set("DbType", $(e.currentTarget).val());
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var toolbar;
+    var dbListView;
+    var dbEditView;
+    var dbList;
+    $(function () {
+        toolbar = new window.Database.Toolbar({
+            el:"#toolbar"
+        });
+        dbListView = new window.Database.DbListView({
+            el: "#dbListView"
+        });
+        dbEditView = new window.Database.DbEditView({
+            el: "#editView"
+        });
+        dbList = new window.Database.DbList();
+        dbListView.refresh();
+    })
+</script>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>编码</th>
+                <th>类型</th>
+                <th>说明</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="dbListView"></tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="editView" />
+
+<ul id="toolbar" class="nav nav-pills navbar-fixed-bottom nav-justified" role="tablist">
+    <li role="presentation"><a class="btn btn-default" data-action="refresh"><span class="glyphicon glyphicon-refresh"></span>刷新</a></li>
+    <li role="presentation"><a class="btn btn-default" data-action="add"><span class="glyphicon glyphicon-plus"></span>新建</a></li>
+</ul>
